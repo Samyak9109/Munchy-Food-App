@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const config = require('../config/config');
+import mongoose from "mongoose";
+import config from "../config/config.js";
 
 const foodPartnerSchema = new mongoose.Schema({
     name: {
@@ -19,5 +19,5 @@ const foodPartnerSchema = new mongoose.Schema({
 
 const foodPartnerModel = mongoose.model('FoodPartner', foodPartnerSchema);
 
-module.exports = foodPartnerModel;
+export default foodPartnerModel;
 

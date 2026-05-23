@@ -1,6 +1,6 @@
-const app = require('./src/app');
-const connectDB = require('./src/config/database')
-const config  = require('./src/config/config')
+import app from "./src/app.js";
+import connectDB from "./src/config/database.js";
+import config from "./src/config/config.js";
 
 const PORT = config.PORT || 3000;
 

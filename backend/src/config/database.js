@@ -1,7 +1,6 @@
-// database.js
-const mongoose = require("mongoose");
-const config = require("./config");
-const dns = require("dns");
+import dns from "dns";
+import mongoose from "mongoose";
+import config from "./config.js";
 
 async function connectDB() {
   // Force Google DNS — system DNS (router) can't resolve MongoDB SRV records
@@ -16,4 +15,4 @@ async function connectDB() {
   }
 }
 
-module.exports = connectDB;
+export default connectDB;

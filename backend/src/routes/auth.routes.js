@@ -1,15 +1,21 @@
-const express = require('express');
-const router = express.Router();
-const authController = require('../controllers/auth.controller');
+import express from "express";
+import {
+  login,
+  logout,
+  registerFoodPartner,
+  registerUser,
+} from "../controllers/auth.controller.js";
 
-router.post('/user/register',    authController.registerUser);
-router.post('/partner/register', authController.registerFoodPartner);
+const router = express.Router();
+
+router.post('/user/register',    registerUser);
+router.post('/partner/register', registerFoodPartner);
 
 // Same controller, role auto-detected from the URL
-router.post('/user/login',    authController.login);
-router.post('/partner/login', authController.login);
+router.post('/user/login',    login);
+router.post('/partner/login', login);
 
 // Single logout — works for both roles
-router.post('/logout', authController.logout);
+router.post('/logout', logout);
 
-module.exports = router;
+export default router;

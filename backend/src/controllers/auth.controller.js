@@ -1,10 +1,10 @@
-const userModel = require("../models/user.model.js");
-const jwt = require("jsonwebtoken");
-const config = require("../config/config.js");
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
-const sessionModel = require("../models/session.model.js");
-const foodPartnerModel = require("../models/foodPartner.model.js");
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import config from "../config/config.js";
+import foodPartnerModel from "../models/foodPartner.model.js";
+import sessionModel from "../models/session.model.js";
+import userModel from "../models/user.model.js";
 
 // Get model based on role
 function getModelByRole(role) {
@@ -264,7 +264,7 @@ async function logout(req, res) {
   }
 }
 
-module.exports = {
+export {
   registerUser,
   registerFoodPartner,
   login,
