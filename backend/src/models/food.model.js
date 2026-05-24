@@ -13,6 +13,11 @@ const foodSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    store: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Store",
+      required: true,
+    },
 
     price: {
       type: Number,

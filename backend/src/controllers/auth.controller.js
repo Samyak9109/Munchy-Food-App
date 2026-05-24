@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
-import foodPartnerModel from "../models/foodPartner.model.js";
+import foodPartnerModel from "../models/partner.model.js";
 import sessionModel from "../models/session.model.js";
 import userModel from "../models/user.model.js";
 
@@ -87,7 +87,7 @@ async function registerUser(req, res) {
 
 // ================= REGISTER PARTNER =================
 async function registerFoodPartner(req, res) {
-  const { name, email, password } = req.body;
+  const { bussinessName,contactName, email, password, phone, address } = req.body;
 
   try {
     // Check if partner exists
@@ -97,9 +97,12 @@ async function registerFoodPartner(req, res) {
 
     // Create partner
     const partner = await foodPartnerModel.create({
-      name,
+      bussinessName,
+      contactName,
       email,
       password: await bcrypt.hash(password, 10),
+      phone,
+      address
     });
 
     // Generate refresh token
