@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const foodSchema = new mongoose.Schema(
   {
     name: {
@@ -28,12 +27,11 @@ const foodSchema = new mongoose.Schema(
     },
 
     image: {
-      type: String,   // URL from cloudinary/S3
-      required: true,
+      type: String,
     },
 
     video: {
-      type: String,   // URL from cloudinary/S3 (optional)
+      type: String,
       required: true,
     },
 
@@ -52,10 +50,10 @@ const foodSchema = new mongoose.Schema(
 
     ratings: {
       average: { type: Number, default: 0, min: 0, max: 5 },
-      count:   { type: Number, default: 0 },
+      count: { type: Number, default: 0 },
     },
   },
-  { timestamps: true }  // adds createdAt and updatedAt
+  { timestamps: true }, // adds createdAt and updatedAt
 );
 
 const foodModel = mongoose.model("Food", foodSchema);
