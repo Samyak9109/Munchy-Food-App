@@ -1,7 +1,7 @@
 import foodPartnerModel from "../models/foodPartner.model.js";
 import jwt from "jsonwebtoken";
 
-export const authFoodPartner = async (req, res, next) => {
+async function authFoodPartner(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -28,4 +28,15 @@ export const authFoodPartner = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ message: "Invalid token" });
   }
+}
+
+async function authCustomer(req, res, next) {
+  const authHeader = req.headers.authorization;
+  next()
+}
+
+
+export default {
+  authFoodPartner,
+  authCustomer,
 };

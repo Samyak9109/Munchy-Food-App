@@ -1,5 +1,5 @@
 import express from "express";
-import { authFoodPartner } from "../middlewares/auth.middleware.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import * as foodController from "../controllers/food.controller.js";
 import upload from "../middlewares/multer.middelware.js";
 
@@ -7,7 +7,7 @@ const router = express.Router();
 
 // upload.fields handles multiple files in one request
 router.post("/addFood",
-  authFoodPartner,
+  authMiddleware.authFoodPartner,
   upload.fields([
     { name: "image", maxCount: 1 },
     { name: "video", maxCount: 1 },
@@ -15,4 +15,6 @@ router.post("/addFood",
   foodController.createFood
 );
 
-export default router;
+router.get("/getFoodItem", authMiddleware.authCustomer, foodController.getFoodItem);
+
+export default router; 

@@ -33,15 +33,26 @@ export const createFood = async (req, res) => {
       foodPartner: req.foodPartner._id,
     });
 
-    return res
-      .status(201)
-      .json({ 
-        message: "Food item created successfully", food 
-      });
+    return res.status(201).json({
+      message: "Food item created successfully",
+      food,
+    });
   } catch (error) {
     console.error("Food creation error:", error);
     return res
       .status(500)
       .json({ message: "Error creating food item", error: error.message });
+  }
+};
+
+export const getFoodItem = async (req, res) => {
+  try {
+    const foodItems = await foodModel.find({})
+    return res.status(200).json({ foodItems });
+  } catch (error) {
+    console.error("Error fetching food videos:", error);
+    return res
+      .status(500)
+      .json({ message: "Error fetching food videos", error: error.message });
   }
 };
