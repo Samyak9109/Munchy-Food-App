@@ -2,210 +2,233 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
-import foodPartnerModel from "../models/partner.model.js";
+import partnerModel from "../models/partner.model.js";
 import sessionModel from "../models/session.model.js";
 import userModel from "../models/user.model.js";
+import otpModel from "../models/otp.model.js";
+import { generateOTP, hashOTP, verifyOTP } from "../services/otp.service.js";
+import sendEmail from "../services/email.service.js";
 
-// Get model based on role
 function getModelByRole(role) {
   if (role === "user") return userModel;
-  if (role === "partner") return foodPartnerModel;
+  if (role === "partner") return partnerModel;
   return null;
 }
 
-// Hash refresh token before storing
 function hashRefreshToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-// ================= REGISTER USER =================
+async function issueTokens(account, role, req, res) {
+  const refreshToken = jwt.sign(
+    { userId: account._id, role },
+    config.JWT_SECRET,
+    { expiresIn: "7d" },
+  );
+
+  const session = await sessionModel.create({
+    userId: account._id,
+    role,
+    refreshToken: hashRefreshToken(refreshToken),
+    ip: req.ip,
+    userAgent: req.headers["user-agent"],
+  });
+
+  const accessToken = jwt.sign(
+    { userId: account._id, sessionID: session._id, role },
+    config.JWT_SECRET,
+    { expiresIn: "15m" },
+  );
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return accessToken;
+}
+
+// ── REGISTER USER ───────────────────────────────────────────────
 async function registerUser(req, res) {
   const { name, email, password } = req.body;
 
   try {
-    // Check if user exists
+    // delete unverified account so user can re-register
+    await userModel.findOneAndDelete({ email, isVerified: false });
+
     if (await userModel.findOne({ email })) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Create new user
-    const user = await userModel.create({
+    await userModel.create({
       name,
       email,
       password: await bcrypt.hash(password, 10),
     });
 
-    // Create refresh token
-    const refreshToken = jwt.sign(
-      { userId: user._id, role: "user" },
-      config.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const otp = generateOTP();
 
-    // Save session
-    const session = await sessionModel.create({
-      userId: user._id,
-      role: "user",
-      refreshToken: hashRefreshToken(refreshToken),
-      ip: req.ip,
-      userAgent: req.headers["user-agent"],
+    await otpModel.create({
+      email,
+      otp: await hashOTP(otp),
+      purpose: "register",
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    // Create access token
-    const accessToken = jwt.sign(
-      { userId: user._id, sessionID: session._id, role: "user" },
-      config.JWT_SECRET,
-      { expiresIn: "15m" }
+    await sendEmail(
+      email,
+      "Verify your Munchy account",
+      `<h2>Welcome to Munchy!</h2>
+       <p>Your verification code is: <strong>${otp}</strong></p>
+       <p>This code expires in 10 minutes.</p>`,
     );
-
-    // Store refresh token in cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
 
     return res.status(201).json({
-      message: "User registered successfully",
-      account: {
-        id: user._id,
-        username: user.name,
-        email: user.email,
-        role: "user",
-      },
-      accessToken,
+      message: "Registration successful. Please check your email for OTP.",
+      email,
     });
-
   } catch (error) {
-    return res.status(500).json({
-      message: "Error registering user",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error registering user", error: error.message });
   }
 }
 
-// ================= REGISTER PARTNER =================
-async function registerFoodPartner(req, res) {
-  const { bussinessName,contactName, email, password, phone, address } = req.body;
+// ── REGISTER PARTNER ────────────────────────────────────────────
+async function registerPartner(req, res) {
+  const { name, email, password, phone } = req.body;
 
   try {
-    // Check if partner exists
-    if (await foodPartnerModel.findOne({ email })) {
+    // delete unverified account so partner can re-register
+    await partnerModel.findOneAndDelete({ email, isVerified: false });
+
+    if (await partnerModel.findOne({ email })) {
       return res.status(400).json({ message: "Account already exists" });
     }
 
-    // Create partner
-    const partner = await foodPartnerModel.create({
-      bussinessName,
-      contactName,
+    await partnerModel.create({
+      name,
       email,
       password: await bcrypt.hash(password, 10),
       phone,
-      address
     });
 
-    // Generate refresh token
-    const refreshToken = jwt.sign(
-      { userId: partner._id, role: "partner" },
-      config.JWT_SECRET,
-      { expiresIn: "7d" }
+    const otp = generateOTP();
+
+    await otpModel.create({
+      email,
+      otp: await hashOTP(otp),
+      purpose: "register",
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    await sendEmail(
+      email,
+      "Verify your Munchy partner account",
+      `<h2>Welcome to Munchy!</h2>
+       <p>Your verification code is: <strong>${otp}</strong></p>
+       <p>This code expires in 10 minutes.</p>`,
     );
-
-    // Save session
-    const session = await sessionModel.create({
-      userId: partner._id,
-      role: "partner",
-      refreshToken: hashRefreshToken(refreshToken),
-      ip: req.ip,
-      userAgent: req.headers["user-agent"],
-    });
-
-    // Generate access token
-    const accessToken = jwt.sign(
-      { userId: partner._id, sessionID: session._id, role: "partner" },
-      config.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
-
-    // Save cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
 
     return res.status(201).json({
-      message: "Food partner registered successfully",
-      account: {
-        id: partner._id,
-        username: partner.name,
-        email: partner.email,
-        role: "partner",
-      },
-      accessToken,
+      message: "Registration successful. Please check your email for OTP.",
+      email,
     });
-
   } catch (error) {
-    return res.status(500).json({
-      message: "Error registering food partner",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error registering partner", error: error.message });
   }
 }
 
-// ================= LOGIN =================
-async function login(req, res) {
-  const { email, password } = req.body;
-
-  // Detect role from route
+// ── VERIFY EMAIL (shared for user + partner) ─────────────────────
+async function verifyEmail(req, res) {
+  const { email, otp } = req.body;
   const role = req.path.includes("partner") ? "partner" : "user";
   const model = getModelByRole(role);
 
   try {
-    // Find account
-    const account = await model.findOne({ email });
+    const otpRecord = await otpModel.findOne({
+      email,
+      purpose: "register",
+      used: false,
+    });
 
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // check expiry
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // verify OTP
+    const isValid = await verifyOTP(otp, otpRecord.otp);
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // mark OTP as used
+    otpRecord.used = true;
+    await otpRecord.save();
+
+    // mark account as verified
+    const account = await model.findOneAndUpdate(
+      { email },
+      { isVerified: true },
+      { new: true },
+    );
+
+    // issue tokens now that email is verified
+    const accessToken = await issueTokens(account, role, req, res);
+
+    return res.status(200).json({
+      message: "Email verified successfully",
+      account: {
+        id: account._id,
+        username: account.name,
+        email: account.email,
+        role,
+      },
+      accessToken,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error verifying email", error: error.message });
+  }
+}
+
+// ── LOGIN (shared for user + partner) ───────────────────────────
+async function login(req, res) {
+  const { email, password } = req.body;
+  const role = req.path.includes("partner") ? "partner" : "user";
+  const model = getModelByRole(role);
+
+  try {
+    const account = await model.findOne({ email });
     if (!account) {
       return res.status(404).json({ message: "Account not found" });
     }
 
-    // Verify password
+    if (!account.isVerified) {
+      return res
+        .status(401)
+        .json({ message: "Please verify your email first" });
+    }
+
+    if (!account.isActive) {
+      return res.status(403).json({ message: "Account has been deactivated" });
+    }
+
     if (!(await bcrypt.compare(password, account.password))) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Create refresh token
-    const refreshToken = jwt.sign(
-      { userId: account._id, role },
-      config.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    // Save session
-    const session = await sessionModel.create({
-      userId: account._id,
-      role,
-      refreshToken: hashRefreshToken(refreshToken),
-      ip: req.ip,
-      userAgent: req.headers["user-agent"],
-    });
-
-    // Create access token
-    const accessToken = jwt.sign(
-      { userId: account._id, sessionID: session._id, role },
-      config.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
-
-    // Store cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    const accessToken = await issueTokens(account, role, req, res);
 
     return res.status(200).json({
       message: "Logged in successfully",
@@ -217,59 +240,148 @@ async function login(req, res) {
       },
       accessToken,
     });
-
   } catch (error) {
-    return res.status(500).json({
-      message: "Error logging in",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error logging in", error: error.message });
   }
 }
 
-// ================= LOGOUT =================
+// ── LOGOUT ──────────────────────────────────────────────────────
 async function logout(req, res) {
   const incomingRefreshToken = req.cookies.refreshToken;
 
-  // No token found
   if (!incomingRefreshToken) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
-    // Find active session
     const session = await sessionModel.findOne({
       refreshToken: hashRefreshToken(incomingRefreshToken),
       revoked: false,
     });
 
     if (!session) {
-      return res.status(400).json({
-        message: "Invalid or revoked session",
-      });
+      return res.status(400).json({ message: "Invalid or revoked session" });
     }
 
-    // Revoke session
     session.revoked = true;
     await session.save();
 
-    // Remove cookie
     res.clearCookie("refreshToken");
-
-    return res.status(200).json({
-      message: "Logged out successfully",
-    });
-
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    return res.status(500).json({
-      message: "Error logging out",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error logging out", error: error.message });
+  }
+}
+async function googleAuthCallback(req, res) {
+  try {
+    const account = req.user; 
+    const role = req.path.includes("partner") ? "partner" : "user";
+
+    if (!account.isActive) {
+      return res.status(403).json({ message: "Account has been deactivated" });
+    }
+
+    const accessToken = await issueTokens(account, role, req, res);
+
+   
+    return res.redirect(
+      `${config.FRONTEND_URL}/auth/success?token=${accessToken}&role=${role}`,
+    );
+  } catch (error) {
+    return res.redirect(`${config.FRONTEND_URL}/auth/error`);
   }
 }
 
-export {
-  registerUser,
-  registerFoodPartner,
-  login,
-  logout,
-};
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+  const role = req.path.includes("partner") ? "partner" : "user";
+  const model = getModelByRole(role);
+
+  try {
+    const account = await model.findOne({ email });
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    const otp = generateOTP();
+
+    await otpModel.create({
+      email,
+      otp: await hashOTP(otp),
+      purpose: "resetPassword",
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    await sendEmail(
+      email,
+      "OTP for PassWord Reset",
+      `<h2>Welcome to Munchy!</h2>
+       <p>Your verification code is: <strong>${otp}</strong></p>
+       <p>This code expires in 10 minutes.</p>`,
+    );
+
+    return res.status(200).json({
+      message: "Password reset OTP sent to your email",
+      email,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error sending OTP", error: error.message });
+  }
+}
+
+async function resetPassword(req, res) {
+
+  const { email, otp, newPassword } = req.body;
+  const role = req.path.includes("partner") ? "partner" : "user";
+  const model = getModelByRole(role);
+
+  try {
+    const otpRecord = await otpModel.findOne({
+      email,
+      purpose: "reserPassword",
+      used: false,
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // check expiry
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // verify OTP
+    const isValid = await verifyOTP(otp, otpRecord.otp);
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // mark OTP as used
+    otpRecord.used = true;
+    await otpRecord.save();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await model.findOneAndUpdate({ email }, { password: hashedPassword });
+
+    const account = await model.findOne({ email });
+    await sessionModel.updateMany({ userId: account._id }, { revoked: true });
+
+    return res
+      .status(200)
+      .json({ message: "Password reset successfully. Please login again." });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error resetting password", error: error.message });
+  }
+}
+
+
+// exports
+export { registerUser, registerPartner, verifyEmail, login, logout, googleAuthCallback, forgotPassword, resetPassword };

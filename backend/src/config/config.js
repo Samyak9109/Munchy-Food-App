@@ -2,23 +2,45 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-if (!process.env.MONGO_URI) {
-  throw new Error("MONGO_URI is not defined in environment variables");
-}
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET is not defined in environment variables");
-}
-if (!process.env.PORT) {
-  throw new Error("PORT is not defined in environment variables");
+/*
+  Helper function:
+  Checks whether an environment variable exists.
+  Throws a clear error during server startup if missing.
+*/
+function requireEnv(variableName) {
+  if (!process.env[variableName]) {
+    throw new Error(
+      `Environment variable "${variableName}" is missing in .env file`,
+    );
+  }
+
+  return process.env[variableName];
 }
 
 const config = {
-  MONGO_URI: process.env.MONGO_URI,
-  JWT_SECRET: process.env.JWT_SECRET,
-  PORT: process.env.PORT || 3000,
-  IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
-  IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY,
-  IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT,
+  // ===== Server =====
+  PORT: Number(process.env.PORT) || 3000,
+
+  // ===== Database =====
+  MONGO_URI: requireEnv("MONGO_URI"),
+
+  // ===== Authentication =====
+  JWT_SECRET: requireEnv("JWT_SECRET"),
+
+  // ===== ImageKit =====
+  IMAGEKIT_PRIVATE_KEY: requireEnv("IMAGEKIT_PRIVATE_KEY"),
+  IMAGEKIT_PUBLIC_KEY: requireEnv("IMAGEKIT_PUBLIC_KEY"),
+  IMAGEKIT_URL_ENDPOINT: requireEnv("IMAGEKIT_URL_ENDPOINT"),
+
+  // ===== OAuth / Google / External Services =====
+  CLIENT_ID: requireEnv("CLIENT_ID"),
+  CLIENT_SECRET: requireEnv("CLIENT_SECRET"),
+  REFRESH_TOKEN: requireEnv("REFRESH_TOKEN"),
+  GOOGLE_CALLBACK_URL_USER: process.env.GOOGLE_CALLBACK_URL_USER,
+  GOOGLE_CALLBACK_URL_PARTNER: process.env.GOOGLE_CALLBACK_URL_PARTNER,
+
+  // ===== Email =====
+  EMAIL_USER: requireEnv("EMAIL_USER"),
 };
 
 export default config;
