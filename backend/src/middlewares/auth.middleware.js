@@ -1,4 +1,4 @@
-import partnerModel from "../models/partner.model.js"; /
+import partnerModel from "../models/partner.model.js"; 
 import userModel from "../models/user.model.js"; 
 import jwt from "jsonwebtoken";
 
