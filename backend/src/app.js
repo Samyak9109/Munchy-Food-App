@@ -2,8 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes.js";
 import foodRouter from "./routes/food.routes.js";
-import config from "./config/config.js";
 import storeRouter from "./routes/store.routes.js";
+import userRouter from "./routes/user.routes.js";
 
 
 const app = express();
@@ -15,5 +15,5 @@ app.use(passport.initialize());
 app.use("/api/auth", authRouter);
 app.use("/api/food", foodRouter);
 app.use("/api/store", storeRouter);
-
+app.use("/api/user", userRouter);
 export default app;
