@@ -4,80 +4,61 @@ const storeSchema = new mongoose.Schema(
   {
     partner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "FoodPartner",
+      ref: "Partner",
       required: true,
     },
-
     name: {
       type: String,
       required: true,
       trim: true,
     },
-
     description: {
       type: String,
       trim: true,
     },
-
     image: {
       type: String,
     },
-
     address: {
       type: String,
       required: true,
     },
+    cuisine: [{ type: String, trim: true }],
 
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude] — NOTE: longitude first
+        required: true,
+      },
+    },
+
+    // keep old coordinates for reference
     coordinates: {
-      lat: {
-        type: Number,
-      },
-      lng: {
-        type: Number,
-      },
+      lat: { type: Number },
+      lng: { type: Number },
     },
 
     timing: {
-      open: {
-        type: String,
-      },
-      close: {
-        type: String,
-      },
+      open: { type: String },
+      close: { type: String },
     },
-
     isOpen: {
       type: Boolean,
       default: false,
     },
-    cuisine: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
     rating: {
-      average: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 5,
-      },
-      count: {
-        type: Number,
-        default: 0,
-        min: 0,
-      },
-    },
-
-    role: {
-      type: String,
-      default: "partner",
+      average: { type: Number, default: 0, min: 0, max: 5 },
+      count: { type: Number, default: 0, min: 0 },
     },
   },
   { timestamps: true },
 );
 
-const storeModel = mongoose.model("Store", storeSchema);
+storeSchema.index({ location: "2dsphere" });
 
-export default storeModel;
+export default mongoose.model("Store", storeSchema);

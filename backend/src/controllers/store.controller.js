@@ -23,6 +23,10 @@ export const createStore = async (req, res) => {
       cuisine,
       timing,
       coordinates,
+      location: {
+        type: "Point",
+        coordinates: [coordinates.lng, coordinates.lat], 
+      },
       partner: req.partner._id,
     });
 
