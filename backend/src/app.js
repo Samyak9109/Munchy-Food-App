@@ -12,6 +12,7 @@ import paymentRouter from "./routes/payment.routes.js";
 import reviewRouter from "./routes/review.routes.js";
 import reelRouter from "./routes/review.routes.js";
 import favoriteRouter from "./routes/favorite.routes.js";
+import mapRouter from "./routes/map.routes.js";
 
 const app = express();
 
@@ -31,5 +32,7 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/reel", reelRouter);
 app.use("/api/favorite", favoriteRouter);
+app.use("/api/map", mapRouter);
+
 
 export default app;

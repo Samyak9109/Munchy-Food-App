@@ -45,6 +45,8 @@ const config = {
   // ===== Payment =====
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+
+  OPENROUTE_API_KEY: process.env.OPENROUTE_API_KEY,
 };
 
 export default config;
