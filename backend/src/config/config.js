@@ -41,6 +41,10 @@ const config = {
 
   // ===== Email =====
   EMAIL_USER: requireEnv("EMAIL_USER"),
+
+  // ===== Payment =====
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
 };
 
 export default config;
