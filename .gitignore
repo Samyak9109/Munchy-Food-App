@@ -31,6 +31,7 @@ out/
 
 # React / Vite
 .vite/
+dist-ssr/
 coverage/
 
 # ==========================
@@ -73,6 +74,17 @@ data/
 # ==========================
 uploads/
 public/uploads/
+storage/
+
+# ==========================
+# Code Analysis / Agent Artifacts
+# ==========================
+graphify-out/
+**/graphify-out/
+.agents/
+**/.agents/
+.codex/
+**/.codex/
 
 # ==========================
 # Testing
@@ -92,6 +104,7 @@ coverage/
 # ==========================
 tmp/
 temp/
+*.local
 
 # ==========================
 # Docker (Optional)
