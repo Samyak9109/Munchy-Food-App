@@ -5,6 +5,7 @@ import {
   validateUserRegister,
   validatePartnerRegister,
   validateLogin,
+  validateForgotPassword,
 } from "../validators/auth.validator.js";
 
 const router = express.Router();

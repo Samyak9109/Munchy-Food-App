@@ -8,7 +8,7 @@ import {
   getStoreWithMenuDAO,
 } from "../dao/store.dao.js";
 import { getFoodByStoreDAO } from "../dao/food.dao.js";
-import { uploadToImagekit } from "../utils/imagekit.js";
+import { uploadToImagekit } from "../services/storage.service.js";
 import partnerModel from "../models/partner.model.js";
 
 // ── CREATE STORE ─────────────────────────────────────────────

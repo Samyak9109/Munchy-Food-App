@@ -11,11 +11,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-transporter.verify((error, success) => {
-  if (error) console.error("Email server error:", error);
-  else console.log("Email server ready");
-});
-
 // base email wrapper — consistent styling across all emails
 const baseTemplate = (content) => `
 <!DOCTYPE html>

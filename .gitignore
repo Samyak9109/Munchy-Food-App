@@ -121,3 +121,5 @@ temp/
 # ==========================
 .vercel
 .netlify
+.claude
+claude.md

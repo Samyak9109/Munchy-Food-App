@@ -3,7 +3,7 @@ import {
   deleteFavoriteDAO,
   getFavoriteDAO,
   getFavoritesByUserDAO,
-} from "../dao/favorite.dao.js";
+} from "../dao/favourite.dao.js";
 
 // ── TOGGLE FAVORITE ──────────────────────────────────────────
 export const toggleFavorite = async (req, res) => {

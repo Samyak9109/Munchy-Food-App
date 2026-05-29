@@ -1,9 +1,6 @@
 import express from "express";
-import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import mongoSanitize from "express-mongo-sanitize";
-import hpp from "hpp";
 import config from "./config/config.js";
 import passport from "./config/passport.js";
 
@@ -31,32 +28,21 @@ import {
 
 const app = express();
 
-// ── DB CONNECTION ────────────────────────────────────────────
-mongoose
-  .connect(config.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
-
 // ── CORE MIDDLEWARES ─────────────────────────────────────────
 app.use(
   cors({
     origin: config.FRONTEND_URL,
-    credentials: true, // allow cookies
+    credentials: true,
   }),
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(mongoSanitize()); // prevent NoSQL injection
-app.use(hpp()); // prevent HTTP parameter pollution
 app.use(passport.initialize());
-app.use(generalLimiter); // apply general rate limit to all routes
+app.use(generalLimiter);
 
 // ── ROUTES ───────────────────────────────────────────────────
-app.use("/api/auth", authLimiter, authRouter); // stricter limit on auth
+app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/food", foodRouter);
 app.use("/api/store", storeRouter);
 app.use("/api/user", userRouter);
@@ -80,12 +66,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // ── ERROR HANDLING ───────────────────────────────────────────
-app.use(notFound); // 404 handler
-app.use(errorHandler); // global error handler
-
-// ── START SERVER ─────────────────────────────────────────────
-app.listen(config.PORT, () => {
-  console.log(`Munchy server running on port ${config.PORT}`);
-});
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;

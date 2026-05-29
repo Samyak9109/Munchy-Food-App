@@ -10,7 +10,7 @@ const client = new ImageKit({
   urlEndpoint: config.IMAGEKIT_URL_ENDPOINT,
 });
 
-const uploadToImagekit = async (file) => {
+export const uploadToImagekit = async (file) => {
   // write buffer to a temp file → stream it → delete it
   const tempPath = path.join(os.tmpdir(), `${Date.now()}_${file.originalname}`);
 

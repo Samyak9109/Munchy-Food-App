@@ -8,7 +8,7 @@ import config from "../config/config.js";
 
 // initialize Gemini model
 const model = new ChatGoogleGenerativeAI({
-  modelName: "gemini-pro",
+  model: "gemini-1.5-flash",
   apiKey: config.GEMINI_API_KEY,
   temperature: 0.7, // creativity level — 0 = factual, 1 = creative
 });

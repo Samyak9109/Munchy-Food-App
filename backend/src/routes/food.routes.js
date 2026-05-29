@@ -8,6 +8,7 @@ const router = express.Router();
 
 // ── PUBLIC ROUTES ────────────────────────────────────────────
 router.get("/", foodController.getFoodItem);
+router.get("/feed", authMiddleware.authCustomer, foodController.getFoodItem);
 router.get("/category/:category", foodController.getFoodByCategory);
 router.get("/:id", foodController.getFoodById);
 
@@ -32,8 +33,5 @@ router.patch(
   authMiddleware.authPartner,
   foodController.toggleAvailability,
 );
-
-// ── USER ROUTES ──────────────────────────────────────────────
-router.get("/feed", authMiddleware.authCustomer, foodController.getFoodItem);
 
 export default router;

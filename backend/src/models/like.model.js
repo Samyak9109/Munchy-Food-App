@@ -23,4 +23,4 @@ likeSchema.index({ reel: 1, user: 1 }, { unique: true });
 
 const likeModel = mongoose.model("Like", likeSchema);
 
-export default like;
+export default likeModel;

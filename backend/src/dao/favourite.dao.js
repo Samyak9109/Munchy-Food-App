@@ -1,4 +1,4 @@
-import favoriteModel from "../models/favorite.model.js";
+import favoriteModel from "../models/favourite.model.js";
 
 export const createFavoriteDAO = async (userId, storeId) =>
   await favoriteModel.create({ user: userId, store: storeId });

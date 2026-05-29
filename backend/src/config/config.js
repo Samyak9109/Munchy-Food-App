@@ -47,7 +47,7 @@ const config = {
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
 
   OPENROUTE_API_KEY: process.env.OPENROUTE_API_KEY,
-  GEMENI_API_KEY: process.env.GEMINI_API_KEY
+  GEMINI_API_KEY: requireEnv("GEMINI_API_KEY"),
 };
 
 export default config;
