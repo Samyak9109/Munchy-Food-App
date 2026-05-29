@@ -344,7 +344,7 @@ async function resetPassword(req, res) {
   try {
     const otpRecord = await otpModel.findOne({
       email,
-      purpose: "reserPassword",
+      purpose: "resetPassword",
       used: false,
     });
 

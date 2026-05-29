@@ -4,13 +4,17 @@ import {
   getOrdersByUserDAO,
   getOrdersByStoreDAO,
   updateOrderStatusDAO,
-  updateOrderOtpDAO,
-  updatePickupTimeDAO,
   cancelOrderDAO,
 } from "../dao/order.dao.js";
 import { getCartByUserDAO, clearCartDAO } from "../dao/cart.dao.js";
-import { generateOTP, hashOTP, verifyOTP } from "../services/otp.service.js";
-import sendEmail from "../services/email.service.js";
+import { generateOTP, hashOTP } from "../services/otp.service.js";
+import {
+  sendOrderPlacedEmail,
+  sendOrderConfirmedEmail,
+  sendOrderReadyEmail,
+  sendOrderPickedUpEmail,
+  sendNewOrderEmail,
+} from "../services/email.service.js";
 import bcrypt from "bcrypt";
 
 // ── PLACE ORDER ──────────────────────────────────────────────
@@ -40,22 +44,21 @@ export const placeOrder = async (req, res) => {
       note: req.body.note || null,
     });
 
-    // send OTP to user email
-    await sendEmail(
-      req.user.email,
-      "Your Munchy Order OTP",
-      `<h2>Order Placed Successfully!</h2>
-       <p>Your pickup OTP is: <strong>${otp}</strong></p>
-       <p>Show this to the restaurant when picking up your order.</p>
-       <p>Order ID: ${order._id}</p>`,
-    );
+    // fetch full order with populated fields for email
+    const populatedOrder = await getOrderByIdDAO(order._id);
+
+    // notify user with OTP
+    await sendOrderPlacedEmail(req.user.email, populatedOrder, otp);
+
+    // notify partner about new order
+    await sendNewOrderEmail(cart.store.partner.email, populatedOrder);
 
     // clear cart after order placed
     await clearCartDAO(req.user._id);
 
     return res
       .status(201)
-      .json({ message: "Order placed successfully", order });
+      .json({ message: "Order placed successfully", order: populatedOrder });
   } catch (error) {
     return res
       .status(500)
@@ -122,7 +125,7 @@ export const cancelOrder = async (req, res) => {
 
 // ── GET STORE ORDERS (partner) ───────────────────────────────
 export const getStoreOrders = async (req, res) => {
-  const { status } = req.query; // optional filter by status
+  const { status } = req.query;
 
   try {
     const orders = await getOrdersByStoreDAO(req.params.storeId, status);
@@ -155,14 +158,10 @@ export const updateStatus = async (req, res) => {
 
     const updated = await updateOrderStatusDAO(req.params.id, status);
 
-    // send email to user on status change
-    await sendEmail(
-      order.user.email,
-      `Your Munchy Order is ${status}`,
-      `<h2>Order Update</h2>
-       <p>Your order status has been updated to: <strong>${status}</strong></p>
-       <p>Order ID: ${order._id}</p>`,
-    );
+    // send correct email based on new status
+    if (status === "confirmed")
+      await sendOrderConfirmedEmail(order.user.email, order);
+    if (status === "ready") await sendOrderReadyEmail(order.user.email, order);
 
     return res
       .status(200)
@@ -187,24 +186,16 @@ export const verifyPickupOTP = async (req, res) => {
       return res.status(400).json({ message: "Order is not ready for pickup" });
     }
 
-    // verify OTP
+    // verify OTP against stored hash
     const isValid = await bcrypt.compare(otp, order.otp);
     if (!isValid) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // mark as picked up
     await updateOrderStatusDAO(req.params.id, "pickedup");
 
     // send confirmation to user
-    await sendEmail(
-      order.user.email,
-      "Order Picked Up — Enjoy your meal!",
-      `<h2>Order Complete!</h2>
-       <p>Your order has been picked up successfully.</p>
-       <p>Enjoy your meal! 🍔</p>
-       <p>Order ID: ${order._id}</p>`,
-    );
+    await sendOrderPickedUpEmail(order.user.email, order);
 
     return res.status(200).json({ message: "Order picked up successfully" });
   } catch (error) {

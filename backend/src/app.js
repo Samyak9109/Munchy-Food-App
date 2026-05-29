@@ -36,5 +36,6 @@ app.use("/api/favorite", favoriteRouter);
 app.use("/api/map", mapRouter);
 app.use("/api/dashboard", dashboardRouter);
 
-
+import chatbotRouter from "./routes/chatbot.routes.js";
+app.use("/api/chatbot", chatbotRouter);
 export default app;
