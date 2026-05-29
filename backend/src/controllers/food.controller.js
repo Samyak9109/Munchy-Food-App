@@ -8,19 +8,19 @@ import {
   updateFoodDAO,
   deleteFoodDAO,
   toggleFoodAvailabilityDAO,
-} from "../dao/food.dao.js"; 
+} from "../dao/food.dao.js";
 
 // ── CREATE FOOD ──────────────────────────────────────────────
 export const createFood = async (req, res) => {
-  const { name, description, price, category, store } = req.body; 
+  const { name, description, price, category, store } = req.body;
   try {
-    if (!req.files?.video) {
-      return res.status(400).json({ message: "Food video is required" });
+    if (!req.files?.image) {
+      return res.status(400).json({ message: "Food image is required" });
     }
 
-    const videoUrl = await uploadToImagekit(req.files.video[0]);
-    const imageUrl = req.files?.image
-      ? await uploadToImagekit(req.files.image[0])
+    const imageUrl = await uploadToImagekit(req.files.image[0]);
+    const videoUrl = req.files?.video
+      ? await uploadToImagekit(req.files.video[0])
       : null;
 
     const food = await createFoodDAO({
@@ -28,9 +28,9 @@ export const createFood = async (req, res) => {
       description,
       price,
       category,
-      image: imageUrl,
+      image: imageUrl, 
       video: videoUrl,
-      foodPartner: req.partner._id, 
+      foodPartner: req.partner._id,
       store,
     });
 
@@ -47,7 +47,7 @@ export const createFood = async (req, res) => {
 // ── GET ALL FOOD (reel feed) ─────────────────────────────────
 export const getFoodItem = async (req, res) => {
   try {
-    const foodItems = await getFoodVideosDAO(); 
+    const foodItems = await getFoodVideosDAO();
     return res.status(200).json({ foodItems });
   } catch (error) {
     return res
@@ -59,7 +59,7 @@ export const getFoodItem = async (req, res) => {
 // ── GET FOOD BY ID ───────────────────────────────────────────
 export const getFoodById = async (req, res) => {
   try {
-    const food = await getFoodByIdDAO(req.params.id); 
+    const food = await getFoodByIdDAO(req.params.id);
     if (!food) return res.status(404).json({ message: "Food item not found" });
     return res.status(200).json({ food });
   } catch (error) {
@@ -75,12 +75,10 @@ export const getFoodByCategory = async (req, res) => {
     const food = await getFoodByCategoryDAO(req.params.category);
     return res.status(200).json({ food });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Error fetching food by category",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Error fetching food by category",
+      error: error.message,
+    });
   }
 };
 

@@ -55,33 +55,33 @@ export const validateCreateFood = [
   }),
 
   body().custom((_, { req }) => {
-    if (!req.files?.video) {
-      throw new Error("Video is required");
+    if (!req.files?.image) {
+      throw new Error("Food image is required");
     }
 
-    const video = req.files.video[0];
+    const image = req.files.image[0];
 
-    if (!ALLOWED_VIDEO_TYPES.includes(video.mimetype)) {
-      throw new Error("Invalid video format");
+    if (!ALLOWED_IMAGE_TYPES.includes(image.mimetype)) {
+      throw new Error("Invalid image format. Allowed: jpeg, png, webp");
     }
 
-    if (video.size > MAX_VIDEO_SIZE) {
-      throw new Error("Video size must be under 100MB");
+    if (image.size > MAX_IMAGE_SIZE) {
+      throw new Error("Image size must be under 5MB");
     }
 
     return true;
   }),
 
   body().custom((_, { req }) => {
-    if (req.files?.image) {
-      const image = req.files.image[0];
+    if (req.files?.video) {
+      const video = req.files.video[0];
 
-      if (!ALLOWED_IMAGE_TYPES.includes(image.mimetype)) {
-        throw new Error("Invalid image format");
+      if (!ALLOWED_VIDEO_TYPES.includes(video.mimetype)) {
+        throw new Error("Invalid video format. Allowed: mp4, webm, quicktime");
       }
 
-      if (image.size > MAX_IMAGE_SIZE) {
-        throw new Error("Image size must be under 5MB");
+      if (video.size > MAX_VIDEO_SIZE) {
+        throw new Error("Video size must be under 100MB");
       }
     }
 

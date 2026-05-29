@@ -33,11 +33,11 @@ const foodSchema = new mongoose.Schema(
 
     image: {
       type: String,
+      required: true,
     },
 
     video: {
       type: String,
-      required: true,
     },
 
     // Which food partner owns this item
