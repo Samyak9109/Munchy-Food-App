@@ -31,8 +31,14 @@ const app = express();
 // ── CORE MIDDLEWARES ─────────────────────────────────────────
 app.use(
   cors({
-    origin: config.FRONTEND_URL,
-    credentials: true,
+    origin: [
+      config.FRONTEND_URL, 
+      "http://localhost:5173", 
+      "http://localhost:3000",
+    ],
+    credentials: true, 
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 app.use(express.json());

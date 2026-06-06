@@ -160,10 +160,16 @@ async function verifyEmail(req, res) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-    // check expiry
-    if (otpRecord.expiresAt < new Date()) {
-      return res.status(400).json({ message: "OTP has expired" });
-    }
+    const otp = generateOTP();
+
+    await otpModel.deleteMany({ email, purpose: "register", used: false });
+
+    await otpModel.create({
+      email,
+      otp: await hashOTP(otp),
+      purpose: "register",
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    });
 
     // verify OTP
     const isValid = await verifyOTP(otp, otpRecord.otp);
@@ -308,12 +314,13 @@ async function forgotPassword(req, res) {
     }
 
     const otp = generateOTP();
+    await otpModel.deleteMany({ email, purpose: "register", used: false });
 
     await otpModel.create({
       email,
       otp: await hashOTP(otp),
-      purpose: "resetPassword",
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      purpose: "register",
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
     });
 
     await sendEmail(
