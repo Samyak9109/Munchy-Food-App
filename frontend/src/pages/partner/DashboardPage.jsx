@@ -10,40 +10,52 @@ export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [storeId, setStoreId] = useState(null);
+  const [store, setStore] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasStore, setHasStore] = useState(true);
 
   const fetchDashboard = useCallback(async () => {
     try {
       const storeRes = await api.get("/store");
       const myStore = storeRes.data.stores?.find(
-        (s) => s.partner?._id === user?.id || s.partner === user?.id,
+        (s) =>
+          s.partner?._id === user?.id ||
+          s.partner === user?.id ||
+          s.partner?._id === user?._id ||
+          s.partner === user?._id,
       );
 
       if (myStore) {
+        setStore(myStore);
         setStoreId(myStore._id);
         setIsOpen(myStore.isOpen);
+        setHasStore(true);
 
-        const statsRes = await api.get(`/dashboard/${myStore._id}/daily`);
+        const [statsRes, ordersRes] = await Promise.all([
+          api.get(`/dashboard/${myStore._id}/daily`),
+          api.get(`/order/store/${myStore._id}?status=placed`),
+        ]);
+
         setStats(statsRes.data.stats);
-
-        const ordersRes = await api.get(
-          `/order/store/${myStore._id}?status=placed`,
-        );
         setOrders(ordersRes.data.orders || []);
+      } else {
+        setHasStore(false);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Dashboard fetch error:", err);
+      setHasStore(false);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]); 
+  }, [user?.id, user?._id]);
 
   useEffect(() => {
     fetchDashboard();
   }, [fetchDashboard]);
 
   const handleToggleStore = async () => {
+    if (!storeId) return;
     try {
       await api.patch(`/store/${storeId}/status`, { isOpen: !isOpen });
       setIsOpen(!isOpen);
@@ -59,7 +71,7 @@ export default function DashboardPage() {
       console.error("Logout error:", err);
     } finally {
       clearAuth();
-      navigate("/login");
+      navigate("/partner/login");
     }
   };
 
@@ -83,6 +95,41 @@ export default function DashboardPage() {
       label: "Ready",
     },
   };
+
+  // ── NO STORE STATE ───────────────────────────────────────
+  if (!loading && !hasStore) {
+    return (
+      <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-4 gap-6">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+        <span
+          className="material-symbols-outlined text-6xl text-primary"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          storefront
+        </span>
+        <div className="text-center space-y-2">
+          <h2 className="font-montserrat text-headline-lg-mobile text-on-surface">
+            No store yet
+          </h2>
+          <p className="text-body-md text-on-surface-variant">
+            Create your store to start receiving orders
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/partner/kitchen")}
+          className="bg-primary-container text-on-primary-container font-montserrat font-bold px-8 py-4 rounded-xl neon-glow-red active:scale-[0.98] transition-all"
+        >
+          Create Store
+        </button>
+        <button
+          onClick={handleLogout}
+          className="text-on-surface-variant text-body-md hover:text-primary transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-background text-on-surface pb-28">
@@ -109,14 +156,19 @@ export default function DashboardPage() {
                 Partner Hub
               </h2>
               <p className="text-body-md text-on-surface-variant">
-                Welcome back, {user?.username || "Partner"}
+                Welcome back, {user?.username || user?.name || "Partner"}
               </p>
             </div>
           </div>
 
-          {/* Upload Reel CTA */}
+          {/* Store name */}
+          {store && (
+            <p className="text-body-md text-primary font-inter">{store.name}</p>
+          )}
+
+          {/* Kitchen CTA */}
           <button
-            onClick={() => navigate("/kitchen")}
+            onClick={() => navigate("/partner/kitchen")}
             className="w-full mt-2 bg-primary-container text-on-primary-container rounded-xl py-4 px-6 font-montserrat font-bold text-label-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all neon-glow-red"
           >
             <span
@@ -131,7 +183,6 @@ export default function DashboardPage() {
 
         {/* Bento Stats */}
         <section className="grid grid-cols-2 gap-4">
-          {/* Active Orders */}
           <div className="bg-surface-slate rounded-xl p-4 flex flex-col justify-between border border-[rgba(255,255,255,0.12)]">
             <div className="flex items-center gap-2 mb-2 text-secondary-fixed">
               <span
@@ -147,7 +198,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Sales Today */}
           <div className="bg-surface-slate rounded-xl p-4 flex flex-col justify-between border border-[rgba(255,255,255,0.12)]">
             <div className="flex items-center gap-2 mb-2 text-status-success">
               <span
@@ -196,7 +246,7 @@ export default function DashboardPage() {
               Live Orders
             </h2>
             <button
-              onClick={() => navigate("/orders")}
+              onClick={() => navigate("/partner/orders")}
               className="text-label-bold text-primary hover:opacity-80 transition-opacity"
             >
               View All
@@ -225,11 +275,9 @@ export default function DashboardPage() {
                     key={order._id}
                     className="bg-surface-slate rounded-xl p-4 border border-[rgba(255,255,255,0.12)] flex flex-col gap-3 relative overflow-hidden"
                   >
-                    {/* left color bar */}
                     <div
                       className={`absolute top-0 left-0 w-1 h-full ${s.dot}`}
                     />
-
                     <div className="flex justify-between items-start pl-2">
                       <div>
                         <div className="text-label-bold text-on-surface-variant mb-1 font-inter">
@@ -252,7 +300,6 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </div>
-
                     <div className="pl-2 pt-2 border-t border-[rgba(255,255,255,0.12)] flex justify-between items-center">
                       <div className="flex items-center gap-2 text-on-surface-variant text-body-md">
                         <span className="material-symbols-outlined text-[18px]">
@@ -261,7 +308,7 @@ export default function DashboardPage() {
                         ₹{order.totalPrice}
                       </div>
                       <button
-                        onClick={() => navigate(`/orders/${order._id}`)}
+                        onClick={() => navigate(`/partner/orders/${order._id}`)}
                         className="bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface rounded-full w-10 h-10 flex items-center justify-center"
                       >
                         <span className="material-symbols-outlined">
@@ -279,7 +326,7 @@ export default function DashboardPage() {
         {/* Quick Links */}
         <section className="grid grid-cols-2 gap-4 pb-4">
           <button
-            onClick={() => navigate("/analytics")}
+            onClick={() => navigate("/partner/analytics")} // ✅ fixed path
             className="bg-surface-slate rounded-xl p-4 border border-[rgba(255,255,255,0.12)] flex flex-col items-center gap-2 hover:border-primary/50 transition-all active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-primary text-3xl">
@@ -290,7 +337,7 @@ export default function DashboardPage() {
             </span>
           </button>
           <button
-            onClick={() => navigate("/kitchen")}
+            onClick={() => navigate("/partner/kitchen")} // ✅ fixed path
             className="bg-surface-slate rounded-xl p-4 border border-[rgba(255,255,255,0.12)] flex flex-col items-center gap-2 hover:border-primary/50 transition-all active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-primary text-3xl">
@@ -306,17 +353,22 @@ export default function DashboardPage() {
       {/* Bottom Nav */}
       <nav className="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-surface/80 backdrop-blur-xl border-t border-[rgba(255,255,255,0.12)]">
         {[
-          { icon: "receipt_long", label: "Home", path: "/", active: true },
+          {
+            icon: "receipt_long",
+            label: "Home",
+            path: "/partner",
+            active: true,
+          },
           {
             icon: "inventory_2",
             label: "Kitchen",
-            path: "/kitchen",
+            path: "/partner/kitchen",
             active: false,
           },
           {
             icon: "bar_chart",
             label: "Analytics",
-            path: "/analytics",
+            path: "/partner/analytics",
             active: false,
           },
         ].map((item) => (

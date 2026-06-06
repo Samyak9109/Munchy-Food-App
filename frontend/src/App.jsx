@@ -14,7 +14,7 @@ import ExplorePage from "./pages/user/ExplorePage";
 import ChatbotPage from "./pages/user/ChatbotPage";
 import OrderStatusPage from "./pages/user/OrderStatusPage";
 import CartPage from "./pages/user/CartPage";
-import OrdersListPage from "./pages/user/OrdersListPage";
+import OrdersListPage from "./pages/user/OrderListPage";
 import StorePage from "./pages/user/StorePage";
 import ProfilePage from "./pages/user/ProfilePage";
 import PaymentPage from "./pages/user/PaymentPage";
