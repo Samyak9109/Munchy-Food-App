@@ -13,14 +13,27 @@ import ReelsPage from "./pages/user/ReelsPage";
 import ExplorePage from "./pages/user/ExplorePage";
 import ChatbotPage from "./pages/user/ChatbotPage";
 import OrderStatusPage from "./pages/user/OrderStatusPage";
+import CartPage from "./pages/user/CartPage";
+import OrdersListPage from "./pages/user/OrdersListPage";
+import StorePage from "./pages/user/StorePage";
+import ProfilePage from "./pages/user/ProfilePage";
+import PaymentPage from "./pages/user/PaymentPage";
+import ReviewPage from "./pages/user/ReviewPage";
 
 const ProtectedRoute = ({ children, role }) => {
   const { accessToken, role: userRole } = useAuthStore();
-  if (!accessToken)
+
+  if (!accessToken) {
     return (
       <Navigate to={role === "partner" ? "/partner/login" : "/login"} replace />
     );
-  if (role && userRole !== role) return <Navigate to="/" replace />;
+  }
+  if (role && userRole !== role) {
+    // redirect to correct home based on actual role
+    return (
+      <Navigate to={userRole === "partner" ? "/partner" : "/feed"} replace />
+    );
+  }
   return children;
 };
 
@@ -28,15 +41,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Default route */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* ── ROOT ──────────────────────────────────────────── */}
+        <Route path="/" element={<RootRedirect />} />
 
-        {/* user auth */}
+        {/* ── USER AUTH ─────────────────────────────────────── */}
         <Route path="/login" element={<UserLoginPage />} />
 
-        {/* user app */}
+        {/* ── USER APP ──────────────────────────────────────── */}
         <Route
-          path="/"
+          path="/feed"
           element={
             <ProtectedRoute role="user">
               <ReelsPage />
@@ -60,6 +73,22 @@ export default function App() {
           }
         />
         <Route
+          path="/cart"
+          element={
+            <ProtectedRoute role="user">
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute role="user">
+              <OrdersListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/orders/:id"
           element={
             <ProtectedRoute role="user">
@@ -67,11 +96,43 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/store/:id"
+          element={
+            <ProtectedRoute role="user">
+              <StorePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute role="user">
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute role="user">
+              <PaymentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/review/:orderId"
+          element={
+            <ProtectedRoute role="user">
+              <ReviewPage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* partner auth */}
+        {/* ── PARTNER AUTH ──────────────────────────────────── */}
         <Route path="/partner/login" element={<PartnerLoginPage />} />
 
-        {/* partner app */}
+        {/* ── PARTNER APP ───────────────────────────────────── */}
         <Route
           path="/partner"
           element={
@@ -97,8 +158,18 @@ export default function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* ── FALLBACK ──────────────────────────────────────── */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
+}
+
+// redirects to correct home based on role
+function RootRedirect() {
+  const { accessToken, role } = useAuthStore();
+
+  if (!accessToken) return <Navigate to="/login" replace />;
+  if (role === "partner") return <Navigate to="/partner" replace />;
+  return <Navigate to="/feed" replace />;
 }

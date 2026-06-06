@@ -284,7 +284,7 @@ async function logout(req, res) {
 }
 async function googleAuthCallback(req, res) {
   try {
-    const account = req.user; 
+    const account = req.user;
     const role = req.path.includes("partner") ? "partner" : "user";
 
     if (!account.isActive) {
@@ -293,7 +293,6 @@ async function googleAuthCallback(req, res) {
 
     const accessToken = await issueTokens(account, role, req, res);
 
-   
     return res.redirect(
       `${config.FRONTEND_URL}/auth/success?token=${accessToken}&role=${role}`,
     );
@@ -343,7 +342,6 @@ async function forgotPassword(req, res) {
 }
 
 async function resetPassword(req, res) {
-
   const { email, otp, newPassword } = req.body;
   const role = req.path.includes("partner") ? "partner" : "user";
   const model = getModelByRole(role);
@@ -389,6 +387,67 @@ async function resetPassword(req, res) {
   }
 }
 
+async function refreshToken(req, res) {
+  const incomingRefreshToken = req.cookies.refreshToken;
+
+  if (!incomingRefreshToken) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    // verify the refresh token
+    const decoded = jwt.verify(incomingRefreshToken, config.JWT_SECRET);
+
+    // find the session
+    const session = await sessionModel.findOne({
+      refreshToken: hashRefreshToken(incomingRefreshToken),
+      revoked: false,
+    });
+
+    if (!session) {
+      return res.status(401).json({ message: "Invalid session" });
+    }
+
+    // get the account
+    const model = getModelByRole(decoded.role);
+    const account = await model.findById(decoded.userId);
+
+    if (!account || !account.isActive) {
+      return res.status(401).json({ message: "Account not found" });
+    }
+
+    // issue new access token
+    const accessToken = jwt.sign(
+      { userId: account._id, sessionID: session._id, role: decoded.role },
+      config.JWT_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    return res.status(200).json({
+      accessToken,
+      account: {
+        id: account._id,
+        username: account.name,
+        email: account.email,
+        role: decoded.role,
+      },
+    });
+  } catch (error) {
+    return res
+      .status(401)
+      .json({ message: "Invalid or expired refresh token" });
+  }
+}
 
 // exports
-export { registerUser, registerPartner, verifyEmail, login, logout, googleAuthCallback, forgotPassword, resetPassword };
+export {
+  registerUser,
+  registerPartner,
+  verifyEmail,
+  login,
+  logout,
+  googleAuthCallback,
+  forgotPassword,
+  resetPassword,
+  refreshToken,
+};
