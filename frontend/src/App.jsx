@@ -1,175 +1,81 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuthStore } from "./store/authStore";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// partner pages
-import PartnerLoginPage from "./pages/partner/LoginPage";
-import DashboardPage from "./pages/partner/DashboardPage";
-import KitchenPage from "./pages/partner/KitchenPage";
-import AnalyticsPage from "./pages/partner/AnalyticsPage";
+import UserLayout from './layouts/UserLayout';
+import PartnerLayout from './layouts/PartnerLayout';
 
-// user pages
-import UserLoginPage from "./pages/user/LoginPage";
-import ReelsPage from "./pages/user/ReelsPage";
-import ExplorePage from "./pages/user/ExplorePage";
-import ChatbotPage from "./pages/user/ChatbotPage";
-import OrderStatusPage from "./pages/user/OrderStatusPage";
-import CartPage from "./pages/user/CartPage";
-import OrdersListPage from "./pages/user/OrderListPage";
-import StorePage from "./pages/user/StorePage";
-import ProfilePage from "./pages/user/ProfilePage";
-import PaymentPage from "./pages/user/PaymentPage";
-import ReviewPage from "./pages/user/ReviewPage";
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
 
-const ProtectedRoute = ({ children, role }) => {
-  const { accessToken, role: userRole } = useAuthStore();
+import ReelsPage from './pages/user/ReelsPage';
+import KitchensPage from './pages/user/KitchensPage';
+import ChatbotPage from './pages/user/ChatbotPage';
+import CartPage from './pages/user/CartPage';
+import OrdersPage from './pages/user/OrdersPage';
+import StorePage from './pages/user/StorePage';
+import CheckoutPage from './pages/user/CheckoutPage';
+import OrderDetailPage from './pages/user/OrderDetailPage';
+import ProfilePage from './pages/user/ProfilePage';
+import ForgotPasswordPage from './pages/user/ForgotPasswordPage';
 
-  if (!accessToken) {
-    return (
-      <Navigate to={role === "partner" ? "/partner/login" : "/login"} replace />
-    );
-  }
-  if (role && userRole !== role) {
-    // redirect to correct home based on actual role
-    return (
-      <Navigate to={userRole === "partner" ? "/partner" : "/feed"} replace />
-    );
-  }
-  return children;
-};
+import DashboardPage from './pages/partner/DashboardPage';
+import PartnerOrdersPage from './pages/partner/PartnerOrdersPage';
+import PartnerReelsPage from './pages/partner/PartnerReelsPage';
+import AnalyticsPage from './pages/partner/AnalyticsPage';
+import StoreManagePage from './pages/partner/StoreManagePage';
+import OTPVerifyPage from './pages/partner/OTPVerifyPage';
+
+import ProtectedRoute from './components/common/ProtectedRoute';
+
+const qc = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
+});
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* ── ROOT ──────────────────────────────────────────── */}
-        <Route path="/" element={<RootRedirect />} />
+    <QueryClientProvider client={qc}>
+      <BrowserRouter>
+        <Routes>
+          {/* AUTH */}
+          <Route path="/login"            element={<LoginPage />} />
+          <Route path="/register"         element={<RegisterPage />} />
+          <Route path="/forgot-password"  element={<ForgotPasswordPage />} />
 
-        {/* ── USER AUTH ─────────────────────────────────────── */}
-        <Route path="/login" element={<UserLoginPage />} />
+          {/* USER APP */}
+          <Route element={
+            <ProtectedRoute requiredRole="user">
+              <UserLayout />
+            </ProtectedRoute>
+          }>
+            <Route path="/"           element={<ReelsPage />} />
+            <Route path="/kitchens"   element={<KitchensPage />} />
+            <Route path="/chatbot"    element={<ChatbotPage />} />
+            <Route path="/cart"       element={<CartPage />} />
+            <Route path="/orders"     element={<OrdersPage />} />
+            <Route path="/orders/:id" element={<OrderDetailPage />} />
+            <Route path="/store/:id"  element={<StorePage />} />
+            <Route path="/checkout"   element={<CheckoutPage />} />
+            <Route path="/profile"    element={<ProfilePage />} />
+          </Route>
 
-        {/* ── USER APP ──────────────────────────────────────── */}
-        <Route
-          path="/feed"
-          element={
-            <ProtectedRoute role="user">
-              <ReelsPage />
+          {/* PARTNER APP */}
+          <Route path="/partner" element={
+            <ProtectedRoute requiredRole="partner">
+              <PartnerLayout />
             </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/explore"
-          element={
-            <ProtectedRoute role="user">
-              <ExplorePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/chat"
-          element={
-            <ProtectedRoute role="user">
-              <ChatbotPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <ProtectedRoute role="user">
-              <CartPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/orders"
-          element={
-            <ProtectedRoute role="user">
-              <OrdersListPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/orders/:id"
-          element={
-            <ProtectedRoute role="user">
-              <OrderStatusPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/store/:id"
-          element={
-            <ProtectedRoute role="user">
-              <StorePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute role="user">
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/payment"
-          element={
-            <ProtectedRoute role="user">
-              <PaymentPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/review/:orderId"
-          element={
-            <ProtectedRoute role="user">
-              <ReviewPage />
-            </ProtectedRoute>
-          }
-        />
+          }>
+            <Route index element={<Navigate to="/partner/dashboard" replace />} />
+            <Route path="dashboard"       element={<DashboardPage />} />
+            <Route path="orders"          element={<PartnerOrdersPage />} />
+            <Route path="orders/:orderId" element={<OTPVerifyPage />} />
+            <Route path="reels"           element={<PartnerReelsPage />} />
+            <Route path="analytics"       element={<AnalyticsPage />} />
+            <Route path="store"           element={<StoreManagePage />} />
+          </Route>
 
-        {/* ── PARTNER AUTH ──────────────────────────────────── */}
-        <Route path="/partner/login" element={<PartnerLoginPage />} />
-
-        {/* ── PARTNER APP ───────────────────────────────────── */}
-        <Route
-          path="/partner"
-          element={
-            <ProtectedRoute role="partner">
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/partner/kitchen"
-          element={
-            <ProtectedRoute role="partner">
-              <KitchenPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/partner/analytics"
-          element={
-            <ProtectedRoute role="partner">
-              <AnalyticsPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ── FALLBACK ──────────────────────────────────────── */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
-}
-
-// redirects to correct home based on role
-function RootRedirect() {
-  const { accessToken, role } = useAuthStore();
-
-  if (!accessToken) return <Navigate to="/login" replace />;
-  if (role === "partner") return <Navigate to="/partner" replace />;
-  return <Navigate to="/feed" replace />;
 }

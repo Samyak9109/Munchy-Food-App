@@ -1,0 +1,194 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msgRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.userRow {
+  flex-direction: row-reverse;
+}
+
+.botAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-high);
+  flex-shrink: 0;
+}
+
+.bubble {
+  max-width: 80%;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.userRow .bubble {
+  background: var(--surface-high);
+}
+
+.typing {
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* Mood chips */
+.chips {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+}
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.chip:hover { background: var(--surface-high); border-color: var(--yellow); color: var(--yellow); }
+
+/* Input row */
+.inputRow {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--outline-dim);
+  background: var(--bg);
+}
+
+.input {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+.input::placeholder { color: var(--text-muted); }
+.input:focus { border-color: var(--primary-red); }
+
+.sendBtn {
+  width: 44px;
+  height: 44px;
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  color: var(--on-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+.sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Food recommendation cards */
+.foodCards {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-top: 12px;
+  padding-bottom: 4px;
+}
+.foodCards::-webkit-scrollbar { display: none; }
+
+.foodCard {
+  min-width: 160px;
+  background: var(--surface-high);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+}
+
+.foodImg {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.matchBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--yellow);
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.foodInfo { padding: 10px; }
+
+.foodName {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.foodStore { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
+
+.foodBottom { display: flex; justify-content: space-between; align-items: center; }
+
+.foodPrice { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary); }
+
+.addBtn {
+  width: 28px;
+  height: 28px;
+  background: var(--yellow);
+  border: none;
+  border-radius: 50%;
+  color: #000;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

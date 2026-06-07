@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Munchy - Order Status</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#60dac4",
+                        "surface": "#131313",
+                        "primary": "#ffb3ae",
+                        "on-tertiary": "#003730",
+                        "on-secondary-fixed-variant": "#544600",
+                        "surface-container": "#201f1f",
+                        "inverse-primary": "#ba1724",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#5c0008",
+                        "status-success": "#00C853",
+                        "surface-variant": "#353534",
+                        "tertiary-fixed-dim": "#60dac4",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#ffdad7",
+                        "primary-container": "#ff5352",
+                        "surface-bright": "#393939",
+                        "surface-container-highest": "#353534",
+                        "tertiary-container": "#0ba38f",
+                        "on-secondary": "#3a3000",
+                        "on-secondary-container": "#725f00",
+                        "secondary-container": "#ffdb3c",
+                        "tertiary-fixed": "#7ef7e0",
+                        "error-container": "#93000a",
+                        "on-surface": "#e5e2e1",
+                        "inverse-surface": "#e5e2e1",
+                        "outline": "#ab8986",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary": "#fff9ef",
+                        "secondary-fixed-dim": "#e9c400",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#ffb3ae",
+                        "on-primary-fixed-variant": "#930014",
+                        "surface-dim": "#131313",
+                        "on-background": "#e5e2e1",
+                        "background": "#131313",
+                        "inverse-on-surface": "#313030",
+                        "status-error": "#FF3D00",
+                        "surface-slate": "#1E1E1E",
+                        "on-tertiary-fixed": "#00201b",
+                        "on-surface-variant": "#e4beba",
+                        "on-primary": "#68000b",
+                        "surface-tint": "#ffb3ae",
+                        "on-primary-fixed": "#410004",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary-fixed-variant": "#005046",
+                        "glass-border": "rgba(255, 255, 255, 0.12)",
+                        "secondary-fixed": "#ffe16d",
+                        "on-secondary-fixed": "#221b00",
+                        "on-tertiary-container": "#003029",
+                        "outline-variant": "#5b403e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "margin-mobile": "16px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "stack-md": "16px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Montserrat"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "display-xl": ["Montserrat"],
+                        "label-bold": ["Inter"],
+                        "price-display": ["Montserrat"],
+                        "title-md": ["Montserrat"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "display-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "price-display": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #353534; border-radius: 4px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-gradient-to-b from-black/80 to-transparent">
+<button aria-label="Location" class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined">location_on</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Munchy</h1>
+<button aria-label="Profile" class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 pb-32">
+<!-- Map & Status Hero Section -->
+<div class="relative w-full h-[309px] min-h-[250px] bg-surface-container-lowest">
+<!-- Simulated Map Background -->
+<img alt="Map to store" class="w-full h-full object-cover opacity-60 grayscale-[50%] contrast-125" data-location="Munchy SoHo Flagship Route" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFR1J4JBjLyIcaiwEbdRjCFSEEYdNV9LPPWlKiHQaXBvFqED-BDWpw8ORS8jy-_XczpBuEakc1bN2OZH0T-MockFwJDqFmDbTWCBUw3ylADlEZOoeniDU0uoyKOxVfpZO1FM5twE7hQyWTT98Gb-_yjIdnUyNVQNAGldJw0yC69f5SWQDxQnC_N76l2AKMgFWZ1Jdas-zaSBMi1ppWMEBhbqVMUlh4pratyOo_w3yjdVIMis3Yfac2xhesld1D7mJbr0I4y2O7HNg"/>
+<!-- Vignette & Gradient Overlays for depth -->
+<div class="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background"></div>
+<div class="absolute inset-0 shadow-[inset_0_-40px_40px_rgba(18,18,18,1)] pointer-events-none"></div>
+<!-- Floating Route Indicator (Simulated) -->
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center drop-shadow-2xl">
+<div class="bg-secondary-fixed-dim text-on-secondary-fixed px-3 py-1 rounded-full font-label-bold text-label-bold mb-1 shadow-[0_0_15px_rgba(233,196,0,0.4)]">
+                    3 min away
+                </div>
+<span class="material-symbols-outlined text-secondary-fixed-dim text-4xl drop-shadow-[0_0_10px_rgba(233,196,0,0.8)]" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<!-- Big Status Badge -->
+<div class="absolute bottom-6 left-margin-mobile right-margin-mobile flex justify-center z-10">
+<div class="flex items-center gap-3 bg-secondary-fixed-dim/10 backdrop-blur-xl border border-secondary-fixed-dim/40 rounded-full px-6 py-3 shadow-[0_0_30px_rgba(233,196,0,0.15)]">
+<span class="material-symbols-outlined text-secondary-fixed-dim animate-pulse" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<h2 class="font-headline-lg-mobile text-[20px] leading-[28px] font-bold text-secondary-fixed-dim uppercase tracking-wide">Ready for Pickup</h2>
+</div>
+</div>
+</div>
+<!-- The Pickup OTP Component -->
+<section class="px-margin-mobile mt-stack-md relative z-20 -mt-4">
+<div class="bg-surface-slate rounded-xl p-stack-lg border border-glass-border shadow-2xl relative overflow-hidden">
+<!-- Inner Neon Glow -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-secondary-fixed-dim/10 rounded-full blur-[40px] pointer-events-none"></div>
+<div class="flex flex-col items-center text-center">
+<h3 class="font-title-md text-title-md text-on-surface mb-1">Show this at the counter</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg">Your order #M-8492 is waiting.</p>
+<!-- 6-Digit OTP Block -->
+<div class="flex gap-2 w-full justify-center">
+<div class="w-12 h-16 bg-surface-container flex items-center justify-center rounded-lg border border-glass-border border-b-[3px] border-b-secondary-fixed-dim shadow-inner">
+<span class="font-display-xl text-[32px] leading-none text-on-surface font-bold">4</span>
+</div>
+<div class="w-12 h-16 bg-surface-container flex items-center justify-center rounded-lg border border-glass-border border-b-[3px] border-b-secondary-fixed-dim shadow-inner">
+<span class="font-display-xl text-[32px] leading-none text-on-surface font-bold">8</span>
+</div>
+<div class="w-12 h-16 bg-surface-container flex items-center justify-center rounded-lg border border-glass-border border-b-[3px] border-b-secondary-fixed-dim shadow-inner">
+<span class="font-display-xl text-[32px] leading-none text-on-surface font-bold">2</span>
+</div>
+<div class="w-4 flex items-center justify-center"></div> <!-- Spacer -->
+<div class="w-12 h-16 bg-surface-container flex items-center justify-center rounded-lg border border-glass-border border-b-[3px] border-b-secondary-fixed-dim shadow-inner">
+<span class="font-display-xl text-[32px] leading-none text-on-surface font-bold">1</span>
+</div>
+<div class="w-12 h-16 bg-surface-container flex items-center justify-center rounded-lg border border-glass-border border-b-[3px] border-b-secondary-fixed-dim shadow-inner">
+<span class="font-display-xl text-[32px] leading-none text-on-surface font-bold">0</span>
+</div>
+<div class="w-12 h-16 bg-surface-container flex items-center justify-center rounded-lg border border-glass-border border-b-[3px] border-b-secondary-fixed-dim shadow-inner">
+<span class="font-display-xl text-[32px] leading-none text-on-surface font-bold">9</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Store Information Card -->
+<section class="px-margin-mobile mt-stack-md">
+<div class="flex items-center gap-4 bg-surface-container/50 backdrop-blur-md rounded-xl p-stack-md border border-glass-border hover:bg-surface-container transition-colors">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-primary shadow-inner">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+<div class="flex-1">
+<h4 class="font-title-md text-[16px] leading-[24px] text-on-surface">Munchy SoHo Hub</h4>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1">123 Prince St, New York, NY 10012</p>
+</div>
+<button aria-label="Get Directions" class="w-10 h-10 rounded-full bg-secondary-fixed-dim text-on-secondary-fixed flex items-center justify-center shadow-[0_4px_12px_rgba(233,196,0,0.3)] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">directions</span>
+</button>
+</div>
+</section>
+<!-- Order Items List -->
+<section class="px-margin-mobile mt-stack-lg">
+<h3 class="font-title-md text-title-md text-on-surface mb-stack-sm flex items-center justify-between">
+<span>Order Summary</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-normal">2 Items</span>
+</h3>
+<div class="flex flex-col gap-stack-sm">
+<!-- Item 1 -->
+<div class="flex gap-4 bg-surface-container-low rounded-xl p-3 border border-glass-border">
+<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="A close up, high definition shot of a vibrant bowl of spicy cyber noodles. The noodles are glossy with dark chili oil and topped with bright green scallions and crushed peanuts. The lighting is moody and cinematic, highlighting the deep reds and neon green accents against a dark slate background, perfectly fitting the premium-street Munchy dark mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOgtIypJJL3UvPaAtvoRR3cfnfxas5BLzc4eueGdV5of9M0nPabR6a5SpakVz0Mm2PuWH5BjNQbS5-VdWAUZPgotxghS1GD_HzBgpJsorw9IHl6PiH83dT2s4vRQQlKj0eWBBMe8HPXQRmpaZXn1AIApz2vZxvBAZJsry9CvdmdOy-2KE0R8G057v6DZk2zFema-A6qvkYf0VWeSMV4FlmquuN50Hp_ZUP_h1cz0sqfpJ359V2yVYsDsOV2MVDGvmGrdf7jpTr7po"/>
+<div class="absolute bottom-1 right-1 bg-surface-slate/80 backdrop-blur-sm rounded px-1.5 py-0.5 font-label-bold text-[10px] text-on-surface">x1</div>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="font-title-md text-[16px] leading-[22px] font-semibold text-on-surface mb-1">Spicy Cyber Noodles</h4>
+<p class="font-body-md text-[13px] text-on-surface-variant">Extra chili oil, No cilantro</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4 bg-surface-container-low rounded-xl p-3 border border-glass-border">
+<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="A refreshing, ice-cold Yuzu Lemonade in a condensation-covered glass, resting on a dark textured table. Slices of bright yellow yuzu float inside, glowing slightly under targeted spotlighting. The background is a deep charcoal blur, enhancing the neon yellow pop of the drink, perfectly aligned with the high-energy, Glassmorphic Minimalism style of the Munchy brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCG_KL5_e476zPqVjTsaPtrG3gInl0vzAJsQnpJ0p2ZZIOkuoNf5L-b2ZGabQuCO8yyRN7t4J1JTbWzMBdPOWxUmH2QERPXzTU9A0bBoxzHjiy6Zy-DU3h2h7ou0cjH2mKuo2w1jG7WL4XoOIFKbT4o_PpAWJNjoKPeoSMtlm9PSAq-Um7M6wEVc3tQUIDiy6u-LHgWpc1gv6jRczn-wXyp4tWQhsB7Sn2Ec-iXKPQwabgO3ZFdexLnwpj9FVkjQEa_C-L93NMfHto"/>
+<div class="absolute bottom-1 right-1 bg-surface-slate/80 backdrop-blur-sm rounded px-1.5 py-0.5 font-label-bold text-[10px] text-on-surface">x1</div>
+</div>
+<div class="flex flex-col justify-center">
+<h4 class="font-title-md text-[16px] leading-[22px] font-semibold text-on-surface mb-1">Yuzu Sparkle</h4>
+<p class="font-body-md text-[13px] text-on-surface-variant">Large, Light Ice</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Shared Component) 
+         Active State: 'receipt_long' (Orders) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-surface/80 backdrop-blur-xl rounded-t-xl border-t border-glass-border shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:hidden">
+<button aria-label="Feed" class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">movie</span>
+</button>
+<button aria-label="Explore" class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">explore</span>
+</button>
+<button aria-label="AI Chat" class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">smart_toy</span>
+</button>
+<button aria-label="Cart" class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<!-- Active Tab -->
+<button aria-label="Orders" class="flex items-center justify-center bg-primary-container/20 text-primary rounded-full p-3 transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined drop-shadow-[0_0_8px_rgba(255,83,82,0.4)]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+</button>
+</nav>
+</body></html>

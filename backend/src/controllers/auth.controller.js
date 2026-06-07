@@ -150,11 +150,13 @@ async function verifyEmail(req, res) {
   const model = getModelByRole(role);
 
   try {
-    const otpRecord = await otpModel.findOne({
-      email,
-      purpose: "register",
-      used: false,
-    });
+    const otpRecord = await otpModel
+      .findOne({
+        email,
+        purpose: "register",
+        used: false,
+      })
+      .sort({ createdAt: -1 });
 
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid or expired OTP" });

@@ -1,0 +1,142 @@
+.page { min-height: 100%; }
+
+.content { padding: 16px; }
+
+.storeTag {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.items { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.itemImg {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.itemInfo { flex: 1; min-width: 0; }
+
+.itemName {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemPrice {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.qtyControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-high);
+  border-radius: 9999px;
+  padding: 6px 12px;
+}
+
+.qtyBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+}
+
+.qty {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 16px;
+  text-align: center;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid var(--outline-dim);
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.totalAmt {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.checkoutBtn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--primary);
+  border-radius: 9999px;
+  color: var(--on-primary);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: opacity 0.2s;
+}
+.checkoutBtn:hover { opacity: 0.9; }
+
+.clearBtn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.clearBtn:hover { border-color: var(--error); color: var(--error); }
+
+.empty {
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-dim);
+}
+
+.browseBtn {
+  margin-top: 8px;
+  padding: 12px 24px;
+  background: var(--primary);
+  border-radius: 9999px;
+  color: var(--on-primary);
+  font-weight: 700;
+  text-decoration: none;
+}

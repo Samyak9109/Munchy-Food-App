@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Management - Munchy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#fff9ef",
+                        "on-secondary-fixed": "#221b00",
+                        "primary-fixed": "#ffdad7",
+                        "status-success": "#00C853",
+                        "tertiary-fixed-dim": "#60dac4",
+                        "on-surface": "#e5e2e1",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb3ae",
+                        "tertiary-container": "#0ba38f",
+                        "surface-slate": "#1E1E1E",
+                        "error": "#ffb4ab",
+                        "surface": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "error-container": "#93000a",
+                        "background": "#131313",
+                        "secondary-fixed": "#ffe16d",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface-variant": "#e4beba",
+                        "on-secondary-fixed-variant": "#544600",
+                        "inverse-primary": "#ba1724",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-container": "#003029",
+                        "primary-fixed-dim": "#ffb3ae",
+                        "inverse-on-surface": "#313030",
+                        "primary-container": "#ff5352",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary-fixed-variant": "#005046",
+                        "surface-container": "#201f1f",
+                        "outline": "#ab8986",
+                        "surface-variant": "#353534",
+                        "surface-dim": "#131313",
+                        "on-tertiary-fixed": "#00201b",
+                        "on-secondary-container": "#725f00",
+                        "on-primary-fixed-variant": "#930014",
+                        "on-primary-container": "#5c0008",
+                        "tertiary": "#60dac4",
+                        "status-error": "#FF3D00",
+                        "surface-container-highest": "#353534",
+                        "surface-bright": "#393939",
+                        "tertiary-fixed": "#7ef7e0",
+                        "on-secondary": "#3a3000",
+                        "on-primary-fixed": "#410004",
+                        "on-tertiary": "#003730",
+                        "secondary-container": "#ffdb3c",
+                        "secondary-fixed-dim": "#e9c400",
+                        "outline-variant": "#5b403e",
+                        "inverse-surface": "#e5e2e1",
+                        "glass-border": "rgba(255, 255, 255, 0.12)",
+                        "primary": "#ffb3ae",
+                        "on-primary": "#68000b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "margin-desktop": "32px",
+                        "stack-sm": "8px",
+                        "gutter": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "price-display": ["Montserrat"],
+                        "label-bold": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "display-xl": ["Montserrat"],
+                        "headline-lg-mobile": ["Montserrat"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "price-display": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "display-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .otp-input:focus {
+            outline: none;
+            border-color: #ffe16d; /* secondary-fixed / Electric Yellow */
+            box-shadow: 0 0 10px rgba(255, 225, 109, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-24 selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation for Transactional Screen -->
+<header class="flex justify-between items-center px-margin-mobile h-16 z-50 fixed top-0 w-full bg-surface-slate shadow-sm">
+<button aria-label="Go Back" class="text-on-surface hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Order #9824</div>
+<button aria-label="Help" class="text-on-surface hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help_outline</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 px-margin-mobile max-w-2xl mx-auto space-y-stack-lg">
+<!-- Status Banner -->
+<section class="glass-panel rounded-xl p-stack-md flex items-center justify-between border-l-4 border-secondary-fixed">
+<div>
+<h2 class="font-title-md text-title-md text-secondary-fixed">Ready for Pickup</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Waiting for customer verification</p>
+</div>
+<div class="bg-secondary-fixed/20 p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-fixed text-3xl" style="font-variation-settings: 'FILL' 1;">timer</span>
+</div>
+</section>
+<!-- Customer Info -->
+<section class="bg-surface-container rounded-xl p-stack-md space-y-stack-md">
+<h3 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Customer Details</h3>
+<div class="flex items-center gap-stack-md">
+<img alt="Profile photo" class="w-16 h-16 rounded-full object-cover border-2 border-surface-variant" data-alt="A close-up studio portrait of a young woman with a vibrant, modern aesthetic, lit by soft rim lighting against a dark charcoal background. The composition is tight and focused, highlighting expressive features suitable for a fast-paced app interface avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkNkSKwNAORQn3qtG8JrQtDnLP1Af4nJAD8U5MEVjnnm2o7nPrtogIrf-qCOka3YQr1ve5I5PML7oEWY-1qYpsI9lUAmnMCixPMvkoGd0ndIqrl-lCLueB2hNqzIVdcgNh1AQgxDvh-mr0C6W9vYgan0LX1U0bFzTG1U-mPrg1O0oczVxZBzf2G4FKx_AtyLGhyMoDtv4T8Fyeyv8VCmzhwGdvgvNhM0MJ3-F1GTouWiABtEb-f7dYUi13Puqi74rRZvNFx3cyKeA"/>
+<div>
+<p class="font-title-md text-title-md text-on-surface">Alex Johnson</p>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm">phone_iphone</span>
+                        +1 (555) 019-2834
+                    </p>
+</div>
+<button class="ml-auto bg-surface-variant text-on-surface p-3 rounded-full hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined">call</span>
+</button>
+</div>
+</section>
+<!-- Order Items -->
+<section class="bg-surface-container rounded-xl p-stack-md">
+<h3 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider mb-stack-md">Order Contents</h3>
+<ul class="space-y-stack-md">
+<li class="flex justify-between items-start border-b border-surface-variant pb-stack-md">
+<div class="flex gap-stack-md">
+<div class="w-8 h-8 rounded bg-surface-bright flex items-center justify-center font-title-md text-title-md text-primary font-bold">2x</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface">Spicy Tuna Crunch Roll</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Extra spicy mayo, no wasabi</p>
+</div>
+</div>
+</li>
+<li class="flex justify-between items-start border-b border-surface-variant pb-stack-md">
+<div class="flex gap-stack-md">
+<div class="w-8 h-8 rounded bg-surface-bright flex items-center justify-center font-title-md text-title-md text-primary font-bold">1x</div>
+<div>
+<p class="font-title-md text-title-md text-on-surface">Dragon Bowl</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Brown rice base</p>
+</div>
+</div>
+</li>
+</ul>
+<div class="mt-stack-md flex justify-between items-center">
+<p class="font-body-lg text-body-lg text-on-surface-variant">Total Items: 3</p>
+<p class="font-price-display text-price-display text-primary">$42.50</p>
+</div>
+</section>
+<!-- OTP Verification Area -->
+<section class="glass-panel rounded-xl p-stack-lg text-center border border-primary/20 relative overflow-hidden">
+<!-- Decorative Glow -->
+<div class="absolute inset-0 bg-primary/5 blur-3xl rounded-full transform -translate-y-1/2 pointer-events-none"></div>
+<div class="relative z-10 space-y-stack-lg">
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Verify Customer Pickup</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Ask the customer for their 6-digit order code to release the food.</p>
+</div>
+<div class="flex justify-center gap-2 sm:gap-4">
+<input class="otp-input w-10 h-12 sm:w-12 sm:h-16 text-center font-display-xl text-display-xl bg-surface-container rounded-lg border border-surface-variant text-on-surface focus:ring-0" maxlength="1" placeholder="·" type="text"/>
+<input class="otp-input w-10 h-12 sm:w-12 sm:h-16 text-center font-display-xl text-display-xl bg-surface-container rounded-lg border border-surface-variant text-on-surface focus:ring-0" maxlength="1" placeholder="·" type="text"/>
+<input class="otp-input w-10 h-12 sm:w-12 sm:h-16 text-center font-display-xl text-display-xl bg-surface-container rounded-lg border border-surface-variant text-on-surface focus:ring-0" maxlength="1" placeholder="·" type="text"/>
+<span class="text-on-surface-variant flex items-center">-</span>
+<input class="otp-input w-10 h-12 sm:w-12 sm:h-16 text-center font-display-xl text-display-xl bg-surface-container rounded-lg border border-surface-variant text-on-surface focus:ring-0" maxlength="1" placeholder="·" type="text"/>
+<input class="otp-input w-10 h-12 sm:w-12 sm:h-16 text-center font-display-xl text-display-xl bg-surface-container rounded-lg border border-surface-variant text-on-surface focus:ring-0" maxlength="1" placeholder="·" type="text"/>
+<input class="otp-input w-10 h-12 sm:w-12 sm:h-16 text-center font-display-xl text-display-xl bg-surface-container rounded-lg border border-surface-variant text-on-surface focus:ring-0" maxlength="1" placeholder="·" type="text"/>
+</div>
+<button class="w-full bg-secondary-fixed text-on-secondary-fixed font-title-md text-title-md py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-opacity-90 transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(255,225,109,0.2)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Confirm Pickup
+                </button>
+</div>
+</section>
+</main>
+<script>
+        // Simple script to auto-focus next OTP input
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+    </script>
+</body></html>

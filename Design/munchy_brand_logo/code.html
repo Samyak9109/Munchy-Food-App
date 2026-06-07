@@ -1,0 +1,20 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="munchy_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF4D4D" />
+      <stop offset="100%" stop-color="#D43636" />
+    </linearGradient>
+  </defs>
+  <!-- Background Circle (to match app feel) -->
+  <rect width="200" height="200" rx="48" fill="#131313"/>
+  
+  <!-- Stylized 'M' with a 'bite' or smile motif -->
+  <path d="M50 140V70C50 64.4772 54.4772 60 60 60H140C145.523 60 150 64.4772 150 70V140" stroke="url(#munchy_grad)" stroke-width="16" stroke-linecap="round"/>
+  <path d="M50 100C75 120 125 120 150 100" stroke="url(#munchy_grad)" stroke-width="16" stroke-linecap="round"/>
+  <path d="M100 60V110" stroke="url(#munchy_grad)" stroke-width="16" stroke-linecap="round"/>
+  
+  <!-- Accent dot/spark to represent 'Velocity' -->
+  <circle cx="160" cy="50" r="8" fill="#FF4D4D">
+    <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg>

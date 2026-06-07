@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Munchy - AI Mood Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#60dac4",
+                        "surface": "#131313",
+                        "primary": "#ffb3ae",
+                        "on-tertiary": "#003730",
+                        "on-secondary-fixed-variant": "#544600",
+                        "surface-container": "#201f1f",
+                        "inverse-primary": "#ba1724",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#5c0008",
+                        "status-success": "#00C853",
+                        "surface-variant": "#353534",
+                        "tertiary-fixed-dim": "#60dac4",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#ffdad7",
+                        "primary-container": "#ff5352",
+                        "surface-bright": "#393939",
+                        "surface-container-highest": "#353534",
+                        "tertiary-container": "#0ba38f",
+                        "on-secondary": "#3a3000",
+                        "on-secondary-container": "#725f00",
+                        "secondary-container": "#ffdb3c",
+                        "tertiary-fixed": "#7ef7e0",
+                        "error-container": "#93000a",
+                        "on-surface": "#e5e2e1",
+                        "inverse-surface": "#e5e2e1",
+                        "outline": "#ab8986",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary": "#fff9ef",
+                        "secondary-fixed-dim": "#e9c400",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#ffb3ae",
+                        "on-primary-fixed-variant": "#930014",
+                        "surface-dim": "#131313",
+                        "on-background": "#e5e2e1",
+                        "background": "#131313",
+                        "inverse-on-surface": "#313030",
+                        "status-error": "#FF3D00",
+                        "surface-slate": "#1E1E1E",
+                        "on-tertiary-fixed": "#00201b",
+                        "on-surface-variant": "#e4beba",
+                        "on-primary": "#68000b",
+                        "surface-tint": "#ffb3ae",
+                        "on-primary-fixed": "#410004",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary-fixed-variant": "#005046",
+                        "glass-border": "rgba(255, 255, 255, 0.12)",
+                        "secondary-fixed": "#ffe16d",
+                        "on-secondary-fixed": "#221b00",
+                        "on-tertiary-container": "#003029",
+                        "outline-variant": "#5b403e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "margin-mobile": "16px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "stack-md": "16px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Montserrat"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "display-xl": ["Montserrat"],
+                        "label-bold": ["Inter"],
+                        "price-display": ["Montserrat"],
+                        "title-md": ["Montserrat"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "display-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "price-display": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .neon-glow-yellow { box-shadow: 0 0 20px rgba(233, 196, 0, 0.2); }
+        .neon-glow-red { box-shadow: 0 0 20px rgba(186, 23, 36, 0.2); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-gradient-to-b from-black/50 to-transparent flex justify-between items-center px-margin-mobile h-16 z-50 transition-opacity">
+<button aria-label="Location" class="text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary tracking-tight">Munchy</h1>
+<button aria-label="Account" class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</header>
+<!-- Chat Canvas -->
+<main class="flex-1 overflow-y-auto hide-scrollbar pt-20 pb-[140px] px-margin-mobile flex flex-col gap-stack-md relative z-10">
+<!-- Background Ambient Glow -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container/10 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary-container/10 rounded-full blur-[100px]"></div>
+</div>
+<!-- AI Greeting -->
+<div class="flex items-start gap-3 w-full max-w-[85%] self-start animate-[fadeIn_0.3s_ease-out]">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 neon-glow-red">
+<span class="material-symbols-outlined text-on-primary-container text-sm">smart_toy</span>
+</div>
+<div class="bg-surface-slate backdrop-blur-xl border border-glass-border rounded-2xl rounded-tl-sm p-4 text-on-surface shadow-lg">
+<p class="font-body-md text-body-md">Tell me how you feel, I will find your meal. 🍕</p>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex items-end gap-3 w-full max-w-[85%] self-end flex-row-reverse animate-[fadeIn_0.4s_ease-out]">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">person</span>
+</div>
+<div class="bg-surface-variant rounded-2xl rounded-tr-sm p-4 text-on-surface shadow-lg">
+<p class="font-body-md text-body-md">Stressed and need comfort food.</p>
+</div>
+</div>
+<!-- AI Response with Food Cards -->
+<div class="flex items-start gap-3 w-full self-start animate-[fadeIn_0.5s_ease-out]">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 neon-glow-red mt-2">
+<span class="material-symbols-outlined text-on-primary-container text-sm">smart_toy</span>
+</div>
+<div class="w-full flex flex-col gap-3">
+<div class="bg-surface-slate backdrop-blur-xl border border-glass-border rounded-2xl rounded-tl-sm p-4 text-on-surface shadow-lg inline-block w-fit max-w-[85%]">
+<p class="font-body-md text-body-md">I've got you. Comfort loading... Check these out:</p>
+</div>
+<!-- Horizontal Scrollable Food Cards -->
+<div class="flex overflow-x-auto gap-4 pb-4 hide-scrollbar w-full snap-x snap-mandatory pr-margin-mobile -mr-margin-mobile">
+<!-- Card 1 -->
+<div class="snap-center shrink-0 w-[240px] bg-surface-slate rounded-[16px] overflow-hidden shadow-lg border border-glass-border flex flex-col">
+<div class="h-32 w-full relative">
+<img class="w-full h-full object-cover" data-alt="A close-up, high-definition shot of a gooey, cheesy pepperoni pizza pulling apart. The scene is lit with warm, moody lighting against a deep slate background, emphasizing the glossy texture of the melted cheese and the crispy edges of the crust. Electric yellow highlights playfully accent the composition, creating a modern, premium street-food aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmGFj8C7aLFpUfN51RkCs0j34qytAo-EMNU1uoDNiVax5aaOynKVMO0SJD356cjaJvaEDJCeZv059_gCWlHJ9_Pn4Tzfx8TQvHFPwj6N1GO9VwLW0t0yB6jhX7Z5_zmYOxbfKVyAPvZ1gLLvOci2aBRJTvPNtMBLE0-EQqBldJjJgJA9-yQtLOsUysXc4v608RnkDesMXEwP-W3-dx-2U0TuI84BWVuw6si6BY_6EWCxyVMXhHxyRxUAjMbawxEEW3-M6OSKPB978"/>
+<div class="absolute top-2 right-2 bg-secondary-fixed-dim text-on-secondary-fixed font-label-bold text-label-bold px-2 py-1 rounded-full neon-glow-yellow flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-[14px]">bolt</span> 98% Match
+                            </div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-1">Midnight Pizza Melt</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">store</span> Slice Haven · 1.2mi
+                            </p>
+<div class="flex justify-between items-center mt-2">
+<span class="font-price-display text-price-display text-primary">$14.99</span>
+<button class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-md">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="snap-center shrink-0 w-[240px] bg-surface-slate rounded-[16px] overflow-hidden shadow-lg border border-glass-border flex flex-col">
+<div class="h-32 w-full relative">
+<img class="w-full h-full object-cover" data-alt="A juicy, double-patty smashburger overflowing with melted cheese and caramelized onions, resting on a dark rustic surface. The lighting is dramatic and directional, creating deep shadows that contrast with the vibrant reds and electric yellows of the sauces. The overall style is immersive and high-contrast, fitting a modern food-discovery platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVKv15IzBDNoaRMyNqKNYvDKxXHAyxHCfN1iO1FJuAO_9XmlkQ9Dre4QbR_YKzXKgdPHvqKCvids64YrWT-aA6wJvAZI_Y4klSL-wVdPxEH7NmeauWJUnhmWeeK8AQ28fwYCaMu2TDZjmVQ7ESlgk5h1uNSKlOc4PN62RI3SjM1NJ1A6Pnx_EIPOmK58Z1H8WtkF9IJ7LnZ5nRn_BIyJudIJwq9_o22_TmAWT8gqKOPlDsZOvucPmy0MVVKKQZK02WOWopElnDp24"/>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<h3 class="font-title-md text-title-md text-on-surface line-clamp-1">The Therapy Burger</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">store</span> Smash Bros · 0.8mi
+                            </p>
+<div class="flex justify-between items-center mt-2">
+<span class="font-price-display text-price-display text-primary">$12.50</span>
+<button class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-md">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Input Area (Fixed) -->
+<div class="fixed bottom-0 w-full bg-surface-slate/90 backdrop-blur-xl border-t border-glass-border p-4 pb-8 z-40 flex flex-col gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+<!-- Suggestions Chips -->
+<div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+<button class="shrink-0 bg-surface-variant border border-glass-border rounded-xl px-4 py-2 font-label-bold text-label-bold text-on-surface hover:bg-surface-bright transition-colors">
+                Stressed 😫
+            </button>
+<button class="shrink-0 bg-secondary-container/20 border border-secondary-fixed-dim/30 rounded-xl px-4 py-2 font-label-bold text-label-bold text-secondary-fixed hover:bg-secondary-container/30 transition-colors">
+                Hungry! 🤤
+            </button>
+<button class="shrink-0 bg-surface-variant border border-glass-border rounded-xl px-4 py-2 font-label-bold text-label-bold text-on-surface hover:bg-surface-bright transition-colors">
+                Date Night 🕯️
+            </button>
+<button class="shrink-0 bg-surface-variant border border-glass-border rounded-xl px-4 py-2 font-label-bold text-label-bold text-on-surface hover:bg-surface-bright transition-colors">
+                Healthy 🥗
+            </button>
+</div>
+<!-- Chat Input -->
+<div class="relative flex items-center">
+<input class="w-full bg-surface border border-glass-border rounded-xl py-3 pl-4 pr-12 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-inner" placeholder="Type or tap a mood..." type="text"/>
+<button class="absolute right-2 w-8 h-8 flex items-center justify-center rounded-full bg-primary text-on-primary hover:bg-primary-fixed transition-colors active:scale-90">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">arrow_upward</span>
+</button>
+</div>
+</div>
+<!-- BottomNavBar (Hidden on this specific view as per rules: Task-Focused/Linear, but included per shared components if needed, though instruction says to suppress if task-focused. Since it's a chat interface, we suppress the main nav to focus on the chat canvas.) -->
+</body></html>

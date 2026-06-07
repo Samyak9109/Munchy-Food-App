@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Munchy - Login</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Montserrat:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#0ba38f",
+                        "error": "#ffb4ab",
+                        "surface": "#131313",
+                        "surface-container-highest": "#353534",
+                        "on-tertiary-fixed-variant": "#005046",
+                        "glass-border": "rgba(255, 255, 255, 0.12)",
+                        "error-container": "#93000a",
+                        "surface-dim": "#131313",
+                        "secondary": "#fff9ef",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-fixed": "#7ef7e0",
+                        "on-secondary": "#3a3000",
+                        "background": "#131313",
+                        "secondary-container": "#ffdb3c",
+                        "status-error": "#FF3D00",
+                        "on-tertiary": "#003730",
+                        "surface-tint": "#ffb3ae",
+                        "on-primary-fixed-variant": "#930014",
+                        "inverse-primary": "#ba1724",
+                        "on-secondary-container": "#725f00",
+                        "on-tertiary-fixed": "#00201b",
+                        "outline-variant": "#5b403e",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#60dac4",
+                        "surface-slate": "#1E1E1E",
+                        "surface-variant": "#353534",
+                        "on-background": "#e5e2e1",
+                        "surface-container": "#201f1f",
+                        "primary-container": "#ff5352",
+                        "primary": "#ffb3ae",
+                        "outline": "#ab8986",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed-dim": "#e9c400",
+                        "surface-bright": "#393939",
+                        "tertiary": "#60dac4",
+                        "on-tertiary-container": "#003029",
+                        "on-secondary-fixed": "#221b00",
+                        "primary-fixed-dim": "#ffb3ae",
+                        "on-primary-fixed": "#410004",
+                        "surface-container-low": "#1c1b1b",
+                        "on-primary-container": "#5c0008",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed": "#ffe16d",
+                        "inverse-surface": "#e5e2e1",
+                        "status-success": "#00C853",
+                        "primary-fixed": "#ffdad7",
+                        "on-surface-variant": "#e4beba",
+                        "on-surface": "#e5e2e1",
+                        "on-primary": "#68000b",
+                        "on-secondary-fixed-variant": "#544600"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "margin-mobile": "16px",
+                        "base": "4px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Montserrat"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Montserrat"],
+                        "label-bold": ["Inter"],
+                        "price-display": ["Montserrat"],
+                        "display-xl": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "price-display": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "display-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .neon-glow {
+            box-shadow: 0 4px 24px -4px rgba(255, 179, 174, 0.4);
+        }
+        .neon-glow:hover {
+            box-shadow: 0 6px 32px -4px rgba(255, 179, 174, 0.6);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col items-center justify-center relative overflow-x-hidden selection:bg-primary/30">
+<!-- Cinematic Background Plate -->
+<div class="fixed inset-0 z-0">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A hyper-realistic, cinematic macro shot of a towering gourmet smashburger with melting golden cheddar cheese dripping over the edges, crispy bacon, and a glossy toasted brioche bun. The scene is illuminated with moody, dramatic studio lighting typical of premium dark-mode food photography. The background is a deep, immersive black that makes the vibrant, saturated colors of the ingredients pop intensely, creating a high-energy, crave-worthy aesthetic suited for a modern Gen-Z social food app." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuApvwaqN5YHJrdub3oGkqE_DqC7nWy7yui9SBE0DZYsjwq5e_HDAANgMa0o6x1Kj6s-zblrEZa0xfeTmjy-9yHL0KVxX3t4QrRlpem8iruKOQ8s_ROlyL8VzXJNqyWRkVEu3WLfSDB_M0D3N5_ZmAVknzgaX5DehGRJlB6Z9WHCLkm3JztgLnnRA1IyEUKoTOrB4uIA-PWaruBw6pWMjAMD2I1JvrZM__zYzZNysemZWZRKDErwl253ehv186qG9K6D3bltPXwxqXk');"></div>
+<!-- Vibe & Velocity Gradient Overlay (Tonal Layering Level 0 to Level 1) -->
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/95 to-background/40 backdrop-blur-[8px]"></div>
+</div>
+<!-- Main Content Container -->
+<main class="relative z-10 w-full max-w-[480px] min-h-screen flex flex-col px-margin-mobile py-margin-mobile">
+<!-- Minimal Header (Focused View Exception) -->
+<header class="flex items-center justify-between pt-stack-sm pb-stack-lg">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-slate/60 border border-glass-border backdrop-blur-md text-on-surface hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="font-display-xl text-primary text-3xl tracking-tighter absolute left-1/2 -translate-x-1/2">
+                Munchy
+            </div>
+<div class="w-10 h-10"></div> <!-- Spacer for centering -->
+</header>
+<div class="flex-1 flex flex-col justify-center gap-stack-lg mt-8">
+<!-- Hero Typography -->
+<div class="text-center space-y-stack-sm">
+<h1 class="font-headline-lg text-on-surface">Welcome back.</h1>
+<p class="font-body-md text-on-surface-variant">Log in to feed your scroll.</p>
+</div>
+<!-- Role Toggle (Glassmorphic) -->
+<div class="flex bg-surface-slate/80 p-1 rounded-full border border-glass-border backdrop-blur-md relative z-20">
+<button class="flex-1 py-2 px-4 rounded-full font-label-bold text-on-surface bg-surface-bright shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-all duration-300" id="toggle-user">
+                    Hungry User
+                </button>
+<button class="flex-1 py-2 px-4 rounded-full font-label-bold text-on-surface-variant hover:text-on-surface transition-all duration-300" id="toggle-partner">
+                    Kitchen Partner
+                </button>
+</div>
+<!-- Login Form -->
+<form class="space-y-stack-md relative z-20">
+<!-- Email Input -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+<input class="w-full bg-surface-slate/60 border border-glass-border rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary focus:bg-surface-slate focus:outline-none transition-all backdrop-blur-sm font-body-md" placeholder="Email address" required="" type="email"/>
+</div>
+<!-- Password Input -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<input class="w-full bg-surface-slate/60 border border-glass-border rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary focus:bg-surface-slate focus:outline-none transition-all backdrop-blur-sm font-body-md" placeholder="Password" required="" type="password"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+<button class="text-primary font-label-bold hover:text-primary-fixed transition-colors" type="button">
+                            FORGOT?
+                        </button>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-stack-sm">
+<button class="w-full py-4 bg-primary text-on-primary rounded-full font-headline-lg-mobile text-lg text-center hover:bg-primary-container active:scale-[0.98] transition-all neon-glow flex items-center justify-center gap-2" type="submit">
+                        Sign In
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Footer -->
+<footer class="mt-auto pt-stack-lg pb-stack-md text-center relative z-20">
+<p class="font-body-md text-on-surface-variant">
+                New to the crave? 
+                <a class="font-label-bold text-primary hover:text-primary-fixed ml-1 transition-colors" href="#">CREATE AN ACCOUNT</a>
+</p>
+</footer>
+</main>
+<!-- Micro-interaction JS for Toggle -->
+<script>
+        const btnUser = document.getElementById('toggle-user');
+        const btnPartner = document.getElementById('toggle-partner');
+
+        function setActive(activeBtn, inactiveBtn) {
+            activeBtn.classList.add('bg-surface-bright', 'text-on-surface', 'shadow-[0_2px_8px_rgba(0,0,0,0.4)]');
+            activeBtn.classList.remove('text-on-surface-variant');
+            
+            inactiveBtn.classList.remove('bg-surface-bright', 'text-on-surface', 'shadow-[0_2px_8px_rgba(0,0,0,0.4)]');
+            inactiveBtn.classList.add('text-on-surface-variant');
+        }
+
+        btnUser.addEventListener('click', () => setActive(btnUser, btnPartner));
+        btnPartner.addEventListener('click', () => setActive(btnPartner, btnUser));
+    </script>
+</body></html>

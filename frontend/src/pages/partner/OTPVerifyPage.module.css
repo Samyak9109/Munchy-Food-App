@@ -1,0 +1,221 @@
+.page { min-height: 100%; padding-bottom: 32px; }
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.back {
+  width: 36px; height: 36px;
+  background: var(--surface);
+  border: none;
+  border-radius: 50%;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* Ready banner */
+.readyBanner {
+  margin: 0 16px 16px;
+  padding: 16px;
+  background: rgba(255,215,0,0.08);
+  border: 1px solid var(--yellow);
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.readyTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--yellow);
+}
+
+.readySub { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+
+.readyIcon { font-size: 28px; }
+
+/* Sections */
+.section { padding: 0 16px; margin-bottom: 16px; }
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+/* Customer */
+.customerCard {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.customerAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface-high);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.customerAvatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.customerInfo { flex: 1; }
+.customerName { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; }
+.customerPhone { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+
+.callBtn {
+  width: 40px; height: 40px;
+  background: var(--surface-high);
+  border-radius: 50%;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* Items */
+.itemsCard {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 10px 0;
+}
+
+.itemBorder { border-bottom: 1px solid var(--outline-dim); }
+
+.qty {
+  background: var(--surface-high);
+  color: var(--text);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.itemName { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 600; }
+.itemNote { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.totalAmt {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* OTP */
+.otpCard {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+.otpCard h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.otpCard p {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.otpRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dash { color: var(--text-dim); font-size: 20px; margin: 0 2px; }
+
+.otpInput {
+  width: 44px;
+  height: 54px;
+  background: var(--surface-high);
+  border: 2px solid var(--outline-dim);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.otpInput:focus { border-color: var(--yellow); }
+.otpFilled { border-color: var(--yellow); color: var(--yellow); }
+
+.error { color: var(--error); font-size: 13px; margin-bottom: 12px; }
+
+.confirmBtn {
+  width: 100%;
+  padding: 16px;
+  background: var(--yellow);
+  border: none;
+  border-radius: 9999px;
+  color: #000;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.2s;
+}
+.confirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }

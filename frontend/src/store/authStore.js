@@ -1,20 +1,31 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-// persisted — survives page refresh
 export const useAuthStore = create(
   persist(
     (set) => ({
       user: null,
       accessToken: null,
-      role: null,
+      role: null, // 'user' | 'partner'
 
-      setAuth: (user, accessToken, role) => set({ user, accessToken, role }),
-      updateUser: (user) => set({ user }),
-      clearAuth: () => set({ user: null, accessToken: null, role: null }),
+      setAuth: (user, accessToken, role) => {
+        localStorage.setItem('accessToken', accessToken);
+        set({ user, accessToken, role });
+      },
+
+      clearAuth: () => {
+        localStorage.removeItem('accessToken');
+        set({ user: null, accessToken: null, role: null });
+      },
+
+      isAuthenticated: () => {
+        const state = useAuthStore.getState();
+        return !!state.user && !!state.accessToken;
+      },
     }),
     {
-      name: "munchy-auth", // localStorage key
-    },
-  ),
+      name: 'munchy-auth',
+      partialize: (s) => ({ user: s.user, role: s.role }),
+    }
+  )
 );
