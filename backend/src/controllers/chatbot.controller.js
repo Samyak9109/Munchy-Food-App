@@ -28,7 +28,7 @@ export const chat = async (req, res) => {
     );
 
     return res.status(200).json({
-      message: response,
+      reply: response,
       // send back history so frontend can maintain conversation
       conversationHistory: [
         ...conversationHistory,

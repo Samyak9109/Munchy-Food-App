@@ -1,12 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useCartStore } from '../../store/cartStore';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import styles from './CartPage.module.css';
 
 export default function CartPage() {
   const qc = useQueryClient();
+  const { setCart } = useCartStore();
 
   const { data, isLoading } = useQuery({
     queryKey: ['cart'],
@@ -14,6 +17,10 @@ export default function CartPage() {
   });
 
   const cart = data?.cart;
+
+  useEffect(() => {
+    if (data?.cart) setCart(data.cart);
+  }, [data]);
 
   const updateQty = useMutation({
     mutationFn: ({ foodId, quantity }) => api.updateCartQty({ foodId, quantity }),

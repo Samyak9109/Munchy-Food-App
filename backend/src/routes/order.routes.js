@@ -24,6 +24,8 @@ router.get(
   orderController.getStoreOrders,
 );
 
+router.get("/partner/:id", authMiddleware.authPartner, orderController.getOrderById);
+
 router.patch(
   "/partner/:id/status",
   authMiddleware.authPartner,

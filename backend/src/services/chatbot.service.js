@@ -46,7 +46,7 @@ export const getChatbotResponse = async (
       // inject DB context as a system message
       new SystemMessage(`
         Available food items:
-        ${foodItems.map((f) => `- ${f.name} (₹${f.price}) — ${f.category.join(", ")}`).join("\n")}
+        ${foodItems.map((f) => `- ${f.name} (₹${f.price}) — ${Array.isArray(f.category) ? f.category.join(", ") : f.category}`).join("\n")}
 
         Nearby stores:
         ${nearbyStores.map((s) => `- ${s.name} — ${s.address} (${(s.distance / 1000).toFixed(1)}km away)`).join("\n")}

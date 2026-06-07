@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Phone } from 'lucide-react';
 import { useRegister } from '../../hooks/useAuth';
 import styles from './AuthPage.module.css';
 
@@ -9,11 +9,12 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const { mutate: register, isPending, error } = useRegister();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    register({ name, email, password, role });
+    register({ name, email, password, phone, role });
   };
 
   return (
@@ -80,6 +81,20 @@ export default function RegisterPage() {
                 minLength={6}
               />
             </div>
+
+            {role === 'partner' && (
+              <div className={styles.inputWrap}>
+                <Phone size={16} className={styles.inputIcon} />
+                <input
+                  className={styles.input}
+                  type="tel"
+                  placeholder="Phone number (10 digits)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
             {error && (
               <p className={styles.error}>

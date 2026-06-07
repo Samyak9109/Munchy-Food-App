@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle, Phone } from 'lucide-react';
@@ -14,7 +14,7 @@ export default function OTPVerifyPage() {
 
   const { data } = useQuery({
     queryKey: ['order', orderId],
-    queryFn: () => api.getOrderById(orderId).then(r => r.data),
+    queryFn: () => api.getOrderByIdPartner(orderId).then(r => r.data),
   });
 
   const verify = useMutation({
@@ -110,10 +110,9 @@ export default function OTPVerifyPage() {
 
           <div className={styles.otpRow}>
             {otp.map((d, i) => (
-              <>
-                {i === 3 && <span key="dash" className={styles.dash}>-</span>}
+              <React.Fragment key={i}>
+                {i === 3 && <span className={styles.dash}>-</span>}
                 <input
-                  key={i}
                   ref={el => inputRefs.current[i] = el}
                   className={`${styles.otpInput} ${d ? styles.otpFilled : ''}`}
                   type="text"
@@ -123,7 +122,7 @@ export default function OTPVerifyPage() {
                   onChange={e => handleDigit(e.target.value, i)}
                   onKeyDown={e => handleKeyDown(e, i)}
                 />
-              </>
+              </React.Fragment>
             ))}
           </div>
 

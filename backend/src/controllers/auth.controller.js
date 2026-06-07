@@ -42,8 +42,8 @@ async function issueTokens(account, role, req, res) {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -161,17 +161,6 @@ async function verifyEmail(req, res) {
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
-
-    const otp = generateOTP();
-
-    await otpModel.deleteMany({ email, purpose: "register", used: false });
-
-    await otpModel.create({
-      email,
-      otp: await hashOTP(otp),
-      purpose: "register",
-      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
-    });
 
     // verify OTP
     const isValid = await verifyOTP(otp, otpRecord.otp);
@@ -315,12 +304,12 @@ async function forgotPassword(req, res) {
     }
 
     const otp = generateOTP();
-    await otpModel.deleteMany({ email, purpose: "register", used: false });
+    await otpModel.deleteMany({ email, purpose: "resetPassword", used: false });
 
     await otpModel.create({
       email,
       otp: await hashOTP(otp),
-      purpose: "register",
+      purpose: "resetPassword",
       expiresAt: new Date(Date.now() + 30 * 60 * 1000),
     });
 

@@ -6,6 +6,7 @@ import PartnerLayout from './layouts/PartnerLayout';
 
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import VerifyOTPPage from './pages/auth/VerifyOTPPage';
 
 import ReelsPage from './pages/user/ReelsPage';
 import KitchensPage from './pages/user/KitchensPage';
@@ -39,6 +40,7 @@ export default function App() {
           {/* AUTH */}
           <Route path="/login"            element={<LoginPage />} />
           <Route path="/register"         element={<RegisterPage />} />
+          <Route path="/verify-otp"       element={<VerifyOTPPage />} />
           <Route path="/forgot-password"  element={<ForgotPasswordPage />} />
 
           {/* USER APP */}

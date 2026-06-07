@@ -12,7 +12,19 @@ const STATUS_LABEL = { placed: 'New', confirmed: 'Preparing', ready: 'Ready', pi
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const storeId = user?.stores?.[0] || user?.id;
+  const storeId = user?.stores?.[0];
+
+  if (!storeId) {
+    return (
+      <div className={styles.page}>
+        <Header title="Dashboard" />
+        <div className={styles.empty}>
+          <p>You haven't created a store yet.</p>
+          <Link to="/partner/store">Create Your Store →</Link>
+        </div>
+      </div>
+    );
+  }
 
   const { data: storeData } = useQuery({
     queryKey: ['my-store'],
