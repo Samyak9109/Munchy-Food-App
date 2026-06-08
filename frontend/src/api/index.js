@@ -30,7 +30,6 @@ export const clearCart       = ()       => api.delete('/cart/clear');
 export const placeOrder      = (data)   => api.post('/order/place', data);
 export const getOrders       = ()       => api.get('/order');
 export const getOrderById    = (id)     => api.get(`/order/${id}`);
-export const getOrderByIdPartner = (id) => api.get(`/order/partner/${id}`);
 export const cancelOrder     = (id)     => api.patch(`/order/${id}/cancel`);
 export const getStoreOrders  = (storeId) => api.get(`/order/store/${storeId}`);
 export const updateOrderStatus = (id, data) => api.patch(`/order/partner/${id}/status`, data);

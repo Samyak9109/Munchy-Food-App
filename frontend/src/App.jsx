@@ -6,7 +6,6 @@ import PartnerLayout from './layouts/PartnerLayout';
 
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
-import VerifyOTPPage from './pages/auth/VerifyOTPPage';
 
 import ReelsPage from './pages/user/ReelsPage';
 import KitchensPage from './pages/user/KitchensPage';
@@ -25,6 +24,7 @@ import PartnerReelsPage from './pages/partner/PartnerReelsPage';
 import AnalyticsPage from './pages/partner/AnalyticsPage';
 import StoreManagePage from './pages/partner/StoreManagePage';
 import OTPVerifyPage from './pages/partner/OTPVerifyPage';
+import PartnerProfilePage from './pages/partner/PartnerProfilePage';
 
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -40,7 +40,6 @@ export default function App() {
           {/* AUTH */}
           <Route path="/login"            element={<LoginPage />} />
           <Route path="/register"         element={<RegisterPage />} />
-          <Route path="/verify-otp"       element={<VerifyOTPPage />} />
           <Route path="/forgot-password"  element={<ForgotPasswordPage />} />
 
           {/* USER APP */}
@@ -73,6 +72,7 @@ export default function App() {
             <Route path="reels"           element={<PartnerReelsPage />} />
             <Route path="analytics"       element={<AnalyticsPage />} />
             <Route path="store"           element={<StoreManagePage />} />
+            <Route path="profile"         element={<PartnerProfilePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

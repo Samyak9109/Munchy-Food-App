@@ -1,0 +1,102 @@
+.page { min-height: 100%; }
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--outline-dim);
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  padding: 8px 16px;
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tabActive {
+  background: var(--primary-red);
+  border-color: var(--primary-red);
+  color: #fff;
+}
+
+.list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.dim { color: var(--text-dim); font-size: 14px; padding: 16px 0; }
+
+.card {
+  display: flex;
+  background: var(--surface);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.card:hover { background: var(--surface-high); }
+
+.cardLeft { width: 4px; flex-shrink: 0; }
+
+.cardBody { flex: 1; padding: 14px; }
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.orderId { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; }
+.status { font-size: 12px; font-weight: 700; }
+
+.customerName {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.items {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.total {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.actionBtn {
+  padding: 8px 16px;
+  background: var(--surface-high);
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.actionBtn:hover { border-color: var(--primary); color: var(--primary); }
+.actionBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.otpBtn { border-color: var(--yellow); color: var(--yellow); }
+.otpBtn:hover { background: rgba(255,215,0,0.1); }

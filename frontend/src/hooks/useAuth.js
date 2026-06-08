@@ -30,9 +30,9 @@ export function useRegister() {
         ? authApi.registerPartner({ name, email, password })
         : authApi.registerUser({ name, email, password }),
     onSuccess: (res, vars) => {
-      sessionStorage.setItem('pendingEmail', vars.email);
-      sessionStorage.setItem('pendingRole', vars.role);
-      navigate('/verify-otp');
+      const { account, accessToken } = res.data;
+      setAuth(account, accessToken, vars.role);
+      navigate(vars.role === 'partner' ? '/partner/dashboard' : '/');
     },
   });
 }

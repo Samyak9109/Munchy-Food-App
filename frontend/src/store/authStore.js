@@ -25,7 +25,7 @@ export const useAuthStore = create(
     }),
     {
       name: 'munchy-auth',
-      partialize: (s) => ({ user: s.user, role: s.role, accessToken: s.accessToken }),
+      partialize: (s) => ({ user: s.user, role: s.role }),
     }
   )
 );

@@ -1,13 +1,14 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Film, ClipboardList, BarChart2, Store } from 'lucide-react';
+import { LayoutDashboard, Film, ClipboardList, BarChart2, Store, User } from 'lucide-react';
 import styles from './PartnerLayout.module.css';
 
 const links = [
-  { to: '/partner/dashboard', icon: LayoutDashboard, label: 'Hub'      },
-  { to: '/partner/orders',    icon: ClipboardList,   label: 'Orders'   },
-  { to: '/partner/reels',     icon: Film,            label: 'Reels'    },
-  { to: '/partner/analytics', icon: BarChart2,       label: 'Stats'    },
-  { to: '/partner/store',     icon: Store,           label: 'Kitchen'  },
+  { to: '/partner/dashboard', icon: LayoutDashboard, label: 'Hub'     },
+  { to: '/partner/orders',    icon: ClipboardList,   label: 'Orders'  },
+  { to: '/partner/reels',     icon: Film,            label: 'Reels'   },
+  { to: '/partner/analytics', icon: BarChart2,       label: 'Stats'   },
+  { to: '/partner/store',     icon: Store,           label: 'Kitchen' },
+  { to: '/partner/profile',   icon: User,            label: 'Profile' },
 ];
 
 export default function PartnerLayout() {
@@ -23,7 +24,7 @@ export default function PartnerLayout() {
             to={to}
             className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}
           >
-            <Icon size={22} />
+            <Icon size={20} />
             <span>{label}</span>
           </NavLink>
         ))}
