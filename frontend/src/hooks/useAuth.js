@@ -21,7 +21,6 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
   return useMutation({
@@ -30,9 +29,11 @@ export function useRegister() {
         ? authApi.registerPartner({ name, email, password })
         : authApi.registerUser({ name, email, password }),
     onSuccess: (res, vars) => {
-      const { account, accessToken } = res.data;
-      setAuth(account, accessToken, vars.role);
-      navigate(vars.role === 'partner' ? '/partner/dashboard' : '/');
+      // Backend returns {message, email} — no token yet (waits for email verification).
+      // Save pending credentials to sessionStorage and redirect to OTP verification.
+      sessionStorage.setItem('pendingEmail', vars.email);
+      sessionStorage.setItem('pendingRole', vars.role);
+      navigate('/verify-otp');
     },
   });
 }

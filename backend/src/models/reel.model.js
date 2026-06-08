@@ -10,7 +10,7 @@ const reelSchema = new mongoose.Schema(
 
     partner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "FoodPartner",
+      ref: "Partner",
       required: true,
     },
 

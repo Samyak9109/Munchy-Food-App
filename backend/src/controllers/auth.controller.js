@@ -189,6 +189,7 @@ async function verifyEmail(req, res) {
         username: account.name,
         email: account.email,
         role,
+        ...(role === 'partner' && { stores: account.stores }),
       },
       accessToken,
     });
@@ -234,6 +235,7 @@ async function login(req, res) {
         username: account.name,
         email: account.email,
         role,
+        ...(role === 'partner' && { stores: account.stores }),
       },
       accessToken,
     });
@@ -421,6 +423,7 @@ async function refreshToken(req, res) {
         username: account.name,
         email: account.email,
         role: decoded.role,
+        ...(decoded.role === 'partner' && { stores: account.stores }),
       },
     });
   } catch (error) {

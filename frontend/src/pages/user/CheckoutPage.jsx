@@ -34,12 +34,12 @@ export default function CheckoutPage() {
       if (payMethod === 'razorpay') {
         // Initiate Razorpay
         const payRes = await api.initiatePayment({ orderId: order._id });
-        const { razorpayOrderId, amount, currency } = payRes.data;
+        const { razorpayOrder, key } = payRes.data;
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY,
-          amount,
-          currency,
-          order_id: razorpayOrderId,
+          key: key || import.meta.env.VITE_RAZORPAY_KEY,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          order_id: razorpayOrder.id,
           handler: async (response) => {
             await api.verifyPayment({ orderId: order._id, ...response });
             qc.invalidateQueries({ queryKey: ['cart'] });

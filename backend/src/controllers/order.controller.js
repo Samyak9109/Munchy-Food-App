@@ -84,9 +84,19 @@ export const getOrderById = async (req, res) => {
     const order = await getOrderByIdDAO(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    // verify order belongs to requesting user
-    if (order.user._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Unauthorized" });
+    if (req.partner) {
+      // Partner context: verify the order belongs to one of this partner's stores
+      const partnerStoreIds = req.partner.stores.map((s) => s.toString());
+      if (!partnerStoreIds.includes(order.store._id.toString())) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+    } else if (req.user) {
+      // User context: verify order belongs to requesting user
+      if (order.user._id.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+    } else {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     return res.status(200).json({ order });

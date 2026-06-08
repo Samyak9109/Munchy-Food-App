@@ -49,19 +49,28 @@ function ReelCard({ reel }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] }),
   });
 
-  // Intersection observer to auto-play/pause
+  // Intersection observer to auto-play/pause + increment views
   useEffect(() => {
     if (!videoRef.current) return;
+    let viewTracked = false;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) videoRef.current?.play().catch(() => {});
-        else videoRef.current?.pause();
+        if (entry.isIntersecting) {
+          videoRef.current?.play().catch(() => {});
+          // Count each view once per mount
+          if (!viewTracked) {
+            viewTracked = true;
+            api.incrementViews(reel._id).catch(() => {});
+          }
+        } else {
+          videoRef.current?.pause();
+        }
       },
       { threshold: 0.6 }
     );
     obs.observe(videoRef.current);
     return () => obs.disconnect();
-  }, []);
+  }, [reel._id]);
 
   const food = reel.food || {};
   const store = reel.store || {};

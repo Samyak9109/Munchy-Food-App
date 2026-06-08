@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Store } from 'lucide-react';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import styles from './StoreManagePage.module.css';
@@ -9,17 +9,20 @@ import styles from './StoreManagePage.module.css';
 export default function StoreManagePage() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const storeId = user?.stores?.[0] || user?.id;
+
+  // Partner model returns stores[] array; fall back gracefully
+  const storeId = user?.stores?.[0] || null;
+
   const [showFoodForm, setShowFoodForm] = useState(false);
   const [editFood, setEditFood] = useState(null);
 
-  const { data: storeData } = useQuery({
-    queryKey: ['my-store'],
+  const { data: storeData, isLoading: storeLoading } = useQuery({
+    queryKey: ['my-store', storeId],
     queryFn: () => api.getStoreById(storeId).then(r => r.data),
     enabled: !!storeId,
   });
 
-  const { data: menuData, isLoading } = useQuery({
+  const { data: menuData, isLoading: menuLoading } = useQuery({
     queryKey: ['store-menu', storeId],
     queryFn: () => api.getStoreMenu(storeId).then(r => r.data),
     enabled: !!storeId,
@@ -36,7 +39,18 @@ export default function StoreManagePage() {
   });
 
   const store = storeData?.store;
-  const foods = menuData?.foods || [];
+  // Backend getStoreMenu returns { store, menu } not { foods }
+  const foods = menuData?.menu || [];
+
+  // ── If partner has no store yet, show creation form ────────────────────
+  if (!storeId && !storeLoading) {
+    return (
+      <div className={styles.page}>
+        <Header title="Kitchen" showLocation={false} />
+        <CreateKitchenForm />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -50,7 +64,8 @@ export default function StoreManagePage() {
             <div className={styles.storeInfo}>
               <h2 className={styles.storeName}>{store.name}</h2>
               <p className={styles.storeCuisine}>{store.cuisine?.join(', ')}</p>
-              <p className={styles.storeAddr}>{store.address?.street}, {store.address?.city}</p>
+              {/* address is a plain String in the model */}
+              <p className={styles.storeAddr}>{store.address}</p>
             </div>
           </div>
         )}
@@ -71,8 +86,8 @@ export default function StoreManagePage() {
           />
         )}
 
-        {isLoading && <p className={styles.dim}>Loading menu...</p>}
-        {!isLoading && foods.length === 0 && <p className={styles.dim}>No items yet. Add your first dish!</p>}
+        {menuLoading && <p className={styles.dim}>Loading menu...</p>}
+        {!menuLoading && foods.length === 0 && <p className={styles.dim}>No items yet. Add your first dish!</p>}
 
         <div className={styles.foodList}>
           {foods.map(food => (
@@ -81,7 +96,11 @@ export default function StoreManagePage() {
               <div className={styles.foodInfo}>
                 <p className={styles.foodName}>{food.name}</p>
                 <p className={styles.foodPrice}>₹{food.price}</p>
-                {food.category && <p className={styles.foodCat}>{food.category}</p>}
+                {food.category && (
+                  <p className={styles.foodCat}>
+                    {Array.isArray(food.category) ? food.category.join(', ') : food.category}
+                  </p>
+                )}
               </div>
               <div className={styles.foodActions}>
                 <button
@@ -109,22 +128,101 @@ export default function StoreManagePage() {
   );
 }
 
+// ── CREATE KITCHEN FORM (new partners with no store yet) ───────────────────
+function CreateKitchenForm() {
+  const qc = useQueryClient();
+  const { user, setAuth, role } = useAuthStore();
+  const [form, setFormState] = useState({
+    name: '',
+    address: '',
+    cuisine: '',
+    description: '',
+  });
+  const [error, setError] = useState('');
+
+  const setF = (key, val) => setFormState(f => ({ ...f, [key]: val }));
+
+  const createStore = useMutation({
+    mutationFn: () => api.createStore({
+      name: form.name,
+      address: form.address,
+      cuisine: form.cuisine.split(',').map(s => s.trim()).filter(Boolean),
+      description: form.description,
+      // dummy coordinates required by store model
+      location: { type: 'Point', coordinates: [0, 0] },
+    }),
+    onSuccess: (res) => {
+      const newStoreId = res.data.store?._id;
+      if (newStoreId) {
+        // Patch the authStore user with the new store id
+        const updatedUser = { ...user, stores: [newStoreId] };
+        setAuth(updatedUser, localStorage.getItem('accessToken'), 'partner');
+      }
+      qc.invalidateQueries({ queryKey: ['my-store'] });
+    },
+    onError: (err) => setError(err.response?.data?.message || 'Failed to create kitchen'),
+  });
+
+  return (
+    <div className={styles.content}>
+      <div className={styles.form} style={{ maxWidth: 480, margin: '2rem auto' }}>
+        <Store size={32} style={{ color: 'var(--accent)', marginBottom: '0.5rem' }} />
+        <h2 className={styles.formTitle}>Create Your Kitchen</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+          Set up your store profile before adding menu items.
+        </p>
+        <input className={styles.input} placeholder="Kitchen name *" value={form.name} onChange={e => setF('name', e.target.value)} />
+        <input className={styles.input} placeholder="Address *" value={form.address} onChange={e => setF('address', e.target.value)} />
+        <input className={styles.input} placeholder="Cuisine types (comma-separated)" value={form.cuisine} onChange={e => setF('cuisine', e.target.value)} />
+        <textarea className={styles.textarea} placeholder="Description" rows={3} value={form.description} onChange={e => setF('description', e.target.value)} />
+        {error && <p className={styles.error}>{error}</p>}
+        <button
+          className={styles.submitBtn}
+          onClick={() => createStore.mutate()}
+          disabled={createStore.isPending || !form.name || !form.address}
+        >
+          {createStore.isPending ? 'Creating...' : 'Create Kitchen'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── FOOD FORM (uses FormData to support file uploads) ──────────────────────
+const VALID_CATEGORIES = ['breakfast', 'lunch', 'dinner', 'snacks', 'drinks', 'desserts'];
+
 function FoodForm({ storeId, food, onClose }) {
   const qc = useQueryClient();
-  const [form, setForm] = useState({
+  const videoRef = useRef(null);
+  const imageRef = useRef(null);
+
+  const [form, setFormState] = useState({
     name: food?.name || '',
     price: food?.price || '',
     description: food?.description || '',
-    category: food?.category || '',
+    category: food?.category?.[0] || food?.category || '',
     isVeg: food?.isVeg ?? true,
   });
 
-  const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+  const set = (key, val) => setFormState(f => ({ ...f, [key]: val }));
 
   const saveMut = useMutation({
-    mutationFn: () => food
-      ? api.updateFood(food._id, { ...form, storeId })
-      : api.createFood({ ...form, storeId }),
+    mutationFn: () => {
+      const fd = new FormData();
+      fd.append('name', form.name);
+      fd.append('price', form.price);
+      fd.append('description', form.description);
+      fd.append('category', form.category);
+      fd.append('isVeg', form.isVeg);
+      fd.append('storeId', storeId);
+
+      if (videoRef.current?.files[0]) fd.append('video', videoRef.current.files[0]);
+      if (imageRef.current?.files[0]) fd.append('image', imageRef.current.files[0]);
+
+      return food
+        ? api.updateFood(food._id, fd)
+        : api.createFood(fd);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['store-menu'] });
       onClose();
@@ -134,10 +232,33 @@ function FoodForm({ storeId, food, onClose }) {
   return (
     <div className={styles.form}>
       <h2 className={styles.formTitle}>{food ? 'Edit Item' : 'New Item'}</h2>
+
       <input className={styles.input} placeholder="Item name *" value={form.name} onChange={e => set('name', e.target.value)} />
       <input className={styles.input} placeholder="Price (₹) *" type="number" value={form.price} onChange={e => set('price', e.target.value)} />
-      <input className={styles.input} placeholder="Category (e.g. Burgers)" value={form.category} onChange={e => set('category', e.target.value)} />
+
+      <select className={styles.input} value={form.category} onChange={e => set('category', e.target.value)}>
+        <option value="">Select category *</option>
+        {VALID_CATEGORIES.map(c => (
+          <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+        ))}
+      </select>
+
       <textarea className={styles.textarea} placeholder="Description" rows={3} value={form.description} onChange={e => set('description', e.target.value)} />
+
+      {/* Video upload (required for new items) */}
+      <div className={styles.fileRow}>
+        <label className={styles.fileLabel}>
+          🎥 Video {!food && <span style={{ color: 'var(--accent)' }}>*</span>}
+        </label>
+        <input ref={videoRef} type="file" accept="video/*" className={styles.fileInput} />
+      </div>
+
+      {/* Image upload (optional) */}
+      <div className={styles.fileRow}>
+        <label className={styles.fileLabel}>🖼 Thumbnail (optional)</label>
+        <input ref={imageRef} type="file" accept="image/*" className={styles.fileInput} />
+      </div>
+
       <div className={styles.vegRow}>
         <span>Veg item</span>
         <button
@@ -148,10 +269,16 @@ function FoodForm({ storeId, food, onClose }) {
           <span className={styles.toggleThumb} />
         </button>
       </div>
+
       {saveMut.error && <p className={styles.error}>{saveMut.error.response?.data?.message || 'Save failed'}</p>}
+
       <div className={styles.formBtns}>
         <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-        <button className={styles.submitBtn} onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !form.name || !form.price}>
+        <button
+          className={styles.submitBtn}
+          onClick={() => saveMut.mutate()}
+          disabled={saveMut.isPending || !form.name || !form.price || !form.category}
+        >
           {saveMut.isPending ? 'Saving...' : food ? 'Update' : 'Add Item'}
         </button>
       </div>

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const foodPartnerSchema = new mongoose.Schema(
+const PartnerSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -53,6 +53,6 @@ const foodPartnerSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const partnerModel = mongoose.model("FoodPartner", foodPartnerSchema);
+const partnerModel = mongoose.model("Partner", PartnerSchema);
 
 export default partnerModel;

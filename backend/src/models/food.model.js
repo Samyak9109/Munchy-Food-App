@@ -10,7 +10,6 @@ const foodSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: true,
       trim: true,
     },
     store: {
@@ -31,19 +30,26 @@ const foodSchema = new mongoose.Schema(
       enum: ["breakfast", "lunch", "dinner", "snacks", "drinks", "desserts"],
     },
 
+    // image is optional — app is reel/video-first
     image: {
+      type: String,
+    },
+
+    // video is required for reel-based app
+    video: {
       type: String,
       required: true,
     },
 
-    video: {
-      type: String,
+    isVeg: {
+      type: Boolean,
+      default: true,
     },
 
     // Which food partner owns this item
-    foodPartner: {
+    Partner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "FoodPartner",
+      ref: "Partner",
       required: true,
     },
 
@@ -64,3 +70,4 @@ const foodSchema = new mongoose.Schema(
 const foodModel = mongoose.model("Food", foodSchema);
 
 export default foodModel;
+

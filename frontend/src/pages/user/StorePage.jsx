@@ -32,9 +32,9 @@ export default function StorePage() {
   });
 
   const store = storeData?.store;
-  const foods = menuData?.foods || [];
-  const categories = ['All', ...new Set(foods.map(f => f.category).filter(Boolean))];
-  const filtered = activeCategory === 'All' ? foods : foods.filter(f => f.category === activeCategory);
+  const foods = menuData?.menu || [];
+  const categories = ['All', ...new Set(foods.flatMap(f => f.category || []))];
+  const filtered = activeCategory === 'All' ? foods : foods.filter(f => f.category?.includes(activeCategory));
 
   if (isLoading) return <div className={styles.loading}>Loading...</div>;
 
@@ -60,7 +60,7 @@ export default function StorePage() {
         <p className={styles.cuisine}>{store?.cuisine?.join(' · ')}</p>
         <div className={styles.meta}>
           <span><Star size={13} fill="currentColor" style={{ color: 'var(--yellow)' }} /> {store?.rating?.average?.toFixed(1) || '—'} ({store?.rating?.count || 0})</span>
-          <span><MapPin size={13} /> {store?.address?.city || 'Nearby'}</span>
+          <span><MapPin size={13} /> {store?.address || 'Nearby'}</span>
         </div>
         {store?.description && <p className={styles.desc}>{store.description}</p>}
       </div>

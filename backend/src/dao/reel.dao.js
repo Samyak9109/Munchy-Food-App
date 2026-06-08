@@ -6,9 +6,9 @@ export const createReelDAO = async (reelData) =>
 export const getAllReelsDAO = async () =>
   await reelModel
     .find()
-    .populate("food", "name price")
+    .populate("food", "name price image")
     .populate("partner", "name avatar")
-    .populate("store", "name address")
+    .populate("store", "name _id address")
     .sort({ createdAt: -1 });
 
 export const getReelsByStoreDAO = async (storeId) =>

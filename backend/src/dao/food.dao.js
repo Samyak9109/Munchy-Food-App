@@ -7,16 +7,16 @@ export const getAllFoodDAO = async () =>
   await foodModel
     .find({ isAvailable: true })
     .populate("store", "name address")
-    .populate("foodPartner", "name");
+    .populate("Partner", "name");
 
 export const getFoodByIdDAO = async (id) =>
   await foodModel
     .findById(id)
     .populate("store", "name address")
-    .populate("foodPartner", "name");
+    .populate("Partner", "name");
 
 export const getFoodByPartnerDAO = async (partnerId) =>
-  await foodModel.find({ foodPartner: partnerId, isAvailable: true });
+  await foodModel.find({ Partner: partnerId, isAvailable: true });
 
 export const getFoodByStoreDAO = async (storeId) =>
   await foodModel.find({ store: storeId, isAvailable: true });
@@ -37,5 +37,5 @@ export const getFoodVideosDAO = async () =>
   await foodModel
     .find({ isAvailable: true, video: { $exists: true, $ne: null } })
     .select("name video ratings")
-    .populate("foodPartner", "name")
+    .populate("Partner", "name")
     .sort({ createdAt: -1 });

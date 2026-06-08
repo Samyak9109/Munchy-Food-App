@@ -28,9 +28,9 @@ export const createFood = async (req, res) => {
       description,
       price,
       category,
-      image: imageUrl, 
+      image: imageUrl,
       video: videoUrl,
-      foodPartner: req.partner._id,
+      Partner: req.partner._id,
       store,
     });
 
@@ -89,12 +89,12 @@ export const updateFood = async (req, res) => {
     if (!food) return res.status(404).json({ message: "Food item not found" });
 
     // verify food belongs to requesting partner
-    if (food.foodPartner.toString() !== req.partner._id.toString()) {
+    if (food.Partner.toString() !== req.partner._id.toString()) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
     // prevent updating partner or store fields
-    const { foodPartner, store, ...updateData } = req.body;
+    const { Partner, store, ...updateData } = req.body;
 
     const updated = await updateFoodDAO(req.params.id, updateData);
     return res
@@ -113,7 +113,7 @@ export const deleteFood = async (req, res) => {
     const food = await getFoodByIdDAO(req.params.id);
     if (!food) return res.status(404).json({ message: "Food item not found" });
 
-    if (food.foodPartner.toString() !== req.partner._id.toString()) {
+    if (food.Partner.toString() !== req.partner._id.toString()) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
@@ -134,7 +134,7 @@ export const toggleAvailability = async (req, res) => {
     const food = await getFoodByIdDAO(req.params.id);
     if (!food) return res.status(404).json({ message: "Food item not found" });
 
-    if (food.foodPartner.toString() !== req.partner._id.toString()) {
+    if (food.Partner.toString() !== req.partner._id.toString()) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
