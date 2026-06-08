@@ -11,10 +11,12 @@ const router = express.Router();
 
 // ── PUBLIC ROUTES ────────────────────────────────────────────
 router.get("/", storeController.getAllStores);
-router.get("/:id", storeController.getStoreById);
 router.get("/:id/menu", storeController.getStoreMenu);
+router.get("/:id", storeController.getStoreById);
 
 // ── PARTNER ROUTES ───────────────────────────────────────────
+// Self-heal: lets partners fetch their own store without knowing its ID
+router.get("/partner/my-store", authMiddleware.authPartner, storeController.getMyStore);
 router.post(
   "/",
   authMiddleware.authPartner,

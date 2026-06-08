@@ -15,7 +15,7 @@ export default function PartnerOrdersPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [tab, setTab] = useState('active');
-  const storeId = user?.stores?.[0] || user?.id;
+  const storeId = user?.stores?.[0] || null;
 
   const { data, isLoading } = useQuery({
     queryKey: ['store-orders', storeId],
@@ -35,6 +35,17 @@ export default function PartnerOrdersPage() {
     : orders.filter(o => o.status === tab);
 
   const NEXT_STATUS = { placed: 'confirmed', confirmed: 'ready' };
+
+  if (!storeId) {
+    return (
+      <div className={styles.page}>
+        <Header title="Orders" showLocation={false} />
+        <div className={styles.content} style={{ textAlign: 'center', marginTop: '3rem', padding: '0 1rem' }}>
+          <p>Please create a Kitchen first from the Kitchen tab.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>

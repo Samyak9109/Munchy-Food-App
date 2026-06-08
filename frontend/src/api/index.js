@@ -10,13 +10,14 @@ export const deleteFood      = (id)     => api.delete(`/food/${id}`);
 export const toggleAvailability = (id)  => api.patch(`/food/${id}/availability`);
 
 // ── STORE ────────────────────────────────────────────────────
-export const getStores       = ()       => api.get('/store');
-export const getStoreById    = (id)     => api.get(`/store/${id}`);
-export const getStoreMenu    = (id)     => api.get(`/store/${id}/menu`);
-export const createStore     = (data)   => api.post('/store', data);
-export const updateStore     = (id, d)  => api.put(`/store/${id}`, d);
-export const deleteStore     = (id)     => api.delete(`/store/${id}`);
-export const toggleStoreStatus = (id)   => api.patch(`/store/${id}/status`);
+export const getStores         = ()         => api.get('/store');
+export const getStoreById      = (id)       => api.get(`/store/${id}`);
+export const getStoreMenu      = (id)       => api.get(`/store/${id}/menu`);
+export const getMyStore        = ()         => api.get('/store/partner/my-store');  // partner self-lookup
+export const createStore       = (data)     => api.post('/store', data);
+export const updateStore       = (id, d)    => api.put(`/store/${id}`, d);
+export const deleteStore       = (id)       => api.delete(`/store/${id}`);
+export const toggleStoreStatus = (id)       => api.patch(`/store/${id}/status`);
 export const uploadStoreImage  = (id, data) => api.post(`/store/${id}/image`, data);
 
 // ── CART ─────────────────────────────────────────────────────
@@ -81,4 +82,5 @@ export const sendChatMessage = (data)   => api.post('/chatbot', data);
 // ── USER ─────────────────────────────────────────────────────
 export const getProfile      = ()       => api.get('/user/profile');
 export const updateProfile   = (data)   => api.put('/user/profile', data);
+export const uploadAvatar    = (data)   => api.post('/user/profile/avatar', data);
 export const deleteAccount   = ()       => api.delete('/user/profile');

@@ -38,6 +38,15 @@ export default function StoreManagePage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['store-menu'] }),
   });
 
+  const uploadStoreImageMut = useMutation({
+    mutationFn: (file) => {
+      const fd = new FormData();
+      fd.append('image', file);
+      return api.uploadStoreImage(storeId, fd);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-store'] }),
+  });
+
   const store = storeData?.store;
   // Backend getStoreMenu returns { store, menu } not { foods }
   const foods = menuData?.menu || [];
@@ -60,7 +69,19 @@ export default function StoreManagePage() {
         {/* Store info */}
         {store && (
           <div className={styles.storeCard}>
-            {store.image && <img src={store.image} alt={store.name} className={styles.storeImg} />}
+            <div style={{ position: 'relative', width: 100, height: 100, flexShrink: 0, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {store.image ? (
+                <img src={store.image} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Store size={32} style={{ color: 'var(--text-muted)' }} />
+              )}
+              <label style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '0.75rem', textAlign: 'center', padding: '4px 0', cursor: 'pointer' }}>
+                {uploadStoreImageMut.isPending ? 'Uploading...' : 'Cover'}
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                  if (e.target.files[0]) uploadStoreImageMut.mutate(e.target.files[0]);
+                }} disabled={uploadStoreImageMut.isPending} />
+              </label>
+            </div>
             <div className={styles.storeInfo}>
               <h2 className={styles.storeName}>{store.name}</h2>
               <p className={styles.storeCuisine}>{store.cuisine?.join(', ')}</p>
@@ -143,14 +164,17 @@ function CreateKitchenForm() {
   const setF = (key, val) => setFormState(f => ({ ...f, [key]: val }));
 
   const createStore = useMutation({
-    mutationFn: () => api.createStore({
-      name: form.name,
-      address: form.address,
-      cuisine: form.cuisine.split(',').map(s => s.trim()).filter(Boolean),
-      description: form.description,
-      // dummy coordinates required by store model
-      location: { type: 'Point', coordinates: [0, 0] },
-    }),
+    mutationFn: () => {
+      const cuisines = form.cuisine.split(',').map(s => s.trim()).filter(Boolean);
+      return api.createStore({
+        name: form.name,
+        address: form.address,
+        cuisine: cuisines.length > 0 ? cuisines : ['General'], // Default cuisine if empty
+        description: form.description,
+        // dummy coordinates required by store model
+        coordinates: { lat: 0, lng: 0 },
+      });
+    },
     onSuccess: (res) => {
       const newStoreId = res.data.store?._id;
       if (newStoreId) {
@@ -160,7 +184,14 @@ function CreateKitchenForm() {
       }
       qc.invalidateQueries({ queryKey: ['my-store'] });
     },
-    onError: (err) => setError(err.response?.data?.message || 'Failed to create kitchen'),
+    onError: (err) => {
+      const data = err.response?.data;
+      if (data?.errors?.length > 0) {
+        setError(data.errors.map(e => e.msg).join(', '));
+      } else {
+        setError(data?.message || 'Failed to create kitchen');
+      }
+    },
   });
 
   return (
@@ -214,7 +245,7 @@ function FoodForm({ storeId, food, onClose }) {
       fd.append('description', form.description);
       fd.append('category', form.category);
       fd.append('isVeg', form.isVeg);
-      fd.append('storeId', storeId);
+      fd.append('store', storeId);
 
       if (videoRef.current?.files[0]) fd.append('video', videoRef.current.files[0]);
       if (imageRef.current?.files[0]) fd.append('image', imageRef.current.files[0]);
@@ -245,18 +276,18 @@ function FoodForm({ storeId, food, onClose }) {
 
       <textarea className={styles.textarea} placeholder="Description" rows={3} value={form.description} onChange={e => set('description', e.target.value)} />
 
-      {/* Video upload (required for new items) */}
+      {/* Image upload (required for new items) */}
       <div className={styles.fileRow}>
         <label className={styles.fileLabel}>
-          🎥 Video {!food && <span style={{ color: 'var(--accent)' }}>*</span>}
+          🖼 Image {!food && <span style={{ color: 'var(--accent)' }}>*</span>}
         </label>
-        <input ref={videoRef} type="file" accept="video/*" className={styles.fileInput} />
+        <input ref={imageRef} type="file" accept="image/*" className={styles.fileInput} />
       </div>
 
-      {/* Image upload (optional) */}
+      {/* Video upload (optional) */}
       <div className={styles.fileRow}>
-        <label className={styles.fileLabel}>🖼 Thumbnail (optional)</label>
-        <input ref={imageRef} type="file" accept="image/*" className={styles.fileInput} />
+        <label className={styles.fileLabel}>🎥 Video (optional)</label>
+        <input ref={videoRef} type="file" accept="video/*" className={styles.fileInput} />
       </div>
 
       <div className={styles.vegRow}>

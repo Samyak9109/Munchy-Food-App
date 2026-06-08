@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Phone, ArrowRight } from 'lucide-react';
 import { useRegister } from '../../hooks/useAuth';
 import styles from './AuthPage.module.css';
 
@@ -9,11 +9,12 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const { mutate: register, isPending, error } = useRegister();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    register({ name, email, password, role });
+    register({ name, email, password, role, ...(role === 'partner' && { phone }) });
   };
 
   return (
@@ -73,13 +74,31 @@ export default function RegisterPage() {
               <input
                 className={styles.input}
                 type="password"
-                placeholder="Password"
+                placeholder="Password (8+ chars, A-Z, 0-9, @$!%*?&)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
+                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}"
+                title="Must be 8+ characters with uppercase, lowercase, number and special character (@$!%*?&)"
               />
             </div>
+
+            {role === 'partner' && (
+              <div className={styles.inputWrap}>
+                <Phone size={16} className={styles.inputIcon} />
+                <input
+                  className={styles.input}
+                  type="tel"
+                  placeholder="Phone number (10 digits)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  required
+                  pattern="\d{10}"
+                  title="Enter a valid 10-digit phone number"
+                />
+              </div>
+            )}
 
             {error && (
               <p className={styles.error}>

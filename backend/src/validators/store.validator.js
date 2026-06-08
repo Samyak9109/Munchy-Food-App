@@ -5,10 +5,10 @@ const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/; // validates HH:MM format
 
 export const validateCreateStore = [
   body("name")
-    .trim() // ❌ was: .trim (missing parentheses)
+    .trim()
     .notEmpty()
     .withMessage("Name is required")
-    .isLength({ min: 2, max: 100 }) // ❌ was: missing comma between min and max
+    .isLength({ min: 2, max: 100 })
     .withMessage("Name must be between 2 and 100 characters"),
 
   body("address")
@@ -22,15 +22,14 @@ export const validateCreateStore = [
     .isArray({ min: 1 })
     .withMessage("At least one cuisine type is required"),
 
+  // timing is optional — partner can update it later from store settings
   body("timing.open")
-    .notEmpty()
-    .withMessage("Opening time is required")
+    .optional()
     .matches(timeRegex)
     .withMessage("Opening time must be in HH:MM format"),
 
   body("timing.close")
-    .notEmpty()
-    .withMessage("Closing time is required")
+    .optional()
     .matches(timeRegex)
     .withMessage("Closing time must be in HH:MM format"),
 

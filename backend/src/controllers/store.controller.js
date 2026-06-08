@@ -85,6 +85,21 @@ export const getStoreMenu = async (req, res) => {
   }
 };
 
+// ── GET MY STORE (partner self-lookup) ──────────────────────────
+// Lets the frontend heal stale sessions where user.stores[] is undefined.
+export const getMyStore = async (req, res) => {
+  try {
+    const { getStoreByPartnerDAO } = await import("../dao/store.dao.js");
+    const stores = await getStoreByPartnerDAO(req.partner._id);
+    const store = stores?.[0] || null;
+    return res.status(200).json({ store });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching store", error: error.message });
+  }
+};
+
 // ── UPDATE STORE ─────────────────────────────────────────────
 export const updateStore = async (req, res) => {
   try {
@@ -134,8 +149,6 @@ export const deleteStore = async (req, res) => {
 
 // ── TOGGLE STORE STATUS ──────────────────────────────────────
 export const toggleStoreStatus = async (req, res) => {
-  const { isOpen } = req.body;
-
   try {
     const store = await getStoreByIdDAO(req.params.id);
     if (!store) return res.status(404).json({ message: "Store not found" });
@@ -144,9 +157,11 @@ export const toggleStoreStatus = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const updated = await toggleStoreStatusDAO(req.params.id, isOpen);
+    // Flip the current status — frontend sends no body, it's a pure toggle
+    const newStatus = !store.isOpen;
+    const updated = await toggleStoreStatusDAO(req.params.id, newStatus);
     return res.status(200).json({
-      message: `Store is now ${isOpen ? "open" : "closed"}`,
+      message: `Store is now ${newStatus ? "open" : "closed"}`,
       store: updated,
     });
   } catch (error) {

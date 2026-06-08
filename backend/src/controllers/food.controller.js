@@ -128,8 +128,6 @@ export const deleteFood = async (req, res) => {
 
 // ── TOGGLE AVAILABILITY ──────────────────────────────────────
 export const toggleAvailability = async (req, res) => {
-  const { isAvailable } = req.body;
-
   try {
     const food = await getFoodByIdDAO(req.params.id);
     if (!food) return res.status(404).json({ message: "Food item not found" });
@@ -138,9 +136,10 @@ export const toggleAvailability = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const updated = await toggleFoodAvailabilityDAO(req.params.id, isAvailable);
+    const newStatus = !food.isAvailable;
+    const updated = await toggleFoodAvailabilityDAO(req.params.id, newStatus);
     return res.status(200).json({
-      message: `Food item is now ${isAvailable ? "available" : "unavailable"}`,
+      message: `Food item is now ${newStatus ? "available" : "unavailable"}`,
       food: updated,
     });
   } catch (error) {

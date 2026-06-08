@@ -5,6 +5,20 @@ import { ArrowLeft, Wallet, Banknote, CreditCard } from 'lucide-react';
 import * as api from '../../api/index';
 import styles from './CheckoutPage.module.css';
 
+// Lazily inject the Razorpay SDK only when a payment is actually triggered.
+// This avoids the flood of preload warnings that occur when checkout.js is
+// loaded eagerly on every page via index.html.
+function loadRazorpay() {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 const PAYMENT_METHODS = [
   { id: 'razorpay', icon: CreditCard, label: 'Card / UPI', sub: 'Razorpay secure checkout' },
   { id: 'cash',     icon: Banknote,   label: 'Cash on Pickup', sub: 'Pay when you collect' },
@@ -32,6 +46,13 @@ export default function CheckoutPage() {
     onSuccess: async (res) => {
       const order = res.data.order;
       if (payMethod === 'razorpay') {
+        // Load Razorpay SDK on-demand (avoids preload warnings on other pages)
+        const loaded = await loadRazorpay();
+        if (!loaded) {
+          alert('Failed to load Razorpay SDK. Please check your internet connection.');
+          return;
+        }
+
         // Initiate Razorpay
         const payRes = await api.initiatePayment({ orderId: order._id });
         const { razorpayOrder, key } = payRes.data;

@@ -58,4 +58,32 @@ async function authCustomer(req, res, next) {
   }
 }
 
-export default { authPartner, authCustomer };
+async function authAny(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res
+      .status(401)
+      .json({ message: "Please login to access this resource" });
+  }
+
+  try {
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role === "partner") {
+      const partner = await partnerModel.findById(decoded.userId);
+      if (!partner) return res.status(401).json({ message: "Account not found" });
+      req.partner = partner;
+    } else {
+      const user = await userModel.findById(decoded.userId);
+      if (!user) return res.status(401).json({ message: "Account not found" });
+      req.user = user;
+    }
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+}
+
+export default { authPartner, authCustomer, authAny };

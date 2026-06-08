@@ -24,9 +24,9 @@ export function useRegister() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: ({ name, email, password, role }) =>
+    mutationFn: ({ name, email, password, role, phone }) =>
       role === 'partner'
-        ? authApi.registerPartner({ name, email, password })
+        ? authApi.registerPartner({ name, email, password, phone })
         : authApi.registerUser({ name, email, password }),
     onSuccess: (res, vars) => {
       // Backend returns {message, email} — no token yet (waits for email verification).

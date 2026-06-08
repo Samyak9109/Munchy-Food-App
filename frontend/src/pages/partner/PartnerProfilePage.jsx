@@ -11,7 +11,7 @@ export default function PartnerProfilePage() {
   const { user } = useAuthStore();
   const { mutate: logout } = useLogout();
   const qc = useQueryClient();
-  const storeId = user?.stores?.[0] || user?.id;
+  const storeId = user?.stores?.[0] || null;
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
 
@@ -26,6 +26,20 @@ export default function PartnerProfilePage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['profile'] }); setEditing(false); },
   });
 
+  const uploadAvatarMut = useMutation({
+    mutationFn: (file) => {
+      const fd = new FormData();
+      fd.append('avatar', file);
+      return api.uploadAvatar(fd);
+    },
+    onSuccess: (res) => {
+      // update auth store user directly to reflect new avatar immediately
+      const updatedUser = { ...user, avatar: res.data.user.avatar };
+      useAuthStore.getState().setAuth(updatedUser, localStorage.getItem('accessToken'), 'partner');
+      qc.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+
   const store = storeData?.store;
 
   return (
@@ -33,8 +47,14 @@ export default function PartnerProfilePage() {
       <Header title="Profile" showLocation={false} />
       <div className={styles.content}>
         <div className={styles.avatarSection}>
-          <div className={styles.avatar}>
+          <div className={styles.avatar} style={{ position: 'relative', overflow: 'hidden' }}>
             {user?.avatar ? <img src={user.avatar} alt={user.name} /> : <User size={40} />}
+            <label style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '0.7rem', textAlign: 'center', padding: '4px 0', cursor: 'pointer', display: 'block' }}>
+              {uploadAvatarMut.isPending ? '...' : 'Upload'}
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                if (e.target.files[0]) uploadAvatarMut.mutate(e.target.files[0]);
+              }} disabled={uploadAvatarMut.isPending} />
+            </label>
           </div>
           {editing
             ? <input className={styles.nameInput} value={name} onChange={e => setName(e.target.value)} />

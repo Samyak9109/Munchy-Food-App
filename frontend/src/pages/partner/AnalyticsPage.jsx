@@ -10,7 +10,7 @@ const PERIODS = ['daily', 'weekly', 'monthly'];
 
 export default function AnalyticsPage() {
   const { user } = useAuthStore();
-  const storeId = user?.stores?.[0] || user?.id;
+  const storeId = user?.stores?.[0] || null;
   const [period, setPeriod] = useState('weekly');
 
   const statsFn = period === 'daily' ? api.getDailyStats : period === 'weekly' ? api.getWeeklyStats : api.getMonthlyStats;
@@ -43,6 +43,17 @@ export default function AnalyticsPage() {
     { icon: Star,        label: 'Avg Order', value: `₹${Math.round(stats.avgOrderValue || 0)}`,       color: 'var(--yellow)' },
     { icon: Clock,       label: 'Completed', value: `${stats.completionRate || 0}%`,                  color: 'var(--success)' },
   ];
+
+  if (!storeId) {
+    return (
+      <div className={styles.page}>
+        <Header title="Analytics" showLocation={false} />
+        <div className={styles.content} style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <p>Please create a Kitchen first from the Kitchen tab.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>

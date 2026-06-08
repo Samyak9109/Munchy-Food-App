@@ -9,7 +9,7 @@ import styles from './PartnerReelsPage.module.css';
 export default function PartnerReelsPage() {
   const { user } = useAuthStore();
   const qc = useQueryClient();
-  const storeId = user?.stores?.[0] || user?.id;
+  const storeId = user?.stores?.[0] || null;
   const [showForm, setShowForm] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -24,6 +24,17 @@ export default function PartnerReelsPage() {
   });
 
   const reels = data?.reels || [];
+
+  if (!storeId) {
+    return (
+      <div className={styles.page}>
+        <Header title="Reels" showLocation={false} />
+        <div className={styles.content} style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <p>Please create a Kitchen first from the Kitchen tab.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -89,6 +100,7 @@ function UploadForm({ storeId, onClose }) {
   const createReel = useMutation({
     mutationFn: () => {
       const fd = new FormData();
+      fd.append('storeId', storeId);
       fd.append('foodId', foodId);
       fd.append('caption', caption);
       if (file) fd.append('video', file);
@@ -100,7 +112,7 @@ function UploadForm({ storeId, onClose }) {
     },
   });
 
-  const foods = menuData?.foods || [];
+  const foods = menuData?.menu || [];
 
   return (
     <div className={styles.form}>

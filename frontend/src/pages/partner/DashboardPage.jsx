@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Film, ClipboardList, TrendingUp, ToggleRight } from 'lucide-react';
+import { Film, ClipboardList, TrendingUp, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import * as api from '../../api/index';
@@ -10,27 +10,50 @@ const STATUS_COLOR = { placed: '#ffdb3c', confirmed: 'var(--primary)', ready: 'v
 const STATUS_LABEL = { placed: 'New', confirmed: 'Preparing', ready: 'Ready', pickedup: 'Done', cancelled: 'Cancelled' };
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, setAuth, role } = useAuthStore();
   const qc = useQueryClient();
-  const storeId = user?.stores?.[0] || user?.id;
 
-  const { data: storeData } = useQuery({
-    queryKey: ['my-store'],
+  // user.stores[0] is populated after our auth fix (login / verifyEmail / refreshToken).
+  // NEVER fall back to user.id — that is the partner's own DB _id, not a store id.
+  const cachedStoreId = user?.stores?.[0] || null;
+
+  // ── Self-heal: if stores[] is missing from cached session, fetch via /store/partner/my-store ──
+  const { data: myStoreData } = useQuery({
+    queryKey: ['my-store-self-heal'],
+    queryFn: () => api.getMyStore().then(r => r.data),
+    enabled: !cachedStoreId,          // only run when cache is stale
+    retry: false,
+    onSuccess: (data) => {
+      if (data.store?._id) {
+        // Patch authStore so subsequent navigations use the correct storeId
+        const updatedUser = { ...user, stores: [data.store._id] };
+        setAuth(updatedUser, localStorage.getItem('accessToken'), 'partner');
+        qc.invalidateQueries({ queryKey: ['my-store'] });
+      }
+    },
+  });
+
+  const storeId = cachedStoreId || myStoreData?.store?._id || null;
+
+  const { data: storeData, isLoading: storeLoading } = useQuery({
+    queryKey: ['my-store', storeId],
     queryFn: () => api.getStoreById(storeId).then(r => r.data),
     enabled: !!storeId,
+    retry: false,
   });
 
   const { data: ordersData } = useQuery({
     queryKey: ['store-orders', storeId],
     queryFn: () => api.getStoreOrders(storeId).then(r => r.data),
     enabled: !!storeId,
-    refetchInterval: 15000, // poll every 15s
+    refetchInterval: 15000,
   });
 
   const { data: stats } = useQuery({
     queryKey: ['daily-stats', storeId],
     queryFn: () => api.getDailyStats(storeId).then(r => r.data),
     enabled: !!storeId,
+    retry: false,
   });
 
   const toggleStatus = useMutation({
@@ -42,6 +65,37 @@ export default function DashboardPage() {
   const orders = ordersData?.orders || [];
   const activeOrders = orders.filter(o => ['placed', 'confirmed', 'ready'].includes(o.status));
   const salesToday = stats?.totalRevenue || 0;
+
+  // Still loading (either cache or self-heal)
+  if (storeLoading && !store) {
+    return (
+      <div className={styles.page}>
+        <Header title="Munchy" />
+        <div className={styles.content}>
+          <p className={styles.dim}>Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Partner genuinely has no store — redirect to create
+  if (!storeLoading && !storeId && !myStoreData?.store) {
+    return (
+      <div className={styles.page}>
+        <Header title="Munchy" />
+        <div className={styles.content}>
+          <div className={styles.welcome}>
+            <Store size={40} style={{ color: 'var(--primary)', marginBottom: 8 }} />
+            <h2>No Kitchen Found</h2>
+            <p>You haven't set up your kitchen yet.</p>
+            <Link to="/partner/store" className={styles.uploadBtn} style={{ marginTop: 16 }}>
+              Create Your Kitchen →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -88,7 +142,7 @@ export default function DashboardPage() {
           <button
             className={`${styles.toggle} ${store?.isOpen ? styles.toggleOn : ''}`}
             onClick={() => toggleStatus.mutate()}
-            disabled={toggleStatus.isPending}
+            disabled={toggleStatus.isPending || !storeId}
           >
             <span className={styles.toggleThumb} />
           </button>
@@ -105,7 +159,7 @@ export default function DashboardPage() {
             <p className={styles.dim}>No active orders right now.</p>
           ) : (
             activeOrders.slice(0, 5).map(order => (
-              <OrderCard key={order._id} order={order} storeId={storeId} />
+              <OrderCard key={order._id} order={order} />
             ))
           )}
         </div>

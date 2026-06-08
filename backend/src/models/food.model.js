@@ -30,15 +30,15 @@ const foodSchema = new mongoose.Schema(
       enum: ["breakfast", "lunch", "dinner", "snacks", "drinks", "desserts"],
     },
 
-    // image is optional — app is reel/video-first
+    // image is required for reel/video-first
     image: {
       type: String,
+      required: true,
     },
 
-    // video is required for reel-based app
+    // video is optional
     video: {
       type: String,
-      required: true,
     },
 
     isVeg: {
