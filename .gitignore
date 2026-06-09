@@ -1,125 +1,140 @@
-# ==========================
 # Dependencies
-# ==========================
 node_modules/
 **/node_modules/
 
-# ==========================
-# Environment Variables
-# ==========================
+# Environment variables and local secrets
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
+!.env.sample
+!**/.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets/
+**/secrets/
 
-# ==========================
-# Logs
-# ==========================
-logs
+# Logs and diagnostics
+logs/
+**/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# ==========================
-# Build / Production
-# ==========================
+# Build and production output
 dist/
+**/dist/
 build/
-.next/
+**/build/
 out/
-
-# React / Vite
-.vite/
+**/out/
 dist-ssr/
+storybook-static/
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+
+# Test and coverage output
 coverage/
+**/coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+cypress/screenshots/
+cypress/videos/
 
-# ==========================
-# Cache Files
-# ==========================
+# Tool and framework caches
 .cache/
+**/.cache/
 .parcel-cache/
+.vite/
+**/.vite/
+.turbo/
 .eslintcache
+*.tsbuildinfo
 
-# ==========================
-# OS Files
-# ==========================
-.DS_Store
-Thumbs.db
+# Package-manager caches
+.npm/
+.pnpm-store/
+.yarn/
+.yarn-cache/
+*.tgz
 
-# ==========================
-# IDE / Editor
-# ==========================
-.vscode/
-.idea/
-*.swp
-*.swo
+# Netlify and other hosting state
+.netlify/
+.vercel/
 
-# ==========================
-# Runtime Data
-# ==========================
-pids
+# Runtime data
+pids/
 *.pid
 *.seed
 *.pid.lock
+tmp/
+**/tmp/
+temp/
+**/temp/
+*.tmp
+*.temp
+*.local
 
-# ==========================
-# MongoDB
-# ==========================
+# Local databases and generated indexes
 data/
+**/data/
 *.mongodb
-
-# ==========================
-# Uploads / Generated Assets
-# ==========================
-uploads/
-public/uploads/
-storage/
-
-# ==========================
-# Code Analysis / Agent Artifacts
-# ==========================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+.codegraph/
 graphify-out/
 **/graphify-out/
+
+# User-generated uploads and local storage
+uploads/
+**/uploads/
+public/uploads/
+storage/
+**/storage/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*.swn
+*~
+
+# Operating-system files
+.DS_Store
+**/.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Local AI-assistant and agent state
 .agents/
 **/.agents/
 .codex/
 **/.codex/
-
-# ==========================
-# Testing
-# ==========================
-coverage/
-.nyc_output/
-
-# ==========================
-# Package Managers
-# ==========================
-.pnpm-store/
-.yarn/
-.yarn-cache/
-
-# ==========================
-# Temporary Files
-# ==========================
-tmp/
-temp/
-*.local
-
-# ==========================
-# Docker (Optional)
-# ==========================
-.dockerignore
-
-# ==========================
-# TypeScript (if using TS)
-# ==========================
-*.tsbuildinfo
-
-# ==========================
-# Misc
-# ==========================
-.vercel
-.netlify
-.claude
+.claude/
+**/.claude/
+.opencode/
+**/.opencode/
 claude.md
+CLAUDE.local.md
+
+# Local scratch notes
+problems.txt

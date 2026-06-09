@@ -1,0 +1,12 @@
+{
+  "name": "munchy-food-discovery",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix frontend",
+    "install:all": "npm ci --prefix backend && npm ci --prefix frontend"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
