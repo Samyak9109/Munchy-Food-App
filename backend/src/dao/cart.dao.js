@@ -12,7 +12,11 @@ export const getCartByUserDAO = async (userId) =>
   await cartModel
     .findOne({ user: userId })
     .populate("items.food", "name price image video")
-    .populate("store", "name image");
+    .populate({
+      path: "store",
+      select: "name image partner",
+      populate: { path: "partner", select: "name email" },
+    });
 
 export const addItemToCartDAO = async (userId, item) =>
   await cartModel.findOneAndUpdate(

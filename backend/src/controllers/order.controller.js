@@ -1,6 +1,8 @@
 import {
   createOrderDAO,
   getOrderByIdDAO,
+  getUserOrderByIdDAO,
+  getOrderWithOtpByIdDAO,
   getOrdersByUserDAO,
   getOrdersByStoreDAO,
   updateOrderStatusDAO,
@@ -41,24 +43,39 @@ export const placeOrder = async (req, res) => {
       })),
       totalPrice: cart.totalPrice,
       otp: hashedOtp,
+      pickupCode: otp,
       note: req.body.note || null,
     });
 
     // fetch full order with populated fields for email
     const populatedOrder = await getOrderByIdDAO(order._id);
 
-    // notify user with OTP
-    await sendOrderPlacedEmail(req.user.email, populatedOrder, otp);
-
-    // notify partner about new order
-    await sendNewOrderEmail(cart.store.partner.email, populatedOrder);
-
-    // clear cart after order placed
+    // The order is complete once it is persisted and the cart is cleared.
+    // Notification failures must not make the client retry and duplicate it.
     await clearCartDAO(req.user._id);
+
+    const notifications = [
+      sendOrderPlacedEmail(req.user.email, populatedOrder, otp),
+    ];
+    if (cart.store?.partner?.email) {
+      notifications.push(
+        sendNewOrderEmail(cart.store.partner.email, populatedOrder),
+      );
+    }
+    Promise.allSettled(notifications).then((results) => {
+      results
+        .filter((result) => result.status === "rejected")
+        .forEach((result) =>
+          console.error("Order notification failed:", result.reason),
+        );
+    });
 
     return res
       .status(201)
-      .json({ message: "Order placed successfully", order: populatedOrder });
+      .json({
+        message: "Order placed successfully",
+        order: { ...populatedOrder.toObject(), pickupCode: otp },
+      });
   } catch (error) {
     return res
       .status(500)
@@ -81,7 +98,9 @@ export const getOrders = async (req, res) => {
 // ── GET SINGLE ORDER ─────────────────────────────────────────
 export const getOrderById = async (req, res) => {
   try {
-    const order = await getOrderByIdDAO(req.params.id);
+    const order = req.user
+      ? await getUserOrderByIdDAO(req.params.id)
+      : await getOrderByIdDAO(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     if (req.partner) {
@@ -138,6 +157,11 @@ export const getStoreOrders = async (req, res) => {
   const { status } = req.query;
 
   try {
+    const partnerStoreIds = req.partner.stores.map((store) => store.toString());
+    if (!partnerStoreIds.includes(req.params.storeId)) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
     const orders = await getOrdersByStoreDAO(req.params.storeId, status);
     return res.status(200).json({ orders });
   } catch (error) {
@@ -155,6 +179,12 @@ export const updateStatus = async (req, res) => {
   try {
     const order = await getOrderByIdDAO(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.store.partner?.toString?.() !== req.partner._id.toString()) {
+      const partnerStoreIds = req.partner.stores.map((store) => store.toString());
+      if (!partnerStoreIds.includes(order.store._id.toString())) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+    }
 
     // partner can only move status forward
     const currentIndex = validFlow.indexOf(order.status);
@@ -168,10 +198,15 @@ export const updateStatus = async (req, res) => {
 
     const updated = await updateOrderStatusDAO(req.params.id, status);
 
-    // send correct email based on new status
-    if (status === "confirmed")
-      await sendOrderConfirmedEmail(order.user.email, order);
-    if (status === "ready") await sendOrderReadyEmail(order.user.email, order);
+    const notification =
+      status === "confirmed"
+        ? sendOrderConfirmedEmail(order.user.email, order)
+        : status === "ready"
+          ? sendOrderReadyEmail(order.user.email, order)
+          : null;
+    notification?.catch((error) =>
+      console.error("Order status notification failed:", error),
+    );
 
     return res
       .status(200)
@@ -188,8 +223,12 @@ export const verifyPickupOTP = async (req, res) => {
   const { otp } = req.body;
 
   try {
-    const order = await getOrderByIdDAO(req.params.id);
+    const order = await getOrderWithOtpByIdDAO(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
+    const partnerStoreIds = req.partner.stores.map((store) => store.toString());
+    if (!partnerStoreIds.includes(order.store._id.toString())) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
 
     // order must be ready before pickup
     if (order.status !== "ready") {
@@ -197,15 +236,19 @@ export const verifyPickupOTP = async (req, res) => {
     }
 
     // verify OTP against stored hash
-    const isValid = await bcrypt.compare(otp, order.otp);
+    if (!otp || !order.otp) {
+      return res.status(400).json({ message: "Pickup OTP is required" });
+    }
+    const isValid = await bcrypt.compare(String(otp).trim(), order.otp);
     if (!isValid) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
     await updateOrderStatusDAO(req.params.id, "pickedup");
 
-    // send confirmation to user
-    await sendOrderPickedUpEmail(order.user.email, order);
+    sendOrderPickedUpEmail(order.user.email, order).catch((error) =>
+      console.error("Pickup notification failed:", error),
+    );
 
     return res.status(200).json({ message: "Order picked up successfully" });
   } catch (error) {

@@ -152,7 +152,7 @@ export default function StoreManagePage() {
 // ── CREATE KITCHEN FORM (new partners with no store yet) ───────────────────
 function CreateKitchenForm() {
   const qc = useQueryClient();
-  const { user, setAuth, role } = useAuthStore();
+  const { user, setAuth } = useAuthStore();
   const [form, setFormState] = useState({
     name: '',
     address: '',

@@ -99,6 +99,29 @@
   align-items: center;
   justify-content: center;
 }
+.filterBtnActive { border-color: var(--yellow); background: rgba(255, 219, 60, 0.1); }
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  margin: -8px 0 18px;
+  padding-bottom: 2px;
+}
+.filterChip, .filterChipActive, .clearFilters {
+  padding: 8px 12px;
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.filterChipActive { border-color: var(--yellow); color: var(--yellow); }
+.clearFilters { border-color: transparent; background: none; color: var(--primary); }
 
 .listHeader {
   display: flex;
@@ -133,6 +156,7 @@
   text-decoration: none;
   transition: background 0.2s;
   border: 1px solid transparent;
+  cursor: pointer;
 }
 .card:hover { background: var(--surface-high); border-color: var(--outline-dim); }
 
@@ -178,6 +202,21 @@
   font-weight: 700;
   color: var(--text);
 }
+
+.cardActions { display: flex; align-items: center; gap: 8px; }
+.favoriteBtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--outline-dim);
+  border-radius: 50%;
+  background: var(--surface-high);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.favoriteBtnActive { color: var(--primary); border-color: var(--primary); }
 
 .rating {
   display: flex;

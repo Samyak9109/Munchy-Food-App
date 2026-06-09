@@ -6,6 +6,8 @@ import {
   validatePartnerRegister,
   validateLogin,
   validateForgotPassword,
+  validateVerifyEmail,
+  validateResetPassword,
 } from "../validators/auth.validator.js";
 
 const router = express.Router();
@@ -21,8 +23,16 @@ router.post(
   validatePartnerRegister,
   authController.registerPartner,
 );
-router.post("/user/verify-email", authController.verifyEmail);
-router.post("/partner/verify-email", authController.verifyEmail);
+router.post(
+  "/user/verify-email",
+  validateVerifyEmail,
+  authController.verifyEmail,
+);
+router.post(
+  "/partner/verify-email",
+  validateVerifyEmail,
+  authController.verifyEmail,
+);
 router.post("/user/login", validateLogin, authController.login);
 router.post("/partner/login", validateLogin, authController.login);
 router.post("/logout", authController.logout);
@@ -63,8 +73,16 @@ router.post(
   validateForgotPassword,
   authController.forgotPassword,
 );
-router.post("/user/reset-password", authController.resetPassword);
-router.post("/partner/reset-password", authController.resetPassword);
+router.post(
+  "/user/reset-password",
+  validateResetPassword,
+  authController.resetPassword,
+);
+router.post(
+  "/partner/reset-password",
+  validateResetPassword,
+  authController.resetPassword,
+);
 router.post("/refresh", authController.refreshToken);
 
 export default router;

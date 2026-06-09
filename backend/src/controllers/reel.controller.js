@@ -6,6 +6,8 @@ import {
   incrementViewsDAO,
   incrementLikesDAO,
   decrementLikesDAO,
+  incrementCommentsDAO,
+  decrementCommentsDAO,
   deleteReelDAO,
 } from "../dao/reel.dao.js";
 import { createLikeDAO, deleteLikeDAO, getLikeDAO } from "../dao/like.dao.js";
@@ -119,6 +121,7 @@ export const addComment = async (req, res) => {
       user: req.user._id,
       text,
     });
+    await incrementCommentsDAO(req.params.id);
 
     return res.status(201).json({ message: "Comment added", comment });
   } catch (error) {
@@ -151,6 +154,7 @@ export const deleteComment = async (req, res) => {
     }
 
     await deleteCommentDAO(req.params.commentId);
+    await decrementCommentsDAO(comment.reel);
     return res.status(200).json({ message: "Comment deleted" });
   } catch (error) {
     return res

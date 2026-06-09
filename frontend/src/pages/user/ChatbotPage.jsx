@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SendHorizontal, Bot } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import * as api from '../../api/index';
@@ -102,8 +102,19 @@ export default function ChatbotPage() {
 }
 
 function FoodCard({ food }) {
+  const qc = useQueryClient();
+  const [added, setAdded] = useState(false);
+  const storeId = food.store?._id || food.store;
+  const addToCart = useMutation({
+    mutationFn: () => api.addToCart({ foodId: food._id, quantity: 1, storeId }),
+    onSuccess: () => {
+      setAdded(true);
+      qc.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
+
   return (
-    <Link to={`/food/${food._id}`} className={styles.foodCard}>
+    <Link to={storeId ? `/store/${storeId}` : '/kitchens'} className={styles.foodCard}>
       {food.image && <img src={food.image} alt={food.name} className={styles.foodImg} />}
       <span className={styles.matchBadge}>⚡ {food.match || 98}% Match</span>
       <div className={styles.foodInfo}>
@@ -111,7 +122,18 @@ function FoodCard({ food }) {
         <p className={styles.foodStore}>🏪 {food.store?.name} · {food.distance || '—'}</p>
         <div className={styles.foodBottom}>
           <span className={styles.foodPrice}>₹{food.price}</span>
-          <button className={styles.addBtn} onClick={e => e.preventDefault()}>+</button>
+          <button
+            className={styles.addBtn}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              addToCart.mutate();
+            }}
+            disabled={addToCart.isPending || added}
+            title={addToCart.error?.response?.data?.message}
+          >
+            {added ? '✓' : '+'}
+          </button>
         </div>
       </div>
     </Link>

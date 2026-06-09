@@ -29,5 +29,19 @@ export const incrementLikesDAO = async (id) =>
 export const decrementLikesDAO = async (id) =>
   await reelModel.findByIdAndUpdate(id, { $inc: { likes: -1 } }, { new: true });
 
+export const incrementCommentsDAO = async (id) =>
+  await reelModel.findByIdAndUpdate(
+    id,
+    { $inc: { commentsCount: 1 } },
+    { new: true },
+  );
+
+export const decrementCommentsDAO = async (id) =>
+  await reelModel.findByIdAndUpdate(
+    id,
+    { $inc: { commentsCount: -1 } },
+    { new: true },
+  );
+
 export const deleteReelDAO = async (id) =>
   await reelModel.findByIdAndDelete(id);

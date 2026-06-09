@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, Mail, Phone, LogOut, Trash2, Heart, ChevronRight, Edit2, Check } from 'lucide-react';
+import { User, Mail, Phone, LogOut, Trash2, Heart, ChevronRight, Edit2, Check, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useLogout } from '../../hooks/useAuth';
@@ -9,27 +9,26 @@ import Header from '../../components/common/Header';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
-  const { user } = useAuthStore();
+  const { user, setAuth } = useAuthStore();
   const { mutate: logout } = useLogout();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const avatarInputRef = useRef(null);
 
   const { data } = useQuery({
     queryKey: ['profile'],
     queryFn: () => api.getProfile().then(r => r.data),
-    onSuccess: (d) => {
-      setName(d.user?.name || '');
-      setPhone(d.user?.phone || '');
-    },
   });
 
   const updateMut = useMutation({
     mutationFn: () => api.updateProfile({ name, phone }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['profile'] });
+    onSuccess: response => {
+      const updatedUser = response.data.user;
+      setAuth(updatedUser, localStorage.getItem('accessToken'), 'user');
+      qc.setQueryData(['profile'], { user: updatedUser });
       setEditing(false);
     },
   });
@@ -37,6 +36,19 @@ export default function ProfilePage() {
   const deleteMut = useMutation({
     mutationFn: api.deleteAccount,
     onSuccess: () => logout(),
+  });
+
+  const avatarMut = useMutation({
+    mutationFn: file => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return api.uploadAvatar(formData);
+    },
+    onSuccess: response => {
+      const updatedUser = response.data.user;
+      setAuth(updatedUser, localStorage.getItem('accessToken'), 'user');
+      qc.setQueryData(['profile'], { user: updatedUser });
+    },
   });
 
   const profile = data?.user || user;
@@ -48,12 +60,37 @@ export default function ProfilePage() {
       <div className={styles.content}>
         {/* Avatar */}
         <div className={styles.avatarSection}>
-          <div className={styles.avatar}>
+          <button
+            className={styles.avatar}
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarMut.isPending}
+            aria-label="Upload profile picture"
+          >
             {profile?.avatar
               ? <img src={profile.avatar} alt={profile.name} />
               : <User size={40} />
             }
-          </div>
+            <span className={styles.avatarEdit}>
+              <Camera size={14} />
+              {avatarMut.isPending ? 'Uploading' : 'Photo'}
+            </span>
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={event => {
+              const file = event.target.files?.[0];
+              if (file) avatarMut.mutate(file);
+              event.target.value = '';
+            }}
+          />
+          {avatarMut.error && (
+            <p className={styles.uploadError}>
+              {avatarMut.error.response?.data?.message || 'Could not upload photo'}
+            </p>
+          )}
           {editing ? (
             <input
               className={styles.nameInput}
@@ -70,7 +107,15 @@ export default function ProfilePage() {
         {/* Edit / save */}
         <button
           className={styles.editBtn}
-          onClick={() => editing ? updateMut.mutate() : setEditing(true)}
+          onClick={() => {
+            if (editing) {
+              updateMut.mutate();
+              return;
+            }
+            setName(profile?.name || '');
+            setPhone(profile?.phone || '');
+            setEditing(true);
+          }}
           disabled={updateMut.isPending}
         >
           {editing ? <><Check size={16} /> Save Changes</> : <><Edit2 size={16} /> Edit Profile</>}

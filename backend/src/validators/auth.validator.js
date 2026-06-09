@@ -28,19 +28,31 @@ const emailRule = body("email")
   .withMessage("Invalid email format")
   .normalizeEmail();
 
-const passwordRule = body("password")
+const passwordPolicy = (field) =>
+  body(field)
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters")
+    .matches(/[a-z]/)
+    .withMessage("Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/)
+    .withMessage("Password must contain at least one uppercase letter")
+    .matches(/\d/)
+    .withMessage("Password must contain at least one number")
+    .matches(/[@$!%*?&]/)
+    .withMessage("Password must contain at least one special character");
+
+const passwordRule = passwordPolicy("password");
+
+const otpRule = body("otp")
+  .trim()
   .notEmpty()
-  .withMessage("Password is required")
-  .isLength({ min: 8 })
-  .withMessage("Password must be at least 8 characters")
-  .matches(/[a-z]/)
-  .withMessage("Password must contain at least one lowercase letter")
-  .matches(/[A-Z]/)
-  .withMessage("Password must contain at least one uppercase letter")
-  .matches(/\d/)
-  .withMessage("Password must contain at least one number")
-  .matches(/[@$!%*?&]/)
-  .withMessage("Password must contain at least one special character");
+  .withMessage("OTP is required")
+  .isLength({ min: 6, max: 6 })
+  .withMessage("OTP must be exactly 6 digits")
+  .isNumeric()
+  .withMessage("OTP must contain only digits");
 
 const phoneRule = body("phone")
   .notEmpty()
@@ -72,3 +84,16 @@ export const validateLogin = [
 ];
 
 export const validateForgotPassword = [emailRule, handleValidationErrors];
+
+export const validateVerifyEmail = [
+  emailRule,
+  otpRule,
+  handleValidationErrors,
+];
+
+export const validateResetPassword = [
+  emailRule,
+  otpRule,
+  passwordPolicy("newPassword"),
+  handleValidationErrors,
+];

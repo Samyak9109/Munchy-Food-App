@@ -20,6 +20,7 @@ function requireEnv(variableName) {
 const config = {
   // ===== Server =====
   PORT: Number(process.env.PORT) || 3000,
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
 
   // ===== Database =====
   MONGO_URI: requireEnv("MONGO_URI"),
@@ -49,6 +50,7 @@ const config = {
 
   OPENROUTE_API_KEY: process.env.OPENROUTE_API_KEY,
   GEMINI_API_KEY: requireEnv("GEMINI_API_KEY"),
+  GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.5-flash",
 };
 
 export default config;

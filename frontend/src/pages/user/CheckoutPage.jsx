@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Wallet, Banknote, CreditCard } from 'lucide-react';
+import { ArrowLeft, Banknote, CreditCard } from 'lucide-react';
 import * as api from '../../api/index';
 import styles from './CheckoutPage.module.css';
 

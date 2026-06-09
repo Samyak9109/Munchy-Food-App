@@ -1,4 +1,7 @@
-import { getChatbotResponse } from "../services/chatbot.service.js";
+import {
+  getChatbotResponse,
+  getFallbackResponse,
+} from "../services/chatbot.service.js";
 import { getAllFoodDAO } from "../dao/food.dao.js";
 import { getNearbyStoresDAO } from "../dao/map.dao.js";
 
@@ -19,16 +22,40 @@ export const chat = async (req, res) => {
       nearbyStores = await getNearbyStoresDAO(lng, lat, 10); // 10km radius
     }
 
-    // get response from Gemini via LangChain
-    const response = await getChatbotResponse(
-      message,
-      foodItems,
-      nearbyStores,
-      conversationHistory,
-    );
+    const searchTerms = message
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((term) => term.length > 2);
+    const matchingItems = foodItems.filter((food) => {
+      const searchable = [
+        food.name,
+        food.description,
+        ...(Array.isArray(food.category) ? food.category : [food.category]),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchTerms.some((term) => searchable.includes(term));
+    });
+    const recommendations = (matchingItems.length ? matchingItems : foodItems)
+      .slice(0, 4);
+
+    let response;
+    try {
+      response = await getChatbotResponse(
+        message,
+        foodItems,
+        nearbyStores,
+        conversationHistory,
+      );
+    } catch (aiError) {
+      console.error("Gemini request failed:", aiError.message);
+      response = getFallbackResponse(message, recommendations);
+    }
 
     return res.status(200).json({
       reply: response,
+      recommendations,
       // send back history so frontend can maintain conversation
       conversationHistory: [
         ...conversationHistory,

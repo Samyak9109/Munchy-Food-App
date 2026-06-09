@@ -60,6 +60,12 @@ const orderSchema = new mongoose.Schema(
     otp: {
       type: String,
       default: null,
+      select: false,
+    },
+    pickupCode: {
+      type: String,
+      default: null,
+      select: false,
     },
     note: {
       // ✅ added — user notes for order

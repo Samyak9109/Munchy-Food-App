@@ -8,7 +8,7 @@ import config from "../config/config.js";
 
 // initialize Gemini model
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-1.5-flash",
+  model: config.GEMINI_MODEL,
   apiKey: config.GEMINI_API_KEY,
   temperature: 0.7, // creativity level — 0 = factual, 1 = creative
 });
@@ -68,4 +68,17 @@ export const getChatbotResponse = async (
   } catch (error) {
     throw new Error(`Chatbot error: ${error.message}`);
   }
+};
+
+export const getFallbackResponse = (userMessage, foodItems) => {
+  if (!foodItems.length) {
+    return "I could not find any available dishes right now. Please check again shortly.";
+  }
+
+  const names = foodItems
+    .slice(0, 3)
+    .map((food) => `${food.name} (₹${food.price})`)
+    .join(", ");
+
+  return `Based on "${userMessage}", try ${names}. These are available right now.`;
 };

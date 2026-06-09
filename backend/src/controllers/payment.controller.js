@@ -46,7 +46,7 @@ export const initiatePayment = async (req, res) => {
       user: req.user._id,
       order: orderId,
       amount: order.totalPrice,
-      method,
+      method: method || "card",
       status: "pending",
       gatewayId: razorpayOrder.id,
     });

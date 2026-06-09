@@ -10,7 +10,7 @@ const STATUS_COLOR = { placed: '#ffdb3c', confirmed: 'var(--primary)', ready: 'v
 const STATUS_LABEL = { placed: 'New', confirmed: 'Preparing', ready: 'Ready', pickedup: 'Done', cancelled: 'Cancelled' };
 
 export default function DashboardPage() {
-  const { user, setAuth, role } = useAuthStore();
+  const { user, setAuth } = useAuthStore();
   const qc = useQueryClient();
 
   // user.stores[0] is populated after our auth fix (login / verifyEmail / refreshToken).
@@ -169,13 +169,7 @@ export default function DashboardPage() {
 }
 
 function OrderCard({ order }) {
-  const qc = useQueryClient();
   const statusColor = STATUS_COLOR[order.status] || 'var(--text-dim)';
-
-  const updateStatus = useMutation({
-    mutationFn: (status) => api.updateOrderStatus(order._id, { status }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['store-orders'] }),
-  });
 
   return (
     <Link to={`/partner/orders/${order._id}`} className={styles.orderCard}>

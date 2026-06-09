@@ -31,7 +31,7 @@ export function useRegister() {
     onSuccess: (res, vars) => {
       // Backend returns {message, email} — no token yet (waits for email verification).
       // Save pending credentials to sessionStorage and redirect to OTP verification.
-      sessionStorage.setItem('pendingEmail', vars.email);
+      sessionStorage.setItem('pendingEmail', res.data.email || vars.email);
       sessionStorage.setItem('pendingRole', vars.role);
       navigate('/verify-otp');
     },

@@ -63,9 +63,13 @@ export default function VerifyOTPPage() {
               <input
                 className={styles.input}
                 type="text"
+                inputMode="numeric"
                 placeholder="Enter 6-digit OTP"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                onChange={(e) => {
+                  setOtp(e.target.value.replace(/\D/g, '').slice(0, 6));
+                  setError('');
+                }}
                 maxLength={6}
                 required
                 style={{ textAlign: 'center', letterSpacing: '0.25em', fontSize: '1.2rem' }}

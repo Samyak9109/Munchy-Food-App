@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Star, MapPin, Heart, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Heart, Plus } from 'lucide-react';
 import * as api from '../../api/index';
 import styles from './StorePage.module.css';
 
@@ -21,9 +21,17 @@ export default function StorePage() {
     queryFn: () => api.getStoreMenu(id).then(r => r.data),
   });
 
+  const { data: favoritesData } = useQuery({
+    queryKey: ['favorites'],
+    queryFn: () => api.getFavorites().then(r => r.data),
+  });
+
+  const isFavorite = (favoritesData?.favorites || [])
+    .some(favorite => favorite.store?._id === id);
+
   const favMut = useMutation({
     mutationFn: () => api.toggleFavorite(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['store', id] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['favorites'] }),
   });
 
   const addToCart = useMutation({
@@ -45,7 +53,7 @@ export default function StorePage() {
         <div className={styles.heroOverlay} />
         <button className={styles.backBtn} onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
         <button className={styles.favBtn} onClick={() => favMut.mutate()}>
-          <Heart size={20} fill={store?.isFavourited ? 'currentColor' : 'none'} />
+          <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
       </div>
 

@@ -33,7 +33,7 @@ export default function OrderDetailPage() {
 
   const stepIdx = STATUS_STEPS.indexOf(order.status);
   const isCancelled = order.status === 'cancelled';
-  const isReady = order.status === 'ready' || order.status === 'pickedup';
+  const showPickupCode = !!order.pickupCode && !isCancelled;
 
   return (
     <div className={styles.page}>
@@ -44,27 +44,33 @@ export default function OrderDetailPage() {
       </div>
 
       <div className={styles.content}>
-        {/* OTP card — shown when ready */}
-        {isReady && order.otp && (
+        {/* Pickup code is visible only to the customer who owns this order. */}
+        {showPickupCode && (
           <div className={styles.otpCard}>
             <div className={styles.mapThumb}>
               <MapPin size={20} />
               <span>3 min away</span>
             </div>
-            <div className={styles.readyBadge}>✓ READY FOR PICKUP</div>
-            <p className={styles.otpHint}>Show this at the counter</p>
-            <p className={styles.otpSub}>Your order #{order._id.slice(-4).toUpperCase()} is waiting.</p>
+            <div className={styles.readyBadge}>
+              {order.status === 'ready' ? '✓ READY FOR PICKUP' : STATUS_LABEL[order.status]?.toUpperCase()}
+            </div>
+            <p className={styles.otpHint}>Your pickup code</p>
             <div className={styles.otpDigits}>
-              {String(order.otp).split('').map((d, i) => (
-                <span key={i} className={styles.digit}>{d}</span>
+              {String(order.pickupCode).split('').map((digit, index) => (
+                <span key={`${digit}-${index}`} className={styles.digit}>{digit}</span>
               ))}
             </div>
+            <p className={styles.otpSub}>Give this code to the kitchen partner when collecting your order.</p>
             {order.store && (
               <div className={styles.storeRow}>
                 <Store size={16} />
                 <div>
                   <p className={styles.storeName}>{order.store.name}</p>
-                  <p className={styles.storeAddr}>{order.store.address?.street}</p>
+                  <p className={styles.storeAddr}>
+                    {typeof order.store.address === 'string'
+                      ? order.store.address
+                      : order.store.address?.street}
+                  </p>
                 </div>
                 <button className={styles.dirBtn}>◆</button>
               </div>

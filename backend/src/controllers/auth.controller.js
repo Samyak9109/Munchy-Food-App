@@ -52,11 +52,14 @@ async function issueTokens(account, role, req, res) {
 
 // ── REGISTER USER ───────────────────────────────────────────────
 async function registerUser(req, res) {
-  const { name, email, password } = req.body;
+  const { name, password } = req.body;
+  const email = req.body.email?.toLowerCase()?.trim();
+  const role = "user";
 
   try {
     // delete unverified account so user can re-register
     await userModel.findOneAndDelete({ email, isVerified: false });
+    await otpModel.deleteMany({ email, purpose: "register", role, used: false });
 
     if (await userModel.findOne({ email })) {
       return res.status(400).json({ message: "User already exists" });
@@ -74,6 +77,7 @@ async function registerUser(req, res) {
       email,
       otp: await hashOTP(otp),
       purpose: "register",
+      role,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
@@ -98,11 +102,14 @@ async function registerUser(req, res) {
 
 // ── REGISTER PARTNER ────────────────────────────────────────────
 async function registerPartner(req, res) {
-  const { name, email, password, phone } = req.body;
+  const { name, password, phone } = req.body;
+  const email = req.body.email?.toLowerCase()?.trim();
+  const role = "partner";
 
   try {
     // delete unverified account so partner can re-register
     await partnerModel.findOneAndDelete({ email, isVerified: false });
+    await otpModel.deleteMany({ email, purpose: "register", role, used: false });
 
     if (await partnerModel.findOne({ email })) {
       return res.status(400).json({ message: "Account already exists" });
@@ -121,6 +128,7 @@ async function registerPartner(req, res) {
       email,
       otp: await hashOTP(otp),
       purpose: "register",
+      role,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
@@ -145,7 +153,8 @@ async function registerPartner(req, res) {
 
 // ── VERIFY EMAIL (shared for user + partner) ─────────────────────
 async function verifyEmail(req, res) {
-  const { email, otp } = req.body;
+  const { otp } = req.body;
+  const email = req.body.email?.toLowerCase()?.trim();
   const role = req.path.includes("partner") ? "partner" : "user";
   const model = getModelByRole(role);
 
@@ -154,18 +163,48 @@ async function verifyEmail(req, res) {
       .findOne({
         email,
         purpose: "register",
-        used: false,
+        $or: [{ role }, { role: null }, { role: { $exists: false } }],
       })
       .sort({ createdAt: -1 });
 
     if (!otpRecord) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+      return res
+        .status(400)
+        .json({ message: "No OTP record found for this email address." });
+    }
+
+    if (otpRecord.used) {
+      return res
+        .status(400)
+        .json({ message: "This OTP has already been verified/used." });
+    }
+
+    // check expiry
+    if (otpRecord.expiresAt < new Date()) {
+      return res
+        .status(400)
+        .json({ message: "This OTP has expired. Please register again." });
+    }
+
+    const pendingAccount = await model.findOne({ email });
+    if (!pendingAccount) {
+      return res
+        .status(404)
+        .json({ message: "No pending account found for this email address." });
+    }
+
+    if (pendingAccount.isVerified) {
+      return res
+        .status(400)
+        .json({ message: "Email is already verified. Please log in." });
     }
 
     // verify OTP
     const isValid = await verifyOTP(otp, otpRecord.otp);
     if (!isValid) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res
+        .status(400)
+        .json({ message: "Incorrect OTP entered. Please try again." });
     }
 
     // mark OTP as used
@@ -189,7 +228,7 @@ async function verifyEmail(req, res) {
         username: account.name,
         email: account.email,
         role,
-        ...(role === 'partner' && { stores: account.stores }),
+        ...(role === "partner" && { stores: account.stores }),
       },
       accessToken,
     });
@@ -202,7 +241,8 @@ async function verifyEmail(req, res) {
 
 // ── LOGIN (shared for user + partner) ───────────────────────────
 async function login(req, res) {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = req.body.email?.toLowerCase()?.trim();
   const role = req.path.includes("partner") ? "partner" : "user";
   const model = getModelByRole(role);
 
@@ -235,7 +275,7 @@ async function login(req, res) {
         username: account.name,
         email: account.email,
         role,
-        ...(role === 'partner' && { stores: account.stores }),
+        ...(role === "partner" && { stores: account.stores }),
       },
       accessToken,
     });
@@ -295,7 +335,7 @@ async function googleAuthCallback(req, res) {
 }
 
 async function forgotPassword(req, res) {
-  const { email } = req.body;
+  const email = req.body.email?.toLowerCase()?.trim();
   const role = req.path.includes("partner") ? "partner" : "user";
   const model = getModelByRole(role);
 
@@ -306,12 +346,18 @@ async function forgotPassword(req, res) {
     }
 
     const otp = generateOTP();
-    await otpModel.deleteMany({ email, purpose: "resetPassword", used: false });
+    await otpModel.deleteMany({
+      email,
+      purpose: "resetPassword",
+      role,
+      used: false,
+    });
 
     await otpModel.create({
       email,
       otp: await hashOTP(otp),
       purpose: "resetPassword",
+      role,
       expiresAt: new Date(Date.now() + 30 * 60 * 1000),
     });
 
@@ -335,7 +381,8 @@ async function forgotPassword(req, res) {
 }
 
 async function resetPassword(req, res) {
-  const { email, otp, newPassword } = req.body;
+  const { otp, newPassword } = req.body;
+  const email = req.body.email?.toLowerCase()?.trim();
   const role = req.path.includes("partner") ? "partner" : "user";
   const model = getModelByRole(role);
 
@@ -344,7 +391,8 @@ async function resetPassword(req, res) {
       email,
       purpose: "resetPassword",
       used: false,
-    });
+      $or: [{ role }, { role: null }, { role: { $exists: false } }],
+    }).sort({ createdAt: -1 });
 
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
@@ -423,7 +471,7 @@ async function refreshToken(req, res) {
         username: account.name,
         email: account.email,
         role: decoded.role,
-        ...(decoded.role === 'partner' && { stores: account.stores }),
+        ...(decoded.role === "partner" && { stores: account.stores }),
       },
     });
   } catch (error) {

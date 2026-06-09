@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import styles from './Header.module.css';
 
 export default function Header({ title = 'Munchy', showLocation = true, showProfile = true }) {
-  const { role } = useAuthStore();
+  const { role, user } = useAuthStore();
 
   const handleLocationClick = () => {
     if (navigator.geolocation) {
@@ -27,7 +27,10 @@ export default function Header({ title = 'Munchy', showLocation = true, showProf
       <h1 className={styles.logo}>{title}</h1>
       {showProfile && (
         <Link to={role === 'partner' ? '/partner/profile' : '/profile'} className={styles.iconBtn} aria-label="Profile">
-          <User size={20} />
+          {user?.avatar
+            ? <img className={styles.profileImage} src={user.avatar} alt={user.name || 'Profile'} />
+            : <User size={20} />
+          }
         </Link>
       )}
     </header>

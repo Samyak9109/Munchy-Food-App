@@ -16,7 +16,7 @@ export const hashOTP = async (otp) => {
 
 export const verifyOTP = async (incomingOTP, hashedOTP) => {
   try {
-    return await bcrypt.compare(incomingOTP, hashedOTP);
+    return await bcrypt.compare(String(incomingOTP).trim(), hashedOTP);
   } catch (error) {
     throw new Error(`OTP verification failed: ${error.message}`);
   }

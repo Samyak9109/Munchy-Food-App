@@ -14,7 +14,7 @@ export default function OTPVerifyPage() {
 
   const { data } = useQuery({
     queryKey: ['order', orderId],
-    queryFn: () => api.getOrderById(orderId).then(r => r.data),
+    queryFn: () => api.getPartnerOrderById(orderId).then(r => r.data),
   });
 
   const verify = useMutation({
