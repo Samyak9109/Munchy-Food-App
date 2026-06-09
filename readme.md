@@ -2,6 +2,10 @@
 
 Munchy is a full-stack food discovery and self-pickup platform. Customers discover dishes through short-form video reels, find nearby kitchens, receive AI-assisted recommendations, place orders, pay online or at pickup, and collect food using a secure OTP. Food partners manage their kitchen, menu, reels, orders, and sales analytics from a separate dashboard.
 
+## Live Link
+
+munchyfoodpickup.netlify.app
+
 ## Features
 
 ### Customer experience
@@ -61,18 +65,18 @@ Munchy is a full-stack food discovery and self-pickup platform. Customers discov
 
 ## Technology
 
-| Area | Technology |
-| --- | --- |
-| Frontend | React 19, Vite, React Router, TanStack Query, Zustand, Axios |
-| Backend | Node.js 22, Express 5 |
-| Database | MongoDB, Mongoose |
-| Authentication | JWT, refresh sessions, Passport Google OAuth, bcrypt |
-| AI | Gemini via LangChain |
-| Media | ImageKit, Multer |
-| Payments | Razorpay and cash on pickup |
-| Maps | Browser geolocation, MongoDB geospatial queries, OpenRouteService |
-| Email | Nodemailer with Gmail |
-| Deployment | Netlify, Netlify Functions, MongoDB Atlas |
+| Area           | Technology                                                        |
+| -------------- | ----------------------------------------------------------------- |
+| Frontend       | React 19, Vite, React Router, TanStack Query, Zustand, Axios      |
+| Backend        | Node.js 22, Express 5                                             |
+| Database       | MongoDB, Mongoose                                                 |
+| Authentication | JWT, refresh sessions, Passport Google OAuth, bcrypt              |
+| AI             | Gemini via LangChain                                              |
+| Media          | ImageKit, Multer                                                  |
+| Payments       | Razorpay and cash on pickup                                       |
+| Maps           | Browser geolocation, MongoDB geospatial queries, OpenRouteService |
+| Email          | Nodemailer with Gmail                                             |
+| Deployment     | Netlify, Netlify Functions, MongoDB Atlas                         |
 
 ## Quick Start
 
