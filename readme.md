@@ -2,7 +2,7 @@
 
 Munchy is a full-stack food discovery and self-pickup platform. Customers discover dishes through short-form video reels, find nearby kitchens, receive AI-assisted recommendations, place orders, pay online or at pickup, and collect food using a secure OTP. Food partners manage their kitchen, menu, reels, orders, and sales analytics from a separate dashboard.
 
-[Live Demo](https://my-project.netlify.app)
+## [Live Demo](https://munchyfoodpickup.netlify.app/)
 
 ## Features
 
