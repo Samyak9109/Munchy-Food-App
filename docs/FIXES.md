@@ -14,29 +14,29 @@ Audit baseline: frontend `npm run build` passes (JS 412.88 kB, 127.95 kB gzip; C
   Real keys shipped inside the project zip: Mongo, Razorpay, Google, ImageKit, Gemini, OpenRouteService, email. Rotate every one. Create fresh local `.env`. Confirm `.env` is untracked: `git ls-files | grep -i "\.env"` returns only `*.example`.
   Accept: old keys revoked. New keys work locally.
 
-- [ ] **CFG-01 (P2) Fail fast on missing env.** `[verified]` Razorpay keys are not in `requireEnv`.
+- [x] **CFG-01 (P2) Fail fast on missing env.** `[verified]` Razorpay keys are not in `requireEnv`.
   Files: `backend/src/config/config.js`.
   Change: `requireEnv` for Razorpay key id/secret, ImageKit keys, ORS key (`OPENROUTE_API_KEY` currently optional), JWT secrets. Add `RAZORPAY_WEBHOOK_SECRET`, `TAX_RATE` (default 0.05), `CORS_ORIGINS` (comma list). Update `.env.example`.
   Accept: boot without a required var prints the var name and exits 1.
 
-- [ ] **SEC-02 (P2) Hardening middleware.** `[verified]` no helmet, no compression.
+- [x] **SEC-02 (P2) Hardening middleware.** `[verified]` no helmet, no compression.
   Files: `backend/package.json`, `backend/src/app.js`.
   Change: add `helmet`, `compression`. `app.set('trust proxy', 1)`. `express.json({limit:'100kb'})`. CORS from `CORS_ORIGINS` allowlist with credentials. Add request logging (`pino-http` or `morgan`). Central error handler.
   Mount order: webhook raw-body route before `express.json` (see PAY-03).
   Accept: response headers include `x-content-type-options`. Responses gzip. Unknown origin rejected.
 
-- [ ] **SEC-03 (P1) Fix rate limits.** `[verified]` `/auth/refresh` falls under `authLimiter` (10 per 15 min). General limit 100 per 15 min.
+- [x] **SEC-03 (P1) Fix rate limits.** `[verified]` `/auth/refresh` falls under `authLimiter` (10 per 15 min). General limit 100 per 15 min.
   Files: `backend/src/middlewares/rateLimit.middleware.js`, `backend/src/routes/auth.routes.js`.
   Change: strict limiter only on login, register, OTP verify/resend, forgot/reset. Refresh, logout, me use general limiter. General limit 300 per 15 min. Return JSON `{message}` on 429.
   Accept: 30 refresh calls in a minute succeed. 11 bad logins in 15 min return 429.
 
-- [ ] **AUTH-01 (P1) Remove access token from OAuth redirect.** `[verified]` `googleAuthCallback` redirects to `/auth/success?token=...`.
+- [x] **AUTH-01 (P1) Remove access token from OAuth redirect.** `[verified]` `googleAuthCallback` redirects to `/auth/success?token=...`.
   Files: `backend/src/controllers/auth.controller.js`, `frontend/src/pages/auth/AuthSuccessPage.jsx`, `frontend/src/api/auth.js`.
   Change: callback still calls `issueTokens` (sets refresh cookie) but redirects to `/auth/success?role=<role>`. `AuthSuccessPage` calls `POST /auth/refresh`, receives access token and account, calls `setAuth`, then navigates. Confirm refresh response includes the account object. If not, add it.
   Also fix: inactive account returns JSON 403 from a redirect flow. Redirect to `/auth/error?reason=inactive` instead.
   Accept: no token string in browser history or URL. Google login lands on home.
 
-- [ ] **API-01 (P3) Health routes.** Add `GET /api/health` (no DB) and `GET /api/health/db` (ping).
+- [x] **API-01 (P3) Health routes.** Add `GET /api/health` (no DB) and `GET /api/health/db` (ping).
   Accept: both return 200 JSON. Health route unaffected by rate limiter.
 
 ---
