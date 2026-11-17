@@ -45,51 +45,51 @@ Audit baseline: frontend `npm run build` passes (JS 412.88 kB, 127.95 kB gzip; C
 
 Reference: `ARCHITECTURE.md` section 2 (checkout flow, state machine, payment rules).
 
-- [ ] **ORD-01 (P1) Server-side pricing.** `[verified]` order total taken from `cart.totalPrice`. `[verify]` item prices stored at add time. `[verified]` availability checked only at cart add (`cart.controller.js`). No open-store check in `order.controller.js`.
+- [x] **ORD-01 (P1) Server-side pricing.** `[verified]` order total taken from `cart.totalPrice`. `[verify]` item prices stored at add time. `[verified]` availability checked only at cart add (`cart.controller.js`). No open-store check in `order.controller.js`.
   Files: new `backend/src/services/pricing.service.js`, `order.controller.js`, `order.model.js`, `dao/order.dao.js`.
   Change: on order creation load Food documents by id. Reject if any is unavailable, missing, or from another store. Reject if store `isOpen` is false. Compute in paise: `subtotal`, `tax = round(subtotal * TAX_RATE)`, `total`. Persist `subtotal`, `tax`, `totalPrice` and per-item name, price, quantity snapshot.
   Add `GET /orders/preview` returning the same numbers without creating an order.
   Accept: tampering cart prices in DB does not change charge. Closed store returns 400. Response includes subtotal, tax, total.
 
-- [ ] **ORD-02 (P1) `pending_payment` status.** `[verified]` order is created and cart cleared before payment.
+- [x] **ORD-02 (P1) `pending_payment` status.** `[verified]` order is created and cart cleared before payment.
   Files: `order.model.js` (add enum value), `order.controller.js`, `dao/order.dao.js`, partner order queries, `frontend/src/pages/user/OrdersPage.jsx`, `OrderDetailPage.jsx`.
   Change: online orders start as `pending_payment`. Cash orders start as `placed` and clear cart immediately. Cart clears for online orders only after verify or webhook success. Partner queries and partner analytics exclude `pending_payment`. User order list shows it with a "Pay now" button.
   Lazy expiry: when reading orders, any `pending_payment` older than 30 minutes becomes `cancelled`.
   Accept: close payment modal → order shows `pending_payment`, cart intact, partner sees nothing.
 
-- [ ] **PAY-01 (P1) Initiate payment correctly.**
+- [x] **PAY-01 (P1) Initiate payment correctly.**
   Files: `backend/src/controllers/payment.controller.js`, `dao/payment.dao.js`, `models/payment.model.js`.
   Change: confirm order belongs to `req.user` and is `pending_payment`. Amount = `Math.round(order.totalPrice * 100)` (or use stored paise). Idempotent: if a pending Payment exists for the order, reuse its Razorpay order. Unique index on `Payment.order`. Return `{ orderId, razorpayOrderId, amount, currency, key }`.
   Accept: calling initiate twice returns the same Razorpay order. Another user's order returns 403.
 
-- [ ] **PAY-02 (P1) Verify correctly.** `[verified]` no ownership check. `[verified]` payment found by order only. `[verified]` signature compared with `!==`.
+- [x] **PAY-02 (P1) Verify correctly.** `[verified]` no ownership check. `[verified]` payment found by order only. `[verified]` signature compared with `!==`.
   Change: load payment by `gatewayOrderId === razorpay_order_id`. Check payment.order belongs to `req.user`. Compute HMAC SHA256 of `${razorpay_order_id}|${razorpay_payment_id}` with key secret. Compare with `crypto.timingSafeEqual` on equal-length buffers. On success: Payment `success`, save payment id and signature, set `order.payment`, order → `placed`, clear cart. Idempotent if already success. Wrap in try/catch. Never log signature or secret.
   Accept: wrong signature → 400, order stays `pending_payment`. Replay returns 200 without duplicate side effects.
 
-- [ ] **PAY-03 (P1) Webhook.** Add `POST /api/payments/webhook`.
+- [x] **PAY-03 (P1) Webhook.** Add `POST /api/payments/webhook`.
   Files: `app.js`, new `controllers/webhook.controller.js`, `routes/payment.routes.js`.
   Change: mount with `express.raw({type:'application/json'})` before `express.json`. Verify `X-Razorpay-Signature` against `RAZORPAY_WEBHOOK_SECRET`. Handle `payment.captured` (same success path as PAY-02) and `payment.failed` (Payment `failed`). Always 200 after valid signature. Idempotent by payment id.
   Accept: Razorpay test webhook marks order `placed` even if browser closed.
 
-- [ ] **PAY-04 (P1) Frontend payment flow.** `[verified]` no dismiss or failure handler. `[verified]` verify handler has no error handling.
+- [x] **PAY-04 (P1) Frontend payment flow.** `[verified]` no dismiss or failure handler. `[verified]` verify handler has no error handling.
   Files: `frontend/src/pages/user/CheckoutPage.jsx`, `OrderDetailPage.jsx`, `frontend/src/api/*`.
   Change: handle `modal.ondismiss`, `payment.failed`, verify error. Show toast and route to order detail with "Pay now". "Pay now" calls initiate again and reopens checkout. Load Razorpay script once with onload guard. Totals come from `/orders/preview`. Remove client-side tax math.
   Accept: three paths tested: success, dismiss, failure card (`4000 0000 0000 0002` in test mode).
 
-- [ ] **PAY-05 (P2) Link and normalize status.** `[verified]` `order.payment` never set. `[verified]` UI checks `'paid'`, backend uses `'success'`.
+- [x] **PAY-05 (P2) Link and normalize status.** `[verified]` `order.payment` never set. `[verified]` UI checks `'paid'`, backend uses `'success'`.
   Change: single enum `pending|success|failed|refunded`. `OrderDetailPage` reads `order.payment.status`. Populate `payment` in order detail DAO.
   Accept: paid order shows "Paid". Cash shows "Pay at pickup".
 
-- [ ] **PAY-06 (P2) Cash success at pickup.** `[verified]` code comment promises it, no code does it.
+- [x] **PAY-06 (P2) Cash success at pickup.** `[verified]` code comment promises it, no code does it.
   Files: `order.controller.js` pickup OTP verification.
   Change: on successful OTP verify, if method is cash set Payment `success`. Create the Cash Payment record at order creation (unique per order).
   Accept: partner verifies OTP → payment `success`.
 
-- [ ] **PAY-07 (P2) Cancel and refund.** `[verified]` cancel does not touch payment.
+- [x] **PAY-07 (P2) Cancel and refund.** `[verified]` cancel does not touch payment.
   Change: `pending_payment` → cancelled, payment `failed`/void, no refund. Paid online order cancelled in allowed statuses → `razorpay.payments.refund(paymentId, {amount})`, Payment `refunded`, store `refundId`. Refund failure keeps order cancelled with `refundStatus: 'failed'` flagged for manual action and logs error. Cash order → cancelled only.
   Accept: refund visible in Razorpay test dashboard.
 
-- [ ] **PAY-08 (P3) Payment tests.** Vitest or Jest + supertest. Cover: signature valid/invalid, ownership, idempotency, amount rounding, webhook signature.
+- [x] **PAY-08 (P3) Payment tests.** Vitest or Jest + supertest. Cover: signature valid/invalid, ownership, idempotency, amount rounding, webhook signature.
   Accept: `npm test` green in CI.
 
 ---
