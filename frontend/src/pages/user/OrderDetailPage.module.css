@@ -64,6 +64,31 @@
   border-radius: 9999px;
 }
 
+.pendingBanner {
+  background: var(--yellow);
+  color: #000;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.pendingBanner p {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.payNowBtn {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .otpHint {
   font-family: 'Montserrat', sans-serif;
   font-size: 16px;

@@ -6,6 +6,7 @@ import styles from './OrderDetailPage.module.css';
 
 const STATUS_STEPS = ['placed', 'confirmed', 'ready', 'pickedup'];
 const STATUS_LABEL = {
+  pending_payment: 'Awaiting Payment',
   placed: 'Order Placed',
   confirmed: 'Preparing',
   ready: 'Ready for Pickup',
@@ -22,7 +23,7 @@ export default function OrderDetailPage() {
     queryFn: () => api.getOrderById(id).then(r => r.data),
     refetchInterval: (data) => {
       const status = data?.order?.status;
-      return ['placed', 'confirmed', 'ready'].includes(status) ? 8000 : false;
+      return ['pending_payment', 'placed', 'confirmed', 'ready'].includes(status) ? 8000 : false;
     },
   });
 
@@ -33,7 +34,8 @@ export default function OrderDetailPage() {
 
   const stepIdx = STATUS_STEPS.indexOf(order.status);
   const isCancelled = order.status === 'cancelled';
-  const showPickupCode = !!order.pickupCode && !isCancelled;
+  const isPendingPayment = order.status === 'pending_payment';
+  const showPickupCode = !!order.pickupCode && !isCancelled && !isPendingPayment;
 
   return (
     <div className={styles.page}>
@@ -78,8 +80,23 @@ export default function OrderDetailPage() {
           </div>
         )}
 
+        {/* Payment pending banner */}
+        {isPendingPayment && (
+          <div className={styles.section}>
+            <div className={styles.pendingBanner}>
+              <p>Payment pending — complete payment to confirm your order.</p>
+              <button
+                className={styles.payNowBtn}
+                onClick={() => navigate(`/checkout?orderId=${order._id}&pay=1`)}
+              >
+                Pay Now
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Status stepper */}
-        {!isCancelled && (
+        {!isCancelled && !isPendingPayment && (
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Order Status</h2>
             <div className={styles.stepper}>

@@ -7,6 +7,7 @@ import {
   getOrdersByStoreDAO,
   updateOrderStatusDAO,
   cancelOrderDAO,
+  expireOldPendingPaymentsDAO,
 } from "../dao/order.dao.js";
 import { getCartByUserDAO, clearCartDAO } from "../dao/cart.dao.js";
 import { generateOTP, hashOTP } from "../services/otp.service.js";
@@ -60,6 +61,7 @@ export const previewOrder = async (req, res) => {
 // ── PLACE ORDER ──────────────────────────────────────────────
 export const placeOrder = async (req, res) => {
   try {
+    const { paymentMethod = "online" } = req.body; // "online" or "cash"
     const cart = await getCartByUserDAO(req.user._id);
 
     if (!cart || cart.items.length === 0) {
@@ -83,6 +85,9 @@ export const placeOrder = async (req, res) => {
     const otp = generateOTP();
     const hashedOtp = await hashOTP(otp);
 
+    // Online orders start as pending_payment, cash orders start as placed
+    const initialStatus = paymentMethod === "cash" ? "placed" : "pending_payment";
+
     // create order with server-computed pricing
     const order = await createOrderDAO({
       user: req.user._id,
@@ -91,35 +96,41 @@ export const placeOrder = async (req, res) => {
       subtotal: pricing.subtotal,
       tax: pricing.tax,
       totalPrice: pricing.total,
+      status: initialStatus,
       otp: hashedOtp,
       pickupCode: otp,
       note: req.body.note || null,
     });
 
-    // fetch full order with populated fields for email
+    // fetch full order with populated fields
     const populatedOrder = await getOrderByIdDAO(order._id);
 
-    // The order is complete once it is persisted and the cart is cleared.
-    // Notification failures must not make the client retry and duplicate it.
-    await clearCartDAO(req.user._id);
+    // Cash orders: clear cart immediately
+    // Online orders: cart stays until payment verified
+    if (paymentMethod === "cash") {
+      await clearCartDAO(req.user._id);
 
-    const notifications = [
-      sendOrderPlacedEmail(req.user.email, populatedOrder, otp),
-    ];
-    if (store.partner?.email) {
-      notifications.push(sendNewOrderEmail(store.partner.email, populatedOrder));
+      const notifications = [
+        sendOrderPlacedEmail(req.user.email, populatedOrder, otp),
+      ];
+      if (store.partner?.email) {
+        notifications.push(sendNewOrderEmail(store.partner.email, populatedOrder));
+      }
+      Promise.allSettled(notifications).then((results) => {
+        results
+          .filter((result) => result.status === "rejected")
+          .forEach((result) =>
+            console.error("Order notification failed:", result.reason),
+          );
+      });
     }
-    Promise.allSettled(notifications).then((results) => {
-      results
-        .filter((result) => result.status === "rejected")
-        .forEach((result) =>
-          console.error("Order notification failed:", result.reason),
-        );
-    });
 
     return res.status(201).json({
-      message: "Order placed successfully",
-      order: { ...populatedOrder.toObject(), pickupCode: otp },
+      message: paymentMethod === "cash"
+        ? "Order placed successfully"
+        : "Order created. Complete payment to confirm.",
+      order: { ...populatedOrder.toObject(), pickupCode: paymentMethod === "cash" ? otp : null },
+      requiresPayment: paymentMethod === "online",
     });
   } catch (error) {
     return res.status(400).json({
@@ -131,8 +142,18 @@ export const placeOrder = async (req, res) => {
 // ── GET USER ORDERS ──────────────────────────────────────────
 export const getOrders = async (req, res) => {
   try {
+    // Lazy expiry: convert old pending_payment to cancelled
+    await expireOldPendingPaymentsDAO();
+
     const orders = await getOrdersByUserDAO(req.user._id);
-    return res.status(200).json({ orders });
+
+    // Mark which orders need payment
+    const ordersWithPaymentFlag = orders.map((order) => ({
+      ...order.toObject(),
+      needsPayment: order.status === "pending_payment",
+    }));
+
+    return res.status(200).json({ orders: ordersWithPaymentFlag });
   } catch (error) {
     return res
       .status(500)
@@ -143,6 +164,9 @@ export const getOrders = async (req, res) => {
 // ── GET SINGLE ORDER ─────────────────────────────────────────
 export const getOrderById = async (req, res) => {
   try {
+    // Lazy expiry check
+    await expireOldPendingPaymentsDAO();
+
     const order = req.user
       ? await getUserOrderByIdDAO(req.params.id)
       : await getOrderByIdDAO(req.params.id);
@@ -163,7 +187,12 @@ export const getOrderById = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    return res.status(200).json({ order });
+    return res.status(200).json({
+      order: {
+        ...order.toObject(),
+        needsPayment: order.status === "pending_payment",
+      },
+    });
   } catch (error) {
     return res
       .status(500)
@@ -174,6 +203,9 @@ export const getOrderById = async (req, res) => {
 // ── CANCEL ORDER ─────────────────────────────────────────────
 export const cancelOrder = async (req, res) => {
   try {
+    // Lazy expiry check
+    await expireOldPendingPaymentsDAO();
+
     const order = await getOrderByIdDAO(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
@@ -181,7 +213,8 @@ export const cancelOrder = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // can only cancel if placed or confirmed
+    // pending_payment can always be cancelled (no refund needed)
+    // placed/confirmed can be cancelled (refund handled in PAY-07)
     if (!["placed", "confirmed"].includes(order.status)) {
       return res.status(400).json({
         message: "Order cannot be cancelled at this stage",

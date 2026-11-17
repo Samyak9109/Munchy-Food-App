@@ -65,6 +65,7 @@
   align-items: center;
   padding-top: 12px;
   border-top: 1px solid var(--outline-dim);
+  gap: 8px;
 }
 
 .total {
@@ -72,6 +73,20 @@
   font-size: 18px;
   font-weight: 700;
   color: var(--primary);
+}
+
+.payBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .date {

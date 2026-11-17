@@ -23,14 +23,23 @@ export const getOrdersByUserDAO = async (userId) =>
     .find({ user: userId })
     .populate("store", "name address")
     .populate("items.food", "name price image")
+    .populate("payment", "status method")
     .sort({ createdAt: -1 });
 
-export const getOrdersByStoreDAO = async (storeId, status = null) =>
-  await orderModel
-    .find({ store: storeId, ...(status && { status }) })
+export const getOrdersByStoreDAO = async (storeId, status = null) => {
+  // Exclude pending_payment orders from partner view
+  const filter = {
+    store: storeId,
+    status: { $ne: "pending_payment" },
+    ...(status && { status })
+  };
+
+  return await orderModel
+    .find(filter)
     .populate("user", "name email phone avatar")
     .populate("items.food", "name price image")
     .sort({ createdAt: -1 });
+};
 
 export const updateOrderStatusDAO = async (id, status) =>
   await orderModel.findByIdAndUpdate(id, { status }, { new: true });
@@ -47,3 +56,15 @@ export const cancelOrderDAO = async (id) =>
     { status: "cancelled" },
     { new: true },
   );
+
+export const expireOldPendingPaymentsDAO = async () => {
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+  return await orderModel.updateMany(
+    {
+      status: "pending_payment",
+      createdAt: { $lt: thirtyMinutesAgo },
+    },
+    { status: "cancelled" }
+  );
+};
