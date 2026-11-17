@@ -24,6 +24,9 @@ import {
 } from "../services/pricing.service.js";
 import foodModel from "../models/food.model.js";
 import storeModel from "../models/store.model.js";
+import paymentModel from "../models/payment.model.js";
+import Razorpay from "razorpay";
+import config from "../config/config.js";
 import bcrypt from "bcrypt";
 
 // ── PREVIEW ORDER ────────────────────────────────────────────
@@ -88,6 +91,18 @@ export const placeOrder = async (req, res) => {
     // Online orders start as pending_payment, cash orders start as placed
     const initialStatus = paymentMethod === "cash" ? "placed" : "pending_payment";
 
+    // Cash orders get a Payment record at creation (marked success at pickup, PAY-06)
+    let cashPaymentId = null;
+    if (paymentMethod === "cash") {
+      const cashPayment = await paymentModel.create({
+        user: req.user._id,
+        amount: pricing.total,
+        method: "cash",
+        status: "pending",
+      });
+      cashPaymentId = cashPayment._id;
+    }
+
     // create order with server-computed pricing
     const order = await createOrderDAO({
       user: req.user._id,
@@ -100,6 +115,7 @@ export const placeOrder = async (req, res) => {
       otp: hashedOtp,
       pickupCode: otp,
       note: req.body.note || null,
+      payment: cashPaymentId,
     });
 
     // fetch full order with populated fields
@@ -215,10 +231,58 @@ export const cancelOrder = async (req, res) => {
 
     // pending_payment can always be cancelled (no refund needed)
     // placed/confirmed can be cancelled (refund handled in PAY-07)
-    if (!["placed", "confirmed"].includes(order.status)) {
+    if (!["placed", "confirmed", "pending_payment"].includes(order.status)) {
       return res.status(400).json({
         message: "Order cannot be cancelled at this stage",
       });
+    }
+
+    // Cash orders: just cancel, no refund
+    if (order.payment?.method === "cash") {
+      await cancelOrderDAO(req.params.id);
+      return res.status(200).json({ message: "Order cancelled successfully" });
+    }
+
+    // pending_payment online: void the payment, no refund
+    if (order.status === "pending_payment" && order.payment) {
+      await cancelOrderDAO(req.params.id);
+      await paymentModel.updateOne(
+        { _id: order.payment._id },
+        { status: "failed" },
+      );
+      return res.status(200).json({ message: "Order cancelled successfully" });
+    }
+
+    // Paid online order: refund via Razorpay (PAY-07)
+    if (order.payment && order.payment.status === "success") {
+      const razorpay = new Razorpay({
+        key_id: config.RAZORPAY_KEY_ID,
+        key_secret: config.RAZORPAY_KEY_SECRET,
+      });
+      try {
+        const refund = await razorpay.payments.refund(
+          order.payment.gatewayPaymentId,
+          { amount: Math.round(order.totalPrice * 100) },
+        );
+        await cancelOrderDAO(req.params.id);
+        await paymentModel.updateOne(
+          { _id: order.payment._id },
+          { status: "refunded", refundId: refund.id },
+        );
+        return res.status(200).json({ message: "Order cancelled successfully" });
+      } catch (refundError) {
+        // Refund failed: still cancel the order, flag for manual action
+        console.error("Refund failed:", refundError.message);
+        await cancelOrderDAO(req.params.id);
+        await paymentModel.updateOne(
+          { _id: order.payment._id },
+          { status: "refunded", refundStatus: "failed" },
+        );
+        return res.status(200).json({
+          message:
+            "Order cancelled, but refund failed. Contact support with order ID.",
+        });
+      }
     }
 
     await cancelOrderDAO(req.params.id);
@@ -323,6 +387,14 @@ export const verifyPickupOTP = async (req, res) => {
     }
 
     await updateOrderStatusDAO(req.params.id, "pickedup");
+
+    // Cash payment marked successful at pickup (PAY-06)
+    if (order.payment) {
+      await paymentModel.updateOne(
+        { _id: order.payment },
+        { status: "success" },
+      );
+    }
 
     sendOrderPickedUpEmail(order.user.email, order).catch((error) =>
       console.error("Pickup notification failed:", error),

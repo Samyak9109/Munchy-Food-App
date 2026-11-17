@@ -4,7 +4,8 @@ const populateOrder = (query) =>
   query
     .populate("user", "name email phone avatar")
     .populate("store", "name address partner")
-    .populate("items.food", "name price image");
+    .populate("items.food", "name price image")
+    .populate("payment", "status method");
 
 export const createOrderDAO = async (orderData) =>
   await orderModel.create(orderData);
@@ -16,7 +17,7 @@ export const getUserOrderByIdDAO = async (id) =>
   await populateOrder(orderModel.findById(id).select("+pickupCode"));
 
 export const getOrderWithOtpByIdDAO = async (id) =>
-  await populateOrder(orderModel.findById(id).select("+otp"));
+  await populateOrder(orderModel.findById(id).select("+otp").populate("payment", "status method gatewayPaymentId"));
 
 export const getOrdersByUserDAO = async (userId) =>
   await orderModel

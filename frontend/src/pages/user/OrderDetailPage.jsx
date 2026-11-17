@@ -157,7 +157,7 @@ export default function OrderDetailPage() {
           </div>
           <div className={styles.infoRow}>
             <span>Status</span>
-            <span className={order.payment?.status === 'paid' ? styles.paid : styles.pending}>
+            <span className={order.payment?.status === 'success' ? styles.paid : styles.pending}>
               {order.payment?.status || 'pending'}
             </span>
           </div>
