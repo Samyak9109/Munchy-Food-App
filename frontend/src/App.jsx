@@ -12,7 +12,7 @@ import AuthErrorPage from './pages/auth/AuthErrorPage';
 
 import ReelsPage from './pages/user/ReelsPage';
 import KitchensPage from './pages/user/KitchensPage';
-import ChatbotPage from './pages/user/ChatbotPage';
+// import ChatbotPage from './pages/user/ChatbotPage'; // Removed AI feature
 import CartPage from './pages/user/CartPage';
 import OrdersPage from './pages/user/OrdersPage';
 import StorePage from './pages/user/StorePage';
@@ -56,7 +56,7 @@ export default function App() {
           }>
             <Route path="/"           element={<ReelsPage />} />
             <Route path="/kitchens"   element={<KitchensPage />} />
-            <Route path="/chatbot"    element={<ChatbotPage />} />
+            {/* <Route path="/chatbot"    element={<ChatbotPage />} /> */}
             <Route path="/cart"       element={<CartPage />} />
             <Route path="/orders"     element={<OrdersPage />} />
             <Route path="/orders/:id" element={<OrderDetailPage />} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, MessageCircle, Bot, ShoppingCart, MapPin, Send, X } from 'lucide-react';
+import { Heart, MessageCircle, ShoppingCart, MapPin, Send, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import * as api from '../../api/index';
@@ -136,10 +136,7 @@ function ReelCard({ reel }) {
           <span>{formatCount(reel.commentsCount || 0)}</span>
         </button>
 
-        <Link to="/chatbot" className={styles.actionBtn} style={{ color: 'var(--yellow)' }}>
-          <Bot size={26} />
-          <span>Mood</span>
-        </Link>
+        {/* Removed AI chatbot button - pure MERN stack */}
       </div>
 
       {/* Bottom info */}

@@ -20,7 +20,7 @@ import reelRouter from "./routes/reel.routes.js";
 import favoriteRouter from "./routes/favorite.routes.js";
 import mapRouter from "./routes/map.routes.js";
 import dashboardRouter from "./routes/dashboard.routes.js";
-import chatbotRouter from "./routes/chatbot.routes.js";
+// import chatbotRouter from "./routes/chatbot.routes.js"; // Removed AI feature
 
 // middlewares
 import { errorHandler, notFound } from "./middlewares/error.middleware.js";
@@ -103,7 +103,7 @@ app.use("/api/reel", reelRouter);
 app.use("/api/favorite", favoriteRouter);
 app.use("/api/map", mapRouter);
 app.use("/api/dashboard", dashboardRouter);
-app.use("/api/chatbot", chatbotRouter);
+// app.use("/api/chatbot", chatbotRouter); // Removed AI feature
 
 // ── ERROR HANDLING ───────────────────────────────────────────
 app.use(notFound);

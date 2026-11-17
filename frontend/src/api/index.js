@@ -78,7 +78,7 @@ export const getGrowth       = (storeId) => api.get(`/dashboard/${storeId}/growt
 export const getStatusBreakdown = (storeId) => api.get(`/dashboard/${storeId}/breakdown`);
 
 // ── CHATBOT ──────────────────────────────────────────────────
-export const sendChatMessage = (data)   => api.post('/chatbot', data);
+// export const sendChatMessage = (data)   => api.post('/chatbot', data); // Removed AI feature
 
 // ── USER ─────────────────────────────────────────────────────
 export const getProfile      = ()       => api.get('/user/profile');

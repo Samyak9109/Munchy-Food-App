@@ -52,9 +52,9 @@ const config = {
   // ===== Routing / Geocoding =====
   OPENROUTE_API_KEY: requireEnv("OPENROUTE_API_KEY"),
 
-  // ===== AI =====
-  GEMINI_API_KEY: requireEnv("GEMINI_API_KEY"),
-  GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+  // ===== AI ===== (Removed - pure MERN stack)
+  // GEMINI_API_KEY: requireEnv("GEMINI_API_KEY"),
+  // GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.5-flash",
 
   // ===== Business Logic =====
   TAX_RATE: Number(process.env.TAX_RATE) || 0.05,

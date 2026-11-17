@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Film, Compass, Bot, ShoppingCart, ClipboardList } from 'lucide-react';
+import { Film, Compass, ShoppingCart, ClipboardList } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import styles from './BottomNav.module.css';
 
 const links = [
   { to: '/',         icon: Film,          label: 'Reels'    },
   { to: '/kitchens', icon: Compass,       label: 'Find'     },
-  { to: '/chatbot',  icon: Bot,           label: 'Mood'     },
+  // { to: '/chatbot',  icon: Bot,           label: 'Mood'     }, // Removed AI feature
   { to: '/cart',     icon: ShoppingCart,  label: 'Cart', cart: true },
   { to: '/orders',   icon: ClipboardList, label: 'Orders'   },
 ];
