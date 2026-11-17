@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Banknote, CreditCard } from 'lucide-react';
 import * as api from '../../api/index';
 import styles from './CheckoutPage.module.css';
@@ -27,15 +27,36 @@ const PAYMENT_METHODS = [
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [payMethod, setPayMethod] = useState('cash');
   const [note, setNote] = useState('');
+  const [payError, setPayError] = useState(null);
+
+  // When re-paying a pending_payment order, skip cart
+  const existingOrderId = searchParams.get('orderId');
+  const isRepay = searchParams.get('pay') === '1' && existingOrderId;
 
   const { data } = useQuery({
     queryKey: ['cart'],
     queryFn: () => api.getCart().then(r => r.data),
+    enabled: !isRepay,
+  });
+
+  const { data: orderData } = useQuery({
+    queryKey: ['order', existingOrderId],
+    queryFn: () => api.getOrderById(existingOrderId).then(r => r.data),
+    enabled: !!isRepay,
   });
 
   const cart = data?.cart;
+  const repayOrder = orderData?.order;
+
+  // Get server-side preview totals instead of client-side math
+  const { data: preview } = useQuery({
+    queryKey: ['orderPreview'],
+    queryFn: () => api.getOrderPreview().then(r => r.data),
+    enabled: !isRepay && !!cart && cart.items?.length > 0,
+  });
 
   const placeOrder = useMutation({
     mutationFn: () => api.placeOrder({
@@ -46,45 +67,83 @@ export default function CheckoutPage() {
     onSuccess: async (res) => {
       const order = res.data.order;
       if (payMethod === 'razorpay') {
-        // Load Razorpay SDK on-demand (avoids preload warnings on other pages)
-        const loaded = await loadRazorpay();
-        if (!loaded) {
-          alert('Failed to load Razorpay SDK. Please check your internet connection.');
-          return;
-        }
-
-        // Initiate Razorpay
-        const payRes = await api.initiatePayment({ orderId: order._id });
-        const { razorpayOrder, key } = payRes.data;
-        const options = {
-          key: key || import.meta.env.VITE_RAZORPAY_KEY,
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
-          order_id: razorpayOrder.id,
-          handler: async (response) => {
-            await api.verifyPayment({ orderId: order._id, ...response });
-            qc.invalidateQueries({ queryKey: ['cart'] });
-            navigate(`/orders/${order._id}`);
-          },
-          theme: { color: '#FF5352' },
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+        await openRazorpay(order._id);
       } else {
         await api.cashPayment({ orderId: order._id });
         qc.invalidateQueries({ queryKey: ['cart'] });
         navigate(`/orders/${order._id}`);
       }
     },
+    onError: (err) => {
+      setPayError(err.response?.data?.message || 'Order failed');
+    },
   });
 
-  if (!cart || cart.items?.length === 0) {
+  // Open Razorpay checkout for an order. Handles dismiss, failure, verify errors.
+  const openRazorpay = async (orderId) => {
+    setPayError(null);
+    try {
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        setPayError('Failed to load Razorpay SDK. Check internet connection.');
+        return;
+      }
+
+      const payRes = await api.initiatePayment({ orderId });
+      const { razorpayOrder, key } = payRes.data;
+
+      const options = {
+        key: key || import.meta.env.VITE_RAZORPAY_KEY,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        order_id: razorpayOrder.id,
+        handler: async (response) => {
+          try {
+            await api.verifyPayment({ orderId, ...response });
+            qc.invalidateQueries({ queryKey: ['cart'] });
+            qc.invalidateQueries({ queryKey: ['orders'] });
+            navigate(`/orders/${orderId}`);
+          } catch (err) {
+            setPayError('Payment verification failed. Please try again.');
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setPayError('Payment cancelled. You can retry from Orders.');
+          },
+        },
+        theme: { color: '#FF5352' },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      setPayError(err.response?.data?.message || 'Payment initiation failed');
+    }
+  };
+
+  // Re-pay flow: open Razorpay for existing pending_payment order
+  useEffect(() => {
+    if (isRepay && repayOrder && repayOrder.status === 'pending_payment') {
+      openRazorpay(repayOrder._id);
+    }
+  }, [isRepay, repayOrder]);
+
+  if (!isRepay && (!cart || cart.items?.length === 0)) {
     navigate('/cart');
     return null;
   }
 
-  const subtotal = cart.totalPrice;
-  const tax = Math.round(subtotal * 0.05);
+  if (isRepay && !repayOrder) {
+    return <div className={styles.page}><p>Loading order...</p></div>;
+  }
+
+  // Server-side totals (never client-side math)
+  const subtotal = isRepay
+    ? repayOrder.subtotal
+    : preview?.subtotal ?? cart?.totalPrice ?? 0;
+  const tax = isRepay
+    ? repayOrder.tax
+    : preview?.tax ?? Math.round(subtotal * 0.05);
   const total = subtotal + tax;
 
   return (
@@ -155,8 +214,8 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {placeOrder.error && (
-          <p className={styles.error}>{placeOrder.error.response?.data?.message || 'Order failed'}</p>
+        {(placeOrder.error || payError) && (
+          <p className={styles.error}>{payError || placeOrder.error.response?.data?.message || 'Order failed'}</p>
         )}
 
         <button

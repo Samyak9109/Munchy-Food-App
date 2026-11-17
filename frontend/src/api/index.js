@@ -29,6 +29,7 @@ export const clearCart       = ()       => api.delete('/cart/clear');
 
 // ── ORDER ────────────────────────────────────────────────────
 export const placeOrder      = (data)   => api.post('/order/place', data);
+export const getOrderPreview = ()       => api.get('/order/preview');
 export const getOrders       = ()       => api.get('/order');
 export const getOrderById    = (id)     => api.get(`/order/${id}`);
 export const getPartnerOrderById = (id) => api.get(`/order/partner/${id}`);
