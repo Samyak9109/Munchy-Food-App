@@ -12,6 +12,7 @@ const paymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
       required: true,
+      unique: true, // One payment per order
     },
 
     amount: {
@@ -22,17 +23,29 @@ const paymentSchema = new mongoose.Schema(
 
     method: {
       type: String,
-      enum: ["card", "upi", "cash"],
+      enum: ["online", "cash"],
       required: true,
     },
 
     status: {
       type: String,
-      enum: ["pending", "success", "failed"],
+      enum: ["pending", "success", "failed", "refunded"],
       default: "pending",
     },
 
-    gatewayId: {
+    // Razorpay fields
+    gatewayOrderId: {
+      type: String,
+      default: null,
+    },
+
+    gatewayPaymentId: {
+      type: String,
+      default: null,
+    },
+
+    // For refunds
+    refundId: {
       type: String,
       default: null,
     },
@@ -41,6 +54,10 @@ const paymentSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+// Index for fast lookups
+paymentSchema.index({ order: 1 });
+paymentSchema.index({ user: 1, status: 1 });
 
 const paymentModel = mongoose.model("Payment", paymentSchema);
 

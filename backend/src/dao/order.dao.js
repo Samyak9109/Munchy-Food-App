@@ -41,8 +41,12 @@ export const getOrdersByStoreDAO = async (storeId, status = null) => {
     .sort({ createdAt: -1 });
 };
 
-export const updateOrderStatusDAO = async (id, status) =>
-  await orderModel.findByIdAndUpdate(id, { status }, { new: true });
+export const updateOrderStatusDAO = async (id, status, paymentId = null) =>
+  await orderModel.findByIdAndUpdate(
+    id,
+    { status, ...(paymentId && { payment: paymentId }) },
+    { new: true }
+  );
 
 export const updateOrderOtpDAO = async (id, otp) =>
   await orderModel.findByIdAndUpdate(id, { otp }, { new: true });

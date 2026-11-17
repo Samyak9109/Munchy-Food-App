@@ -3,11 +3,16 @@ import crypto from "crypto";
 import config from "../config/config.js";
 import {
   createPaymentDAO,
+  getPaymentByIdDAO,
   getPaymentByOrderDAO,
   getPaymentsByUserDAO,
   updatePaymentStatusDAO,
 } from "../dao/payment.dao.js";
-import { getOrderByIdDAO, updateOrderStatusDAO } from "../dao/order.dao.js";
+import {
+  getOrderByIdDAO,
+  updateOrderStatusDAO,
+} from "../dao/order.dao.js";
+import { clearCartDAO } from "../dao/cart.dao.js";
 import sendEmail from "../services/email.service.js";
 
 const razorpay = new Razorpay({
@@ -17,45 +22,76 @@ const razorpay = new Razorpay({
 
 // ── INITIATE PAYMENT ─────────────────────────────────────────
 export const initiatePayment = async (req, res) => {
-  const { orderId, method } = req.body;
+  const { orderId, method = "online" } = req.body;
 
   try {
+    // Validate order exists and belongs to user
     const order = await getOrderByIdDAO(orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    // verify order belongs to requesting user
     if (order.user._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // check if payment already exists for this order
-    const existingPayment = await getPaymentByOrderDAO(orderId);
-    if (existingPayment && existingPayment.status === "success") {
-      return res.status(400).json({ message: "Order already paid" });
+    // Order must be pending_payment for online payment
+    if (order.status !== "pending_payment") {
+      return res.status(400).json({
+        message: order.status === "placed"
+          ? "Order already confirmed. Contact support."
+          : "Invalid order status for payment",
+      });
     }
 
-    // create razorpay order — amount in paise
+    // Idempotent: reuse existing pending payment
+    let existingPayment = await getPaymentByOrderDAO(orderId);
+
+    if (existingPayment) {
+      if (existingPayment.status === "success") {
+        return res.status(400).json({ message: "Order already paid" });
+      }
+      if (existingPayment.status === "pending" && existingPayment.gatewayOrderId) {
+        // Reuse existing Razorpay order
+        const razorpayOrder = await razorpay.orders.fetch(existingPayment.gatewayOrderId);
+        return res.status(200).json({
+          message: "Payment reuse",
+          razorpayOrder: {
+            id: razorpayOrder.id,
+            amount: razorpayOrder.amount,
+            currency: razorpayOrder.currency,
+          },
+          payment: existingPayment,
+          key: config.RAZORPAY_KEY_ID,
+        });
+      }
+    }
+
+    // Create Razorpay order — amount in paise
+    const amountPaise = Math.round(order.totalPrice * 100);
     const razorpayOrder = await razorpay.orders.create({
-      amount: order.totalPrice * 100,
+      amount: amountPaise,
       currency: "INR",
       receipt: `order_${orderId}`,
     });
 
-    // create payment record in DB
+    // Create payment record in DB
     const payment = await createPaymentDAO({
       user: req.user._id,
       order: orderId,
       amount: order.totalPrice,
-      method: method || "card",
+      method: "online",
       status: "pending",
-      gatewayId: razorpayOrder.id,
+      gatewayOrderId: razorpayOrder.id,
     });
 
     return res.status(201).json({
       message: "Payment initiated",
-      razorpayOrder,
-      payment,
-      key: config.RAZORPAY_KEY_ID, // send to frontend for Razorpay checkout
+      razorpayOrder: {
+        id: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+      },
+      payment: { id: payment._id, status: payment.status },
+      key: config.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     return res
@@ -74,27 +110,56 @@ export const verifyPayment = async (req, res) => {
   } = req.body;
 
   try {
-    // verify razorpay signature
-    const hmac = crypto.createHmac("sha256", config.RAZORPAY_KEY_SECRET);
-    hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-    const generatedSignature = hmac.digest("hex");
+    // Find payment by gateway order ID (more reliable than orderId)
+    const payment = await getPaymentByOrderDAO(orderId);
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
 
-    if (generatedSignature !== razorpay_signature) {
+    // Verify payment belongs to requesting user
+    if (payment.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Idempotent: if already success, return success
+    if (payment.status === "success") {
+      return res.status(200).json({
+        message: "Payment already verified",
+        paymentStatus: "success",
+      });
+    }
+
+    // Verify Razorpay signature with timing-safe comparison
+    const expectedSignature = crypto
+      .createHmac("sha256", config.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    const signatureBuffer = Buffer.from(razorpay_signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+
+    if (
+      signatureBuffer.length !== expectedBuffer.length ||
+      !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
+    ) {
+      await updatePaymentStatusDAO(payment._id, "failed");
       return res.status(400).json({ message: "Invalid payment signature" });
     }
 
-    // find payment by gateway order id
-    const payment = await getPaymentByOrderDAO(orderId);
-    if (!payment) return res.status(404).json({ message: "Payment not found" });
+    // Update payment to success
+    await updatePaymentStatusDAO(payment._id, "success", {
+      paymentId: razorpay_payment_id,
+      signature: null, // Don't store signature
+    });
 
-    // update payment status to success
-    await updatePaymentStatusDAO(payment._id, "success");
-
-    // auto confirm order after successful payment
-    await updateOrderStatusDAO(orderId, "confirmed");
-
-    // send confirmation email
+    // Update order status and link payment
     const order = await getOrderByIdDAO(orderId);
+    await updateOrderStatusDAO(orderId, "placed", payment._id);
+
+    // Clear cart after successful payment
+    await clearCartDAO(req.user._id);
+
+    // Send confirmation email
     await sendEmail(
       order.user.email,
       "Payment Successful — Order Confirmed!",
@@ -105,7 +170,10 @@ export const verifyPayment = async (req, res) => {
        <p>Payment ID: ${razorpay_payment_id}</p>`,
     );
 
-    return res.status(200).json({ message: "Payment verified successfully" });
+    return res.status(200).json({
+      message: "Payment verified successfully",
+      paymentStatus: "success",
+    });
   } catch (error) {
     return res
       .status(500)
@@ -131,8 +199,8 @@ export const cashPayment = async (req, res) => {
       order: orderId,
       amount: order.totalPrice,
       method: "cash",
-      status: "pending", // becomes success when order is pickedup
-      gatewayId: null,
+      status: "success", // Cash payment success at order time
+      gatewayOrderId: null,
     });
 
     return res.status(201).json({

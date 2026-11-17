@@ -14,5 +14,12 @@ export const getPaymentsByUserDAO = async (userId) =>
     .populate("order", "totalPrice status createdAt")
     .sort({ createdAt: -1 });
 
-export const updatePaymentStatusDAO = async (id, status) =>
-  await paymentModel.findByIdAndUpdate(id, { status }, { new: true });
+export const updatePaymentStatusDAO = async (id, status, extraFields = {}) =>
+  await paymentModel.findByIdAndUpdate(
+    id,
+    { status, ...extraFields },
+    { new: true }
+  );
+
+export const getPaymentByGatewayOrderIdDAO = async (gatewayOrderId) =>
+  await paymentModel.findOne({ gatewayOrderId });
