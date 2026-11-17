@@ -1,6 +1,9 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
 import config from "./config/config.js";
 import passport from "./config/passport.js";
 
@@ -28,21 +31,33 @@ import {
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // ── CORE MIDDLEWARES ─────────────────────────────────────────
+app.use(helmet());
+app.use(compression());
+app.use(morgan("combined"));
+
+const allowedOrigins = config.CORS_ORIGINS.length > 0
+  ? config.CORS_ORIGINS
+  : [config.FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"];
+
 app.use(
   cors({
-    origin: [
-      config.FRONTEND_URL, 
-      "http://localhost:5173", 
-      "http://localhost:3000",
-    ],
-    credentials: true, 
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "100kb" }));
+app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(generalLimiter);
