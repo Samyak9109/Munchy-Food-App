@@ -17,7 +17,45 @@ import {
   sendOrderPickedUpEmail,
   sendNewOrderEmail,
 } from "../services/email.service.js";
+import {
+  computeOrderTotals,
+  validateStoreAndAvailability,
+} from "../services/pricing.service.js";
+import foodModel from "../models/food.model.js";
+import storeModel from "../models/store.model.js";
 import bcrypt from "bcrypt";
+
+// ── PREVIEW ORDER ────────────────────────────────────────────
+export const previewOrder = async (req, res) => {
+  try {
+    const cart = await getCartByUserDAO(req.user._id);
+
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    // Compute server-side totals
+    const pricing = await computeOrderTotals(cart.items, foodModel);
+
+    // Validate store is open
+    await validateStoreAndAvailability(
+      await foodModel.find({ _id: { $in: cart.items.map((i) => i.food) } }),
+      cart.store._id,
+      storeModel,
+    );
+
+    return res.status(200).json({
+      subtotal: pricing.subtotal,
+      tax: pricing.tax,
+      total: pricing.total,
+      itemCount: cart.items.length,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message || "Error previewing order",
+    });
+  }
+};
 
 // ── PLACE ORDER ──────────────────────────────────────────────
 export const placeOrder = async (req, res) => {
@@ -28,20 +66,31 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
+    // Compute server-side totals (tamper-proof)
+    const pricing = await computeOrderTotals(cart.items, foodModel);
+
+    // Validate store is open and all items from same store
+    const foods = await foodModel.find({
+      _id: { $in: cart.items.map((i) => i.food) },
+    });
+    const store = await validateStoreAndAvailability(
+      foods,
+      cart.store._id,
+      storeModel,
+    );
+
     // generate OTP for pickup verification
     const otp = generateOTP();
     const hashedOtp = await hashOTP(otp);
 
-    // create order from cart
+    // create order with server-computed pricing
     const order = await createOrderDAO({
       user: req.user._id,
-      store: cart.store._id,
-      items: cart.items.map((item) => ({
-        food: item.food._id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      totalPrice: cart.totalPrice,
+      store: store._id,
+      items: pricing.items,
+      subtotal: pricing.subtotal,
+      tax: pricing.tax,
+      totalPrice: pricing.total,
       otp: hashedOtp,
       pickupCode: otp,
       note: req.body.note || null,
@@ -57,10 +106,8 @@ export const placeOrder = async (req, res) => {
     const notifications = [
       sendOrderPlacedEmail(req.user.email, populatedOrder, otp),
     ];
-    if (cart.store?.partner?.email) {
-      notifications.push(
-        sendNewOrderEmail(cart.store.partner.email, populatedOrder),
-      );
+    if (store.partner?.email) {
+      notifications.push(sendNewOrderEmail(store.partner.email, populatedOrder));
     }
     Promise.allSettled(notifications).then((results) => {
       results
@@ -70,16 +117,14 @@ export const placeOrder = async (req, res) => {
         );
     });
 
-    return res
-      .status(201)
-      .json({
-        message: "Order placed successfully",
-        order: { ...populatedOrder.toObject(), pickupCode: otp },
-      });
+    return res.status(201).json({
+      message: "Order placed successfully",
+      order: { ...populatedOrder.toObject(), pickupCode: otp },
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error placing order", error: error.message });
+    return res.status(400).json({
+      message: error.message || "Error placing order",
+    });
   }
 };
 

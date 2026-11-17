@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-17T11:11:27.671Z",
+        "reason": "functional portfolio project - design polish deferred"
+      },
+      {
+        "rule": "overused-font",
+        "value": "montserrat",
+        "createdAt": "2026-11-17T11:11:31.812Z",
+        "reason": "functional portfolio project - design polish deferred"
+      }
+    ]
+  }
+}

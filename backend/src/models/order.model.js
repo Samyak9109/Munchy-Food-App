@@ -22,6 +22,11 @@ const orderSchema = new mongoose.Schema(
           required: true,
         },
 
+        name: {
+          type: String,
+          required: true,
+        },
+
         quantity: {
           type: Number,
           required: true,
@@ -36,6 +41,18 @@ const orderSchema = new mongoose.Schema(
       },
     ],
 
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    tax: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
     totalPrice: {
       type: Number,
       required: true,
@@ -44,7 +61,7 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["placed", "confirmed", "ready", "pickedup", "cancelled"],
+      enum: ["pending_payment", "placed", "confirmed", "ready", "pickedup", "cancelled"],
       default: "placed",
     },
 

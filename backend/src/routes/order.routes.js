@@ -5,6 +5,8 @@ import * as orderController from "../controllers/order.controller.js";
 const router = express.Router();
 
 // ── USER ROUTES ──────────────────────────────────────────────
+router.get("/preview", authMiddleware.authCustomer, orderController.previewOrder);
+
 router.post("/place", authMiddleware.authCustomer, orderController.placeOrder);
 
 router.get("/", authMiddleware.authCustomer, orderController.getOrders);
