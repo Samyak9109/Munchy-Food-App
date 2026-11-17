@@ -63,7 +63,7 @@ app.use(passport.initialize());
 app.use(generalLimiter);
 
 // ── ROUTES ───────────────────────────────────────────────────
-app.use("/api/auth", authLimiter, authRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/food", foodRouter);
 app.use("/api/store", storeRouter);
 app.use("/api/user", userRouter);

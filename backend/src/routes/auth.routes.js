@@ -1,6 +1,7 @@
 import express from "express";
 import passport from "../config/passport.js";
 import * as authController from "../controllers/auth.controller.js";
+import { authLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
   validateUserRegister,
   validatePartnerRegister,
@@ -15,26 +16,30 @@ const router = express.Router();
 // ── STANDARD AUTH ────────────────────────────────────────────
 router.post(
   "/user/register",
+  authLimiter,
   validateUserRegister,
   authController.registerUser,
 );
 router.post(
   "/partner/register",
+  authLimiter,
   validatePartnerRegister,
   authController.registerPartner,
 );
 router.post(
   "/user/verify-email",
+  authLimiter,
   validateVerifyEmail,
   authController.verifyEmail,
 );
 router.post(
   "/partner/verify-email",
+  authLimiter,
   validateVerifyEmail,
   authController.verifyEmail,
 );
-router.post("/user/login", validateLogin, authController.login);
-router.post("/partner/login", validateLogin, authController.login);
+router.post("/user/login", authLimiter, validateLogin, authController.login);
+router.post("/partner/login", authLimiter, validateLogin, authController.login);
 router.post("/logout", authController.logout);
 
 // ── GOOGLE OAuth ─────────────────────────────────────────────
@@ -65,21 +70,25 @@ router.get(
 // Password Reset
 router.post(
   "/user/forgot-password",
+  authLimiter,
   validateForgotPassword,
   authController.forgotPassword,
 );
 router.post(
   "/partner/forgot-password",
+  authLimiter,
   validateForgotPassword,
   authController.forgotPassword,
 );
 router.post(
   "/user/reset-password",
+  authLimiter,
   validateResetPassword,
   authController.resetPassword,
 );
 router.post(
   "/partner/reset-password",
+  authLimiter,
   validateResetPassword,
   authController.resetPassword,
 );
