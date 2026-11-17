@@ -148,7 +148,7 @@ export const verifyPayment = async (req, res) => {
 
     // Update payment to success
     await updatePaymentStatusDAO(payment._id, "success", {
-      paymentId: razorpay_payment_id,
+      gatewayPaymentId: razorpay_payment_id,
       signature: null, // Don't store signature
     });
 
@@ -159,8 +159,8 @@ export const verifyPayment = async (req, res) => {
     // Clear cart after successful payment
     await clearCartDAO(req.user._id);
 
-    // Send confirmation email
-    await sendEmail(
+    // Send confirmation email (best-effort: failure must not roll back payment)
+    sendEmail(
       order.user.email,
       "Payment Successful — Order Confirmed!",
       `<h2>Payment Successful!</h2>
@@ -168,6 +168,8 @@ export const verifyPayment = async (req, res) => {
        <p>Your order has been confirmed.</p>
        <p>Order ID: ${orderId}</p>
        <p>Payment ID: ${razorpay_payment_id}</p>`,
+    ).catch((error) =>
+      console.error("Payment confirmation email failed:", error),
     );
 
     return res.status(200).json({

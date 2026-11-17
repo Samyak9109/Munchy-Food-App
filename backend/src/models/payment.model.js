@@ -49,6 +49,16 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    // Set when a Razorpay refund fails; order is still cancelled.
+    // Absent on successful refunds. Persists across restarts so support
+    // can see which refunds need manual action (Mongoose strict mode
+    // would otherwise drop this unknown key).
+    refundStatus: {
+      type: String,
+      enum: ["pending", "failed", null],
+      default: null,
+    },
   },
   {
     timestamps: true,
