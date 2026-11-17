@@ -56,6 +56,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
+// ── WEBHOOK ROUTE (before express.json for raw body) ─────────
+import { handleRazorpayWebhook } from "./controllers/webhook.controller.js";
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }), handleRazorpayWebhook);
+
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use(cookieParser());
