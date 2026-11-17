@@ -45,12 +45,24 @@ const config = {
   EMAIL_PASS: requireEnv("EMAIL_PASS"),
   
   // ===== Payment =====
-  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
-  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+  RAZORPAY_KEY_ID: requireEnv("RAZORPAY_KEY_ID"),
+  RAZORPAY_KEY_SECRET: requireEnv("RAZORPAY_KEY_SECRET"),
+  RAZORPAY_WEBHOOK_SECRET: requireEnv("RAZORPAY_WEBHOOK_SECRET"),
 
-  OPENROUTE_API_KEY: process.env.OPENROUTE_API_KEY,
+  // ===== Routing / Geocoding =====
+  OPENROUTE_API_KEY: requireEnv("OPENROUTE_API_KEY"),
+
+  // ===== AI =====
   GEMINI_API_KEY: requireEnv("GEMINI_API_KEY"),
   GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+
+  // ===== Business Logic =====
+  TAX_RATE: Number(process.env.TAX_RATE) || 0.05,
+
+  // ===== CORS =====
+  CORS_ORIGINS: process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
+    : [],
 };
 
 export default config;
