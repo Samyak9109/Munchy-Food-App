@@ -1,8 +1,17 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './AuthPage.module.css';
 
 export default function AuthErrorPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const reason = searchParams.get('reason');
+
+  const getMessage = () => {
+    if (reason === 'inactive') {
+      return 'Your account has been deactivated. Please contact support.';
+    }
+    return 'Something went wrong during Google sign-in. Please try again.';
+  };
 
   return (
     <div className={styles.page}>
@@ -12,7 +21,7 @@ export default function AuthErrorPage() {
         <div className={styles.card}>
           <h2 className={styles.title}>Sign-in failed</h2>
           <p className={styles.subtitle}>
-            Something went wrong during Google sign-in. Please try again.
+            {getMessage()}
           </p>
           <button
             className={styles.submitBtn}

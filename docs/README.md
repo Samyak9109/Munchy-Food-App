@@ -1,18 +1,13 @@
-# Munchy Documentation
+# Munchy docs
 
-This directory documents the current source code and supported workflows.
+Read order for humans and AI agents:
 
-| Document | Purpose |
-| --- | --- |
-| [Getting started](getting-started.md) | Installation, local development, environment variables, and service setup |
-| [Features](features.md) | Customer, partner, authentication, ordering, and platform capabilities |
-| [Architecture](architecture.md) | Frontend/backend organization, request flow, authentication, media, and serverless behavior |
-| [Codebase reference](codebase-reference.md) | Directory-by-directory and module-by-module implementation guide |
-| [API reference](api-reference.md) | REST endpoints, access levels, and core request behavior |
-| [Data model](data-model.md) | MongoDB collections, relationships, indexes, and lifecycle states |
-| [Sample data](sample-data.md) | Seeded sample restaurants, dishes, credentials, and safe usage |
-| [Deployment](deployment.md) | Netlify and MongoDB Atlas production deployment |
+1. `CLAUDE.md`        agent rules, repo map, verify commands
+2. `PRD.md`           what to build, requirements, demo script
+3. `ARCHITECTURE.md`  current and target design, flows, deploy topology
+4. `FIXES.md`         phased task list with IDs and acceptance checks
+5. `DESIGN-SYSTEM.md` tokens, scales, components, UI-* tasks
+6. `PERFORMANCE.md`   baseline, targets, PERF-* tasks
 
-## Development Disclosure
-
-Claude and OpenAI Codex assisted with frontend implementation and bug resolution. Stitch AI produced the design concepts and design system in `Design/`. This documentation and the root README were created with AI assistance and checked against the application source.
+Copy this folder to `<repo>/docs/`. Copy `CLAUDE.md` to `<repo>/CLAUDE.md` as well.
+Run tasks in phase order. One task per commit.

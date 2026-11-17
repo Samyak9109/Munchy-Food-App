@@ -6,8 +6,8 @@ import styles from './AuthPage.module.css';
 
 /**
  * Landing page for Google OAuth success redirect.
- * Backend redirects to /auth/success?token=...&role=...
- * We read those params, fetch the account, call setAuth, then navigate.
+ * Backend redirects to /auth/success?role=... after setting refresh cookie.
+ * We call POST /auth/refresh to get the access token and account details.
  */
 export default function AuthSuccessPage() {
   const navigate = useNavigate();
@@ -15,39 +15,21 @@ export default function AuthSuccessPage() {
   const { setAuth } = useAuthStore();
 
   useEffect(() => {
-    const token = searchParams.get('token');
     const role = searchParams.get('role');
 
-    if (!token || !role) {
+    if (!role) {
       navigate('/auth/error');
       return;
     }
 
-    // Decode the JWT payload to get basic user info
-    // (The refresh endpoint returns the full account object when called.)
-    // We'll store the token first, then attempt a silent refresh to get account details.
-    localStorage.setItem('accessToken', token);
-
-    // Use the refresh endpoint to get account details
     authApi.refresh()
       .then((res) => {
-        const { account, accessToken: newToken } = res.data;
-        setAuth(account, newToken || token, role);
+        const { account, accessToken } = res.data;
+        setAuth(account, accessToken, role);
         navigate(role === 'partner' ? '/partner/dashboard' : '/', { replace: true });
       })
       .catch(() => {
-        // Fallback: build a minimal account from the JWT
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          setAuth(
-            { id: payload.userId, email: '', username: '', role },
-            token,
-            role
-          );
-          navigate(role === 'partner' ? '/partner/dashboard' : '/', { replace: true });
-        } catch {
-          navigate('/auth/error', { replace: true });
-        }
+        navigate('/auth/error', { replace: true });
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

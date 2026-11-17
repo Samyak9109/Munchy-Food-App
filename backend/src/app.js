@@ -60,6 +60,34 @@ app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use(cookieParser());
 app.use(passport.initialize());
+
+// ── HEALTH CHECK (before rate limiter) ────────────────────────
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Munchy API is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get("/api/health/db", async (req, res) => {
+  try {
+    const mongoose = await import("mongoose");
+    await mongoose.default.connection.db.admin().ping();
+    res.status(200).json({
+      status: "ok",
+      message: "Database connected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "error",
+      message: "Database unavailable",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 app.use(generalLimiter);
 
 // ── ROUTES ───────────────────────────────────────────────────
@@ -76,15 +104,6 @@ app.use("/api/favorite", favoriteRouter);
 app.use("/api/map", mapRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/chatbot", chatbotRouter);
-
-// ── HEALTH CHECK ─────────────────────────────────────────────
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    message: "Munchy API is running",
-    timestamp: new Date().toISOString(),
-  });
-});
 
 // ── ERROR HANDLING ───────────────────────────────────────────
 app.use(notFound);

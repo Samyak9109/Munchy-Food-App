@@ -321,14 +321,12 @@ async function googleAuthCallback(req, res) {
     const role = req.path.includes("partner") ? "partner" : "user";
 
     if (!account.isActive) {
-      return res.status(403).json({ message: "Account has been deactivated" });
+      return res.redirect(`${config.FRONTEND_URL}/auth/error?reason=inactive`);
     }
 
-    const accessToken = await issueTokens(account, role, req, res);
+    await issueTokens(account, role, req, res);
 
-    return res.redirect(
-      `${config.FRONTEND_URL}/auth/success?token=${accessToken}&role=${role}`,
-    );
+    return res.redirect(`${config.FRONTEND_URL}/auth/success?role=${role}`);
   } catch (error) {
     return res.redirect(`${config.FRONTEND_URL}/auth/error`);
   }
