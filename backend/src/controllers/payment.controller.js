@@ -121,6 +121,11 @@ export const verifyPayment = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
+    // Verify razorpay_order_id matches the payment's gateway order ID
+    if (razorpay_order_id !== payment.gatewayOrderId) {
+      return res.status(400).json({ message: "Order ID mismatch" });
+    }
+
     // Idempotent: if already success, return success
     if (payment.status === "success") {
       return res.status(200).json({

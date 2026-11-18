@@ -39,6 +39,7 @@ export const getOrdersByStoreDAO = async (storeId, status = null) => {
     .find(filter)
     .populate("user", "name email phone avatar")
     .populate("items.food", "name price image")
+    .populate("payment", "status method")
     .sort({ createdAt: -1 });
 };
 
