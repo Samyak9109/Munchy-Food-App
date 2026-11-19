@@ -1,47 +1,68 @@
 import { getNearbyStoresDAO } from "../dao/map.dao.js";
 import { getStoreByIdDAO } from "../dao/store.dao.js";
-import { getDirections } from "../services/map.service.js";
-import config from "../config/config.js";
+import {
+  getDirections,
+  geocodeSearch as geocodeSearchService,
+} from "../services/map.service.js";
 
 // ── GEOCODE SEARCH ───────────────────────────────────────────
 export const geocodeSearch = async (req, res) => {
   const { q } = req.query;
-  if (!q || q.trim().length < 2) {
-    return res.status(400).json({ message: "Query too short", results: [] });
-  }
-  try {
-    // Use OpenRouteService geocoding
-    const url = `https://api.openrouteservice.org/geocode/search?text=${encodeURIComponent(q.trim())}&size=5`;
-    const response = await fetch(url, {
-      headers: { Authorization: config.OPENROUTE_API_KEY },
+
+  // Input validation: 2–100 characters
+  if (!q || q.trim().length < 2 || q.trim().length > 100) {
+    return res.status(400).json({
+      message: "Query must be between 2 and 100 characters",
+      results: [],
     });
-    if (!response.ok) throw new Error("Geocoding failed");
-    const data = await response.json();
-    const results = (data.features || []).map((f) => ({
-      label: f.properties.label,
-      lat: f.geometry.coordinates[1],
-      lng: f.geometry.coordinates[0],
-    }));
+  }
+
+  try {
+    const results = await geocodeSearchService(q.trim());
     return res.status(200).json({ results });
   } catch (error) {
-    return res.status(500).json({ message: "Geocoding error", results: [] });
+    return res.status(500).json({ message: error.message, results: [] });
   }
 };
 
 // ── GET NEARBY STORES ────────────────────────────────────────
 export const getNearbyStores = async (req, res) => {
-  const { lat, lng, radius = 5 } = req.query;
+  const { lat, lng } = req.query;
+
+  // Validate lat/lng are real numbers
+  const parsedLat = parseFloat(lat);
+  const parsedLng = parseFloat(lng);
+
+  if (
+    lat === undefined ||
+    lng === undefined ||
+    isNaN(parsedLat) ||
+    isNaN(parsedLng)
+  ) {
+    return res
+      .status(400)
+      .json({ message: "lat and lng must be valid numbers" });
+  }
+
+  const radius = parseFloat(req.query.radius) || 5;
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(
+    30,
+    Math.max(1, parseInt(req.query.limit, 10) || 20),
+  );
 
   try {
-    if (!lat || !lng) {
-      return res.status(400).json({ message: "lat and lng are required" });
-    }
-
-    const stores = await getNearbyStoresDAO(lng, lat, parseFloat(radius));
+    const stores = await getNearbyStoresDAO(
+      parsedLng,
+      parsedLat,
+      radius,
+      page,
+      limit,
+    );
 
     return res.status(200).json({
-      message: `Found ${stores.length} stores nearby`,
       stores,
+      total: stores.length,
     });
   } catch (error) {
     return res
@@ -52,12 +73,14 @@ export const getNearbyStores = async (req, res) => {
 
 // ── GET DIRECTIONS TO STORE ──────────────────────────────────
 export const getDirectionsToStore = async (req, res) => {
-  const { userLat, userLng } = req.query;
+  const { userLat, userLng, profile = "driving-car" } = req.query;
   const { storeId } = req.params;
 
   try {
     if (!userLat || !userLng) {
-      return res.status(400).json({ message: "User coordinates are required" });
+      return res
+        .status(400)
+        .json({ message: "User coordinates are required" });
     }
 
     const store = await getStoreByIdDAO(storeId);
@@ -69,12 +92,23 @@ export const getDirectionsToStore = async (req, res) => {
 
     const [storeLng, storeLat] = store.location.coordinates;
 
-    const directions = await getDirections(
-      userLng,
-      userLat,
-      storeLng,
-      storeLat,
-    );
+    let directions = null;
+    try {
+      directions = await getDirections(
+        userLng,
+        userLat,
+        storeLng,
+        storeLat,
+        profile,
+      );
+    } catch {
+      // ORS failure — return gracefully so the page is still usable
+      return res.status(200).json({
+        store: { name: store.name, address: store.address },
+        directions: null,
+        message: "Routing unavailable",
+      });
+    }
 
     return res.status(200).json({
       store: { name: store.name, address: store.address },
