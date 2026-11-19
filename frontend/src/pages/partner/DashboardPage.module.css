@@ -2,6 +2,29 @@
 
 .content { padding: 16px; }
 
+.locationAlert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 83, 82, 0.12);
+  border: 1px solid var(--primary-red);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 13px;
+  text-decoration: none;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+.locationAlert svg {
+  color: var(--primary-red);
+  flex-shrink: 0;
+}
+.locationAlert strong {
+  color: var(--primary-red);
+  white-space: nowrap;
+}
+
 .welcome { margin-bottom: 20px; }
 .welcome h2 { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; }
 .welcome p { font-size: 14px; color: var(--text-dim); margin-top: 2px; }

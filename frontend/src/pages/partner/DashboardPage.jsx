@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Film, ClipboardList, TrendingUp, Store } from 'lucide-react';
+import { Film, ClipboardList, TrendingUp, Store, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import * as api from '../../api/index';
@@ -102,6 +102,15 @@ export default function DashboardPage() {
       <Header title="Munchy" />
 
       <div className={styles.content}>
+        {(!store?.location?.coordinates?.length ||
+          (store?.location?.coordinates[0] === 0 && store?.location?.coordinates[1] === 0) ||
+          store?.needsLocation) && (
+          <Link to="/partner/store" className={styles.locationAlert}>
+            <MapPin size={18} />
+            <span>Your kitchen has no location set. Customers cannot find you on the map. <strong>Set location →</strong></span>
+          </Link>
+        )}
+
         <div className={styles.welcome}>
           <h2>Partner Hub</h2>
           <p>Manage your high-energy kitchen</p>

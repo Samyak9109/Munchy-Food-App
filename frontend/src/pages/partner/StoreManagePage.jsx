@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Store } from 'lucide-react';
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Store, MapPin } from 'lucide-react';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import LocationPicker from '../../components/map/LocationPicker';
 import styles from './StoreManagePage.module.css';
 
 export default function StoreManagePage() {
@@ -33,6 +34,15 @@ export default function StoreManagePage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['store-menu'] }),
   });
 
+  const updateStoreMut = useMutation({
+    mutationFn: (data) => api.updateStore(storeId, data),
+    onSuccess: () => {
+      setEditingLocation(false);
+      setPendingLocation(null);
+      qc.invalidateQueries({ queryKey: ['my-store'] });
+    },
+  });
+
   const deleteFood = useMutation({
     mutationFn: (foodId) => api.deleteFood(foodId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['store-menu'] }),
@@ -50,6 +60,8 @@ export default function StoreManagePage() {
   const store = storeData?.store;
   // Backend getStoreMenu returns { store, menu } not { foods }
   const foods = menuData?.menu || [];
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [pendingLocation, setPendingLocation] = useState(null);
 
   // ── If partner has no store yet, show creation form ────────────────────
   if (!storeId && !storeLoading) {
@@ -68,7 +80,13 @@ export default function StoreManagePage() {
       <div className={styles.content}>
         {/* Store info */}
         {store && (
+          <>
           <div className={styles.storeCard}>
+            {!store.location?.coordinates?.length || (store.location.coordinates[0] === 0 && store.location.coordinates[1] === 0) || store.needsLocation ? (
+              <div className={styles.locationBanner}>
+                <MapPin size={16} /> Your kitchen has no valid location — customers cannot find it on the map.
+              </div>
+            ) : null}
             <div style={{ position: 'relative', width: 100, height: 100, flexShrink: 0, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {store.image ? (
                 <img src={store.image} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -88,7 +106,47 @@ export default function StoreManagePage() {
               {/* address is a plain String in the model */}
               <p className={styles.storeAddr}>{store.address}</p>
             </div>
+            <button
+              className={styles.locationBtn}
+              onClick={() => {
+                setEditingLocation(value => !value);
+                setPendingLocation(null);
+              }}
+            >
+              <MapPin size={16} /> {editingLocation ? 'Cancel' : 'Move location'}
+            </button>
           </div>
+
+          {editingLocation && (
+            <div className={styles.locationEditor}>
+              <LocationPicker
+                initialLat={store.location?.coordinates?.[1]}
+                initialLng={store.location?.coordinates?.[0]}
+                onPick={setPendingLocation}
+              />
+              <div className={styles.locationActions}>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => { setEditingLocation(false); setPendingLocation(null); }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className={styles.submitBtn}
+                  disabled={!pendingLocation}
+                  onClick={() => {
+                    updateStoreMut.mutate({
+                      latitude: pendingLocation.lat,
+                      longitude: pendingLocation.lng,
+                    });
+                  }}
+                >
+                  Save location
+                </button>
+              </div>
+            </div>
+          )}
+          </>
         )}
 
         {/* Menu management */}
@@ -159,20 +217,24 @@ function CreateKitchenForm() {
     cuisine: '',
     description: '',
   });
+  const [location, setLocation] = useState(null); // {lat, lng, label}
   const [error, setError] = useState('');
 
   const setF = (key, val) => setFormState(f => ({ ...f, [key]: val }));
 
   const createStore = useMutation({
     mutationFn: () => {
+      if (!location) {
+        throw new Error('Pin your kitchen on the map before creating it');
+      }
       const cuisines = form.cuisine.split(',').map(s => s.trim()).filter(Boolean);
       return api.createStore({
         name: form.name,
         address: form.address,
         cuisine: cuisines.length > 0 ? cuisines : ['General'], // Default cuisine if empty
         description: form.description,
-        // dummy coordinates required by store model
-        coordinates: { lat: 0, lng: 0 },
+        latitude: location.lat,
+        longitude: location.lng,
       });
     },
     onSuccess: (res) => {
@@ -206,11 +268,15 @@ function CreateKitchenForm() {
         <input className={styles.input} placeholder="Address *" value={form.address} onChange={e => setF('address', e.target.value)} />
         <input className={styles.input} placeholder="Cuisine types (comma-separated)" value={form.cuisine} onChange={e => setF('cuisine', e.target.value)} />
         <textarea className={styles.textarea} placeholder="Description" rows={3} value={form.description} onChange={e => setF('description', e.target.value)} />
+
+        <LocationPicker initialLat={location?.lat} initialLng={location?.lng} onPick={setLocation} />
+
         {error && <p className={styles.error}>{error}</p>}
+        {!location && <p className={styles.dim} style={{ fontSize: '0.85rem', marginBottom: 12 }}>Pin your kitchen on the map to set its location.</p>}
         <button
           className={styles.submitBtn}
           onClick={() => createStore.mutate()}
-          disabled={createStore.isPending || !form.name || !form.address}
+          disabled={createStore.isPending || !form.name || !form.address || !location}
         >
           {createStore.isPending ? 'Creating...' : 'Create Kitchen'}
         </button>

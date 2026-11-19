@@ -147,6 +147,7 @@ export const updateStore = async (req, res) => {
         type: "Point",
         coordinates: [lng, lat],
       };
+      updateData.needsLocation = false;
     }
 
     const updated = await updateStoreDAO(req.params.id, updateData);

@@ -55,6 +55,10 @@ const storeSchema = new mongoose.Schema(
       average: { type: Number, default: 0, min: 0, max: 5 },
       count: { type: Number, default: 0, min: 0 },
     },
+    needsLocation: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
