@@ -173,3 +173,90 @@
   transition: opacity 0.2s;
 }
 .addBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── Directions section ─────────────────────────────────────────────────── */
+
+.directions {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--outline-dim);
+}
+
+.dirRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.dirStat {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dirLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dirProfiles {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.profileBtn {
+  padding: 6px 12px;
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.profileBtnActive {
+  border-color: var(--primary-red);
+  color: var(--primary-red);
+  background: rgba(255,83,82,0.08);
+}
+
+.routeMapWrap {
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--outline-dim);
+  margin-top: 8px;
+}
+
+.noLocBanner {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.viewRouteBtn {
+  padding: 6px 14px;
+  border: 1px solid var(--outline-dim);
+  border-radius: 9999px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.2s;
+}
+.viewRouteBtn:hover { border-color: var(--primary-red); color: var(--primary-red); }
+
+/* Skeleton loader for directions */
+.skeleton {
+  background: var(--surface-high);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

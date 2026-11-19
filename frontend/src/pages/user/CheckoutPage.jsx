@@ -103,7 +103,7 @@ export default function CheckoutPage() {
             qc.invalidateQueries({ queryKey: ['cart'] });
             qc.invalidateQueries({ queryKey: ['orders'] });
             navigate(`/orders/${orderId}`);
-          } catch (err) {
+          } catch {
             setPayError('Payment verification failed. Please try again.');
           }
         },

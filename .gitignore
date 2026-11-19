@@ -61,6 +61,8 @@ cypress/videos/
 .parcel-cache/
 .vite/
 **/.vite/
+.vitest/
+**/.vitest/
 .turbo/
 .eslintcache
 *.tsbuildinfo

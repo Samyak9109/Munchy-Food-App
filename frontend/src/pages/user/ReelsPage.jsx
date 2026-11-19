@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Heart, MessageCircle, ShoppingCart, MapPin, Send, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import styles from './ReelsPage.module.css';
