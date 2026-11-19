@@ -67,6 +67,9 @@ const foodSchema = new mongoose.Schema(
   { timestamps: true }, // adds createdAt and updatedAt
 );
 
+foodSchema.index({ store: 1, isAvailable: 1 });
+foodSchema.index({ category: 1, isAvailable: 1 });
+
 const foodModel = mongoose.model("Food", foodSchema);
 
 export default foodModel;

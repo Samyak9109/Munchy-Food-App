@@ -21,9 +21,22 @@
   height: calc(100dvh - 64px - 48px); /* minus bottom nav + header */
   scroll-snap-align: start;
   overflow: hidden;
+  contain: layout paint;
+}
+
+.activeReel {
+  will-change: transform;
 }
 
 .media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.posterImage {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -40,6 +53,7 @@
     rgba(0,0,0,0.2) 40%,
     transparent 70%
   );
+  pointer-events: none;
 }
 
 .actions {
@@ -50,6 +64,7 @@
   flex-direction: column;
   gap: 20px;
   align-items: center;
+  z-index: 10;
 }
 
 .actionBtn {
@@ -57,9 +72,8 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border);
+  background: rgba(22, 22, 22, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   width: 48px;
   height: 48px;
@@ -72,7 +86,7 @@
   justify-content: center;
 }
 
-.actionBtn:hover { background: rgba(255,255,255,0.15); }
+.actionBtn:hover { background: rgba(255,255,255,0.2); }
 .actionBtn.liked { color: var(--primary-red); }
 
 .info {
@@ -80,6 +94,7 @@
   bottom: 24px;
   left: 16px;
   right: 72px;
+  z-index: 10;
 }
 
 .pickup {
@@ -98,25 +113,23 @@
 
 .storeName {
   font-size: 13px;
+  font-weight: 600;
   color: var(--text-dim);
   margin-bottom: 2px;
 }
 
 .foodName {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 700;
   color: #fff;
-  line-height: 1.1;
   margin-bottom: 4px;
 }
 
 .price {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--yellow);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .caption {
@@ -181,85 +194,137 @@
   border-bottom: 1px solid var(--outline-dim);
 }
 
-.commentsHeader h3 { font-size: 16px; }
+.commentsHeader h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
 .commentsHeader button {
-  display: flex;
   background: none;
-  border: 0;
-  color: var(--text);
+  border: none;
+  color: var(--text-dim);
   cursor: pointer;
 }
 
 .commentsList {
-  min-height: 140px;
+  flex: 1;
   overflow-y: auto;
-  padding: 12px 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.commentDim {
+  color: var(--text-dim);
+  font-size: 14px;
+  text-align: center;
+  padding: 24px 0;
 }
 
 .commentRow {
   display: flex;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .commentAvatar {
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-highest);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 50%;
-  background: var(--surface-high);
-  color: var(--text-dim);
-  font-size: 13px;
-  font-weight: 700;
+  flex-shrink: 0;
 }
-.commentAvatar img { width: 100%; height: 100%; object-fit: cover; }
-.commentName { font-size: 12px; font-weight: 700; color: var(--text-dim); }
-.commentText { margin-top: 2px; font-size: 14px; color: var(--text); }
-.commentDim { padding: 24px 0; text-align: center; color: var(--text-dim); }
-.commentError { padding: 0 16px 8px; color: var(--error); font-size: 12px; }
+
+.commentAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.commentName {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+
+.commentText {
+  font-size: 14px;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.commentError {
+  color: var(--error);
+  font-size: 12px;
+  padding: 0 16px;
+}
 
 .commentForm {
   display: flex;
   gap: 8px;
-  padding: 12px 16px 16px;
+  padding: 12px 16px;
   border-top: 1px solid var(--outline-dim);
+  background: var(--surface);
 }
+
 .commentForm input {
   flex: 1;
-  min-width: 0;
-  padding: 11px 14px;
+  background: var(--surface-high);
   border: 1px solid var(--outline-dim);
   border-radius: 9999px;
-  background: var(--surface-high);
+  padding: 8px 16px;
   color: var(--text);
+  font-size: 14px;
   outline: none;
 }
-.commentForm input:focus { border-color: var(--primary); }
+
+.commentForm input:focus {
+  border-color: var(--primary);
+}
+
 .commentForm button {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--primary);
   color: var(--on-primary);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: opacity 0.2s;
 }
-.commentForm button:disabled { opacity: 0.45; }
+
+.commentForm button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .loading, .empty {
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  height: calc(100dvh - 64px - 48px);
   gap: 8px;
   color: var(--text-dim);
-  font-size: 16px;
+}
+
+.loadingSentinel {
+  padding: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
 }

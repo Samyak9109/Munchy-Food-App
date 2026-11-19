@@ -21,10 +21,11 @@ export default function OrderDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['order', id],
     queryFn: () => api.getOrderById(id).then(r => r.data),
-    refetchInterval: (data) => {
-      const status = data?.order?.status;
+    refetchInterval: (query) => {
+      const status = query.state.data?.order?.status;
       return ['pending_payment', 'placed', 'confirmed', 'ready'].includes(status) ? 8000 : false;
     },
+    refetchIntervalInBackground: false,
   });
 
   const order = data?.order;

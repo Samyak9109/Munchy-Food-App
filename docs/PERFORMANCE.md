@@ -51,12 +51,12 @@ Use Chrome DevTools Performance panel for reels scroll. Check "Layers" for blur 
 
 ## 4. Frontend tasks
 
-- [ ] **PERF-01 (P1) Route-level code splitting.**
+- [x] **PERF-01 (P1) Route-level code splitting.**
   Files: `frontend/src/App.jsx`, `vite.config.js`.
   Change: `React.lazy` + `Suspense` per page. Group by area: auth, user, partner. Suspense fallback is a skeleton from `components/ui`. `manualChunks`: `react` (react, react-dom, react-router), `query` (TanStack), `vendor` rest. Map libraries (`leaflet`, `react-leaflet`) only inside lazy map components.
   Accept: login route loads ≤ 90 kB gzip JS. Partner code not fetched for users. Build output shows multiple chunks.
 
-- [ ] **PERF-02 (P1) Reels feed rewrite.**
+- [x] **PERF-02 (P1) Reels feed rewrite.**
   Files: `frontend/src/pages/user/ReelsPage.jsx`, `ReelsPage.module.css`, `api`, backend reel controller and DAO (see PERF-10).
   Change:
   - `useInfiniteQuery` with page size 5 and cursor by `createdAt`/`_id`.
@@ -70,44 +70,44 @@ Use Chrome DevTools Performance panel for reels scroll. Check "Layers" for blur 
   - Comments load only when opened (already so, keep).
   Accept: at most 3 videos mounted at any time. Swipe feels immediate. Memory flat across 50 reels.
 
-- [ ] **PERF-03 (P2) Image pipeline.**
+- [x] **PERF-03 (P2) Image pipeline.**
   Files: new `frontend/src/lib/img.js`, all components with `<img>` or background images.
   Change: `img(url, {w, h, q = 75})` appends ImageKit `tr=w-<w>,h-<h>,q-<q>,f-auto` (preserve existing query). Use `srcSet` for 1x and 2x on cards. Every `<img>` gets `width`, `height`, `loading="lazy"`, `decoding="async"`, and meaningful `alt`. First visible image on a page uses `loading="eager"` and `fetchpriority="high"`. Replace CSS `background: url()` for food images in `ReelCard` with `<img>`.
   Accept: no layout shift on image load. Image bytes per card drop sharply (record before/after).
 
-- [ ] **PERF-04 (P2) Query tuning.**
+- [x] **PERF-04 (P2) Query tuning.**
   Files: `frontend/src/App.jsx` and hooks.
   Change: `staleTime` per data type: stores and food 2 min, reels 1 min, cart and orders 0 with refetch on focus. `gcTime` 10 min. `retry: 1`, no retry on 4xx. `refetchOnWindowFocus: false` for stores, food, reels. Prefetch store data on card hover or touchstart. Use `placeholderData: keepPreviousData` for filtered lists. Optimistic updates for cart quantity and favourite.
   Accept: no duplicate requests on navigation (Network panel). Back navigation feels instant.
 
-- [ ] **PERF-05 (P2) Render hygiene.**
+- [x] **PERF-05 (P2) Render hygiene.**
   Change: memoize list items (`StoreCard`, `FoodCard`, `ReelCard`, `OrderRow`). Debounce search input 300 ms. Avoid creating objects or functions inline in lists. Move `QueryClient` out of render (already module-level, keep). Check with React Profiler: no full-page re-render on a single like or cart change.
   Accept: Profiler shows isolated re-renders.
 
-- [ ] **PERF-06 (P2) Fonts.**
+- [x] **PERF-06 (P2) Fonts.**
   Change: self-host Montserrat and Inter variable fonts via `@fontsource-variable/*` or WOFF2 files. `font-display: swap`. Preload the two used files. Remove unused weights. Drop the Google Fonts links.
   Accept: no third-party font request. No layout jump on load.
 
-- [ ] **PERF-07 (P2) Perceived speed.**
+- [x] **PERF-07 (P2) Perceived speed.**
   Change: skeletons instead of spinners (from `UI-05`). Preconnect to ImageKit origin in `index.html`. Keep-alive ping plus a "waking server" toast if the first API call exceeds 4 s (Render cold start).
   Accept: no blank screen longer than 100 ms on any route.
 
-- [ ] **PERF-08 (P3) Polling hygiene.**
+- [x] **PERF-08 (P3) Polling hygiene.**
   Change: partner polling only while document is visible (`refetchIntervalInBackground: false`). Back off to 30 s when no pending orders. Keep OrderDetail conditional polling, stop at terminal statuses. Later option: Server-Sent Events.
   Accept: no requests while tab hidden.
 
-- [ ] **PERF-09 (P3) Cloudflare caching.**
+- [x] **PERF-09 (P3) Cloudflare caching.**
   Change: `public/_headers` with `Cache-Control: public, max-age=31536000, immutable` for `/assets/*`, `no-cache` for `/index.html`. Proxy function never caches `/api/*` except explicit public GETs (see PERF-12).
   Accept: repeat visit loads assets from cache.
 
 ## 5. Backend tasks
 
-- [ ] **PERF-10 (P1) Paginate and slim queries.**
+- [x] **PERF-10 (P1) Paginate and slim queries.**
   Files: `dao/reel.dao.js`, `dao/food.dao.js`, `dao/store.dao.js`, controllers.
   Change: `limit` (default 10, max 30) and cursor or `page`. Add `.select()` for list views. Add `.lean()` to every read-only DAO. Return `{items, nextCursor}`. `getAllReelsDAO` returns `likedByMe` (lookup in Like for current user) and `likes`. Replace deep `populate` with minimal fields.
   Accept: reels list returns ≤ 5 items per call. Payload size drops. Response time recorded before/after.
 
-- [ ] **PERF-11 (P1) Indexes.** Verify field names against models, then add:
+- [x] **PERF-11 (P1) Indexes.** Verify field names against models, then add:
   - Food: `{store:1, isAvailable:1}`, `{category:1, isAvailable:1}`
   - Order: `{user:1, createdAt:-1}`, `{store:1, status:1, createdAt:-1}`
   - Payment: `{order:1}` unique, `{gatewayOrderId:1}`
@@ -118,28 +118,28 @@ Use Chrome DevTools Performance panel for reels scroll. Check "Layers" for blur 
   Run `explain()` on top queries. Confirm index use.
   Accept: no collection scans on list and detail queries.
 
-- [ ] **PERF-12 (P2) HTTP caching.**
+- [x] **PERF-12 (P2) HTTP caching.**
   Change: ETag stays on (Express default). `Cache-Control: public, max-age=30, stale-while-revalidate=120` on public GETs that do not depend on the user (store list without distance, food by store). `private, no-store` on cart, orders, auth.
   Accept: repeat call returns 304 or cached.
 
-- [ ] **PERF-13 (P2) Compression and payload.**
+- [x] **PERF-13 (P2) Compression and payload.**
   Change: `compression` middleware (SEC-02). JSON limit 100 kB. Strip unused fields from responses.
   Accept: gzip on JSON responses.
 
-- [ ] **PERF-14 (P2) Store listing query.**
+- [x] **PERF-14 (P2) Store listing query.**
   `[verify]` `getAllStoresDAO` appeared to filter in application code during audit. Confirm exact filters. Move filters to the Mongo query. With `lat/lng` use `$geoNear` (MAP-05). Text search uses a text index or anchored regex on name and cuisine.
   Accept: filtering happens in DB. Query uses index.
 
-- [ ] **PERF-15 (P2) Upload path.**
+- [x] **PERF-15 (P2) Upload path.**
   Files: `middlewares/multer.middleware.js`, `services/storage.service.js`.
   Change: cap video 25 MB, images 5 MB. Remove temp-file write. Pass the buffer to the ImageKit SDK directly (use the SDK's file helper for buffers `[verify helper name in @imagekit/nodejs 7.x]`). Free Render instance has 512 MB, so avoid concurrent large buffers: allow one video upload at a time per user.
   Accept: upload works without touching disk. Memory stays stable under repeated uploads.
 
-- [ ] **PERF-16 (P3) Connection and cold start.**
+- [x] **PERF-16 (P3) Connection and cold start.**
   Change: reuse one Mongoose connection. `maxPoolSize` 10. `serverSelectionTimeoutMS` 5000. Lazy-load the LangChain and AI modules on first chatbot call (heavy import) to cut boot time. Keep boot log of startup duration.
   Accept: cold start time recorded. Chatbot first call still works.
 
-- [ ] **PERF-17 (P3) Slow query log.** Log any request over 500 ms with route and duration.
+- [x] **PERF-17 (P3) Slow query log.** Log any request over 500 ms with route and duration.
   Accept: log line appears for a deliberately slow route.
 
 ## 6. Order of execution

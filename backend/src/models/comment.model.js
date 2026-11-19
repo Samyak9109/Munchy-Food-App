@@ -25,6 +25,8 @@ const commentSchema = new mongoose.Schema(
   },
 );
 
+commentSchema.index({ reel: 1, createdAt: -1 });
+
 const commentModel = mongoose.model("Comment", commentSchema);
 
 export default commentModel;

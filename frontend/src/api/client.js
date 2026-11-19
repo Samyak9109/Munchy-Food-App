@@ -1,15 +1,34 @@
 import axios from 'axios';
+import { useToastStore } from '../store/toastStore';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   withCredentials: true,
 });
 
+let slowTimer = null;
+let activeRequests = 0;
+
 api.interceptors.request.use((config) => {
+  activeRequests += 1;
+  if (activeRequests === 1 && !slowTimer) {
+    slowTimer = setTimeout(() => {
+      useToastStore.getState().info('Waking up server, please wait a moment...', 5000);
+    }, 4000);
+  }
+
   const token = localStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+const clearSlowTimer = () => {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0 && slowTimer) {
+    clearTimeout(slowTimer);
+    slowTimer = null;
+  }
+};
 
 // Track if we're already attempting a refresh to prevent infinite loops
 let isRefreshing = false;
@@ -24,8 +43,12 @@ function processQueue(error, token = null) {
 }
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    clearSlowTimer();
+    return res;
+  },
   async (err) => {
+    clearSlowTimer();
     const originalRequest = err.config;
 
     // Only intercept 401 errors that haven't been retried yet
@@ -53,24 +76,21 @@ api.interceptors.response.use(
         const newToken = res.data.accessToken;
         localStorage.setItem('accessToken', newToken);
 
-        // Also update authStore if available (avoids circular import by using localStorage only)
         processQueue(null, newToken);
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
+      } catch (refreshErr) {
+        processQueue(refreshErr, null);
         localStorage.removeItem('accessToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+        return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
       }
     }
 
     return Promise.reject(err);
-  }
+  },
 );
 
 export default api;
-

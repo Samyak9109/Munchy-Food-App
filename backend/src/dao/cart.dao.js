@@ -16,7 +16,8 @@ export const getCartByUserDAO = async (userId) =>
       path: "store",
       select: "name image partner",
       populate: { path: "partner", select: "name email" },
-    });
+    })
+    .lean();
 
 export const addItemToCartDAO = async (userId, item) =>
   await cartModel.findOneAndUpdate(

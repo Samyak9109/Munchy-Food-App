@@ -44,9 +44,10 @@ export default function DashboardPage() {
 
   const { data: ordersData } = useQuery({
     queryKey: ['store-orders', storeId],
-    queryFn: () => api.getStoreOrders(storeId).then(r => r.data),
+    queryFn: () => api.getStoreOrders(storeId).then((r) => r.data),
     enabled: !!storeId,
     refetchInterval: 15000,
+    refetchIntervalInBackground: false,
   });
 
   const { data: stats } = useQuery({

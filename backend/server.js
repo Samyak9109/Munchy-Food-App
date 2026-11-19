@@ -5,10 +5,12 @@ import config from "./src/config/config.js";
 const PORT = config.PORT || 3000;
 
 async function startServer() {
+  const bootStart = Date.now();
   try {
     await connectDB();
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      const bootDuration = Date.now() - bootStart;
+      console.log(`Server started in ${bootDuration}ms and is running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error.message);

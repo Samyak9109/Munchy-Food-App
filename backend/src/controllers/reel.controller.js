@@ -49,8 +49,10 @@ export const createReel = async (req, res) => {
 // ── GET ALL REELS ────────────────────────────────────────────
 export const getAllReels = async (req, res) => {
   try {
-    const reels = await getAllReelsDAO();
-    return res.status(200).json({ reels });
+    const { cursor, limit } = req.query;
+    const userId = req.user?._id;
+    const result = await getAllReelsDAO({ cursor, limit, userId });
+    return res.status(200).json(result);
   } catch (error) {
     return res
       .status(500)

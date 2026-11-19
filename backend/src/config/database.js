@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import config from "./config.js";
 
@@ -10,10 +9,15 @@ async function connectDB() {
   }
 
   if (!connectionPromise) {
-    connectionPromise = mongoose.connect(config.MONGO_URI).catch((error) => {
-      connectionPromise = undefined;
-      throw error;
-    });
+    connectionPromise = mongoose
+      .connect(config.MONGO_URI, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+      })
+      .catch((error) => {
+        connectionPromise = undefined;
+        throw error;
+      });
   }
 
   await connectionPromise;

@@ -19,9 +19,14 @@ export default function PartnerOrdersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['store-orders', storeId],
-    queryFn: () => api.getStoreOrders(storeId).then(r => r.data),
+    queryFn: () => api.getStoreOrders(storeId).then((r) => r.data),
     enabled: !!storeId,
-    refetchInterval: 10000,
+    refetchInterval: (query) => {
+      const orders = query.state.data?.orders || [];
+      const hasActive = orders.some((o) => ['placed', 'confirmed'].includes(o.status));
+      return hasActive ? 10000 : 30000;
+    },
+    refetchIntervalInBackground: false,
   });
 
   const updateStatus = useMutation({

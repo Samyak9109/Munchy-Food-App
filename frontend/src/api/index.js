@@ -51,7 +51,7 @@ export const getStoreReviews = (storeId)=> api.get(`/review/store/${storeId}`);
 export const deleteReview    = (id)     => api.delete(`/review/${id}`);
 
 // ── REELS ────────────────────────────────────────────────────
-export const getReels        = ()       => api.get('/reel');
+export const getReels        = (params) => api.get('/reel', { params });
 export const getReelsByStore = (storeId)=> api.get(`/reel/store/${storeId}`);
 export const createReel      = (data)   => api.post('/reel', data);           // FormData
 export const deleteReel      = (id)     => api.delete(`/reel/${id}`);

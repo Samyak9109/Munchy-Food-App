@@ -65,8 +65,8 @@ const paymentSchema = new mongoose.Schema(
   },
 );
 
-// Index for fast lookups
-paymentSchema.index({ order: 1 });
+// Indexes for fast lookups
+paymentSchema.index({ gatewayOrderId: 1 });
 paymentSchema.index({ user: 1, status: 1 });
 
 const paymentModel = mongoose.model("Payment", paymentSchema);

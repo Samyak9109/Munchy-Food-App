@@ -1,8 +1,5 @@
 import config from "../config/config.js";
-import ImageKit from "@imagekit/nodejs";
-import fs from "fs";
-import os from "os";
-import path from "path";
+import ImageKit, { toFile } from "@imagekit/nodejs";
 
 const client = new ImageKit({
   privateKey: config.IMAGEKIT_PRIVATE_KEY,
@@ -11,15 +8,14 @@ const client = new ImageKit({
 });
 
 export const uploadToImagekit = async (file) => {
-  // write buffer to a temp file → stream it → delete it
-  const tempPath = path.join(os.tmpdir(), `${Date.now()}_${file.originalname}`);
-
   try {
-    fs.writeFileSync(tempPath, file.buffer); // buffer → temp file
+    const fileName = `${Date.now()}_${file.originalname || "upload"}`;
+    // Convert memory buffer directly to a File object, eliminating disk I/O
+    const uploadFile = await toFile(file.buffer, fileName);
 
     const result = await client.files.upload({
-      file: fs.createReadStream(tempPath), // stream temp file to imagekit
-      fileName: `${Date.now()}_${file.originalname}`,
+      file: uploadFile,
+      fileName,
       folder: "/food-delivery",
       useUniqueFileName: true,
     });
@@ -27,9 +23,6 @@ export const uploadToImagekit = async (file) => {
     return result.url;
   } catch (error) {
     throw new Error(`ImageKit upload failed: ${error.message}`);
-  } finally {
-    // always delete temp file whether upload succeeded or failed
-    if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
   }
 };
 

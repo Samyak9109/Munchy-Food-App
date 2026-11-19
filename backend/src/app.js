@@ -28,6 +28,7 @@ import {
   authLimiter,
   generalLimiter,
 } from "./middlewares/rateLimit.middleware.js";
+import { cachePrivate } from "./middlewares/cache.middleware.js";
 
 const app = express();
 
@@ -95,19 +96,33 @@ app.get("/api/health/db", async (req, res) => {
 
 app.use(generalLimiter);
 
+// ── SLOW REQUEST LOGGER (PERF-17) ────────────────────────────
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (duration > 500) {
+      console.warn(
+        `[SLOW ROUTE] ${req.method} ${req.originalUrl} took ${duration}ms (status: ${res.statusCode})`,
+      );
+    }
+  });
+  next();
+});
+
 // ── ROUTES ───────────────────────────────────────────────────
-app.use("/api/auth", authRouter);
+app.use("/api/auth", cachePrivate, authRouter);
 app.use("/api/food", foodRouter);
 app.use("/api/store", storeRouter);
-app.use("/api/user", userRouter);
-app.use("/api/cart", cartRouter);
-app.use("/api/order", orderRouter);
-app.use("/api/payment", paymentRouter);
+app.use("/api/user", cachePrivate, userRouter);
+app.use("/api/cart", cachePrivate, cartRouter);
+app.use("/api/order", cachePrivate, orderRouter);
+app.use("/api/payment", cachePrivate, paymentRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/reel", reelRouter);
-app.use("/api/favorite", favoriteRouter);
+app.use("/api/favorite", cachePrivate, favoriteRouter);
 app.use("/api/map", mapRouter);
-app.use("/api/dashboard", dashboardRouter);
+app.use("/api/dashboard", cachePrivate, dashboardRouter);
 // app.use("/api/chatbot", chatbotRouter); // Removed AI feature
 
 // ── ERROR HANDLING ───────────────────────────────────────────

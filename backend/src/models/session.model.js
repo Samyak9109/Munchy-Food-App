@@ -34,6 +34,9 @@ const sessionSchema = new mongoose.Schema(
   },
 );
 
+sessionSchema.index({ refreshToken: 1, revoked: 1 });
+sessionSchema.index({ userId: 1, revoked: 1 });
+
 const sessionModel = mongoose.model("Session", sessionSchema);
 
 export default sessionModel;

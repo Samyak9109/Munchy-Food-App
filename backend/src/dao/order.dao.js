@@ -5,7 +5,8 @@ const populateOrder = (query) =>
     .populate("user", "name email phone avatar")
     .populate("store", "name address partner")
     .populate("items.food", "name price image")
-    .populate("payment", "status method");
+    .populate("payment", "status method")
+    .lean();
 
 export const createOrderDAO = async (orderData) =>
   await orderModel.create(orderData);
@@ -17,7 +18,12 @@ export const getUserOrderByIdDAO = async (id) =>
   await populateOrder(orderModel.findById(id).select("+pickupCode"));
 
 export const getOrderWithOtpByIdDAO = async (id) =>
-  await populateOrder(orderModel.findById(id).select("+otp").populate("payment", "status method gatewayPaymentId"));
+  await populateOrder(
+    orderModel
+      .findById(id)
+      .select("+otp")
+      .populate("payment", "status method gatewayPaymentId"),
+  );
 
 export const getOrdersByUserDAO = async (userId) =>
   await orderModel
@@ -25,14 +31,15 @@ export const getOrdersByUserDAO = async (userId) =>
     .populate("store", "name address")
     .populate("items.food", "name price image")
     .populate("payment", "status method")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
 export const getOrdersByStoreDAO = async (storeId, status = null) => {
   // Exclude pending_payment orders from partner view
   const filter = {
     store: storeId,
     status: { $ne: "pending_payment" },
-    ...(status && { status })
+    ...(status && { status }),
   };
 
   return await orderModel
@@ -40,14 +47,15 @@ export const getOrdersByStoreDAO = async (storeId, status = null) => {
     .populate("user", "name email phone avatar")
     .populate("items.food", "name price image")
     .populate("payment", "status method")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 };
 
 export const updateOrderStatusDAO = async (id, status, paymentId = null) =>
   await orderModel.findByIdAndUpdate(
     id,
     { status, ...(paymentId && { payment: paymentId }) },
-    { new: true }
+    { new: true },
   );
 
 export const updateOrderOtpDAO = async (id, otp) =>
@@ -71,6 +79,6 @@ export const expireOldPendingPaymentsDAO = async () => {
       status: "pending_payment",
       createdAt: { $lt: thirtyMinutesAgo },
     },
-    { status: "cancelled" }
+    { status: "cancelled" },
   );
 };

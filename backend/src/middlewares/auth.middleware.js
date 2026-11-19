@@ -86,4 +86,23 @@ async function authAny(req, res, next) {
   }
 }
 
-export default { authPartner, authCustomer, authAny };
+async function authOptional(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+  try {
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role === "user") {
+      req.user = { _id: decoded.userId, role: "user" };
+    } else if (decoded.role === "partner") {
+      req.partner = { _id: decoded.userId, role: "partner" };
+    }
+  } catch (_) {
+    // ignore expired/invalid token for optional auth
+  }
+  next();
+}
+
+export default { authPartner, authCustomer, authAny, authOptional };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Star, MapPin, Heart, Plus } from 'lucide-react';
@@ -7,6 +7,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import * as api from '../../api/index';
 import { useLocationStore } from '../../store/locationStore';
+import { img, srcSet } from '../../lib/img';
 import styles from './StorePage.module.css';
 
 // Fix Leaflet icon in Vite
@@ -67,7 +68,7 @@ export default function StorePage() {
   return (
     <div className={styles.page}>
       {/* Hero */}
-      <div className={styles.hero} style={{ backgroundImage: store?.image ? `url(${store.image})` : undefined }}>
+      <div className={styles.hero} style={{ backgroundImage: store?.image ? `url(${img(store.image, { w: 800, q: 75 })})` : undefined }}>
         <div className={styles.heroOverlay} />
         <button className={styles.backBtn} onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
         <button className={styles.favBtn} onClick={() => favMut.mutate()}>
@@ -240,7 +241,7 @@ function DirectionsSection({ store, storeId }) {
 
 // ── Food item card ────────────────────────────────────────────────────────────
 
-function FoodItem({ food, onAdd }) {
+const FoodItem = memo(function FoodItem({ food, onAdd }) {
   return (
     <div className={styles.foodCard}>
       <div className={styles.foodInfo}>
@@ -255,7 +256,18 @@ function FoodItem({ food, onAdd }) {
         <p className={styles.foodPrice}>₹{food.price}</p>
       </div>
       <div className={styles.foodRight}>
-        {food.image && <img src={food.image} alt={food.name} className={styles.foodImg} />}
+        {food.image && (
+          <img
+            src={img(food.image, { w: 180, h: 180, q: 75 })}
+            srcSet={srcSet(food.image, { w: 180, h: 180, q: 75 })}
+            alt={food.name}
+            className={styles.foodImg}
+            loading="lazy"
+            decoding="async"
+            width={90}
+            height={90}
+          />
+        )}
         <button
           className={styles.addBtn}
           onClick={onAdd}
@@ -266,4 +278,4 @@ function FoodItem({ food, onAdd }) {
       </div>
     </div>
   );
-}
+});

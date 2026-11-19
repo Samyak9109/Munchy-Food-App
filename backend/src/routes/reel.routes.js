@@ -1,13 +1,14 @@
 import express from "express";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import * as reelController from "../controllers/reel.controller.js";
-import upload from "../middlewares/multer.middleware.js";
+import upload, { validateUploadLimits, throttleVideoUpload } from "../middlewares/multer.middleware.js";
+import { cachePublic } from "../middlewares/cache.middleware.js";
 
 const router = express.Router();
 
 // ── PUBLIC ROUTES ────────────────────────────────────────────
-router.get("/", reelController.getAllReels);
-router.get("/store/:storeId", reelController.getReelsByStore);
+router.get("/", authMiddleware.authOptional, cachePublic(15, 60), reelController.getAllReels);
+router.get("/store/:storeId", cachePublic(30, 120), reelController.getReelsByStore);
 router.get("/:id/comments", reelController.getComments);
 
 // ── USER ROUTES ──────────────────────────────────────────────
@@ -39,7 +40,9 @@ router.patch(
 router.post(
   "/",
   authMiddleware.authPartner,
+  throttleVideoUpload,
   upload.single("video"),
+  validateUploadLimits,
   reelController.createReel,
 );
 

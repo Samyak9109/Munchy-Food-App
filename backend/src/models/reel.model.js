@@ -53,6 +53,9 @@ const reelSchema = new mongoose.Schema(
   },
 );
 
+reelSchema.index({ createdAt: -1 });
+reelSchema.index({ store: 1, createdAt: -1 });
+
 const reelModel = mongoose.model("Reel", reelSchema);
 
 export default reelModel;

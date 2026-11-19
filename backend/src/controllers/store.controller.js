@@ -71,7 +71,8 @@ export const getStoreById = async (req, res) => {
 // ── GET ALL STORES ───────────────────────────────────────────
 export const getAllStores = async (req, res) => {
   try {
-    const stores = await getAllStoresDAO();
+    const { q, cuisine, openOnly, page, limit } = req.query;
+    const stores = await getAllStoresDAO({ q, cuisine, openOnly, page, limit });
     return res.status(200).json({ stores });
   } catch (error) {
     return res

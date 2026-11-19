@@ -3,6 +3,7 @@ import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { img } from '../../lib/img';
 import styles from './CartPage.module.css';
 
 export default function CartPage() {
@@ -58,7 +59,15 @@ export default function CartPage() {
           {cart.items.map(item => (
             <div key={item.food._id} className={styles.item}>
               {item.food.image && (
-                <img src={item.food.image} alt={item.food.name} className={styles.itemImg} />
+                <img
+                  src={img(item.food.image, { w: 100, h: 100, q: 75 })}
+                  alt={item.food.name}
+                  className={styles.itemImg}
+                  loading="lazy"
+                  decoding="async"
+                  width={50}
+                  height={50}
+                />
               )}
               <div className={styles.itemInfo}>
                 <p className={styles.itemName}>{item.food.name}</p>

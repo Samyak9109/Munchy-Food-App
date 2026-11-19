@@ -1,39 +1,55 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import UserLayout from './layouts/UserLayout';
 import PartnerLayout from './layouts/PartnerLayout';
-
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import VerifyOTPPage from './pages/auth/VerifyOTPPage';
-import AuthSuccessPage from './pages/auth/AuthSuccessPage';
-import AuthErrorPage from './pages/auth/AuthErrorPage';
-
-import ReelsPage from './pages/user/ReelsPage';
-import KitchensPage from './pages/user/KitchensPage';
-// import ChatbotPage from './pages/user/ChatbotPage'; // Removed AI feature
-import CartPage from './pages/user/CartPage';
-import OrdersPage from './pages/user/OrdersPage';
-import StorePage from './pages/user/StorePage';
-import CheckoutPage from './pages/user/CheckoutPage';
-import OrderDetailPage from './pages/user/OrderDetailPage';
-import ProfilePage from './pages/user/ProfilePage';
-import ForgotPasswordPage from './pages/user/ForgotPasswordPage';
-
-import DashboardPage from './pages/partner/DashboardPage';
-import PartnerOrdersPage from './pages/partner/PartnerOrdersPage';
-import PartnerReelsPage from './pages/partner/PartnerReelsPage';
-import AnalyticsPage from './pages/partner/AnalyticsPage';
-import StoreManagePage from './pages/partner/StoreManagePage';
-import OTPVerifyPage from './pages/partner/OTPVerifyPage';
-import PartnerProfilePage from './pages/partner/PartnerProfilePage';
-
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ToastContainer from './components/common/ToastContainer';
+import PageSkeleton from './components/common/PageSkeleton';
 
+// ── LAZY-LOADED AUTH PAGES ────────────────────────────────────
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const VerifyOTPPage = lazy(() => import('./pages/auth/VerifyOTPPage'));
+const AuthSuccessPage = lazy(() => import('./pages/auth/AuthSuccessPage'));
+const AuthErrorPage = lazy(() => import('./pages/auth/AuthErrorPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/user/ForgotPasswordPage'));
+
+// ── LAZY-LOADED USER PAGES ────────────────────────────────────
+const ReelsPage = lazy(() => import('./pages/user/ReelsPage'));
+const KitchensPage = lazy(() => import('./pages/user/KitchensPage'));
+const CartPage = lazy(() => import('./pages/user/CartPage'));
+const OrdersPage = lazy(() => import('./pages/user/OrdersPage'));
+const OrderDetailPage = lazy(() => import('./pages/user/OrderDetailPage'));
+const StorePage = lazy(() => import('./pages/user/StorePage'));
+const CheckoutPage = lazy(() => import('./pages/user/CheckoutPage'));
+const ProfilePage = lazy(() => import('./pages/user/ProfilePage'));
+
+// ── LAZY-LOADED PARTNER PAGES ─────────────────────────────────
+const DashboardPage = lazy(() => import('./pages/partner/DashboardPage'));
+const PartnerOrdersPage = lazy(() => import('./pages/partner/PartnerOrdersPage'));
+const PartnerReelsPage = lazy(() => import('./pages/partner/PartnerReelsPage'));
+const AnalyticsPage = lazy(() => import('./pages/partner/AnalyticsPage'));
+const StoreManagePage = lazy(() => import('./pages/partner/StoreManagePage'));
+const OTPVerifyPage = lazy(() => import('./pages/partner/OTPVerifyPage'));
+const PartnerProfilePage = lazy(() => import('./pages/partner/PartnerProfilePage'));
+
+// ── QUERY CLIENT WITH PERFORMANCE TUNING (PERF-04) ────────────
 const qc = new QueryClient({
-  defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Do not retry on 4xx client errors
+        const status = error?.response?.status || error?.status;
+        if (status >= 400 && status < 500) return false;
+        return failureCount < 1;
+      },
+      staleTime: 60 * 1000, // 1 min default
+      gcTime: 10 * 60 * 1000, // 10 min cache garbage collection
+      refetchOnWindowFocus: false, // Prevent background refetch storms
+    },
+  },
 });
 
 export default function App() {
@@ -41,50 +57,56 @@ export default function App() {
     <QueryClientProvider client={qc}>
       <BrowserRouter>
         <ToastContainer />
-        <Routes>
-          {/* AUTH */}
-          <Route path="/login"            element={<LoginPage />} />
-          <Route path="/register"         element={<RegisterPage />} />
-          <Route path="/verify-otp"       element={<VerifyOTPPage />} />
-          <Route path="/auth/success"     element={<AuthSuccessPage />} />
-          <Route path="/auth/error"       element={<AuthErrorPage />} />
-          <Route path="/forgot-password"  element={<ForgotPasswordPage />} />
+        <Suspense fallback={<PageSkeleton />}>
+          <Routes>
+            {/* AUTH */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-otp" element={<VerifyOTPPage />} />
+            <Route path="/auth/success" element={<AuthSuccessPage />} />
+            <Route path="/auth/error" element={<AuthErrorPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          {/* USER APP */}
-          <Route element={
-            <ProtectedRoute requiredRole="user">
-              <UserLayout />
-            </ProtectedRoute>
-          }>
-            <Route path="/"           element={<ReelsPage />} />
-            <Route path="/kitchens"   element={<KitchensPage />} />
-            {/* <Route path="/chatbot"    element={<ChatbotPage />} /> */}
-            <Route path="/cart"       element={<CartPage />} />
-            <Route path="/orders"     element={<OrdersPage />} />
-            <Route path="/orders/:id" element={<OrderDetailPage />} />
-            <Route path="/store/:id"  element={<StorePage />} />
-            <Route path="/checkout"   element={<CheckoutPage />} />
-            <Route path="/profile"    element={<ProfilePage />} />
-          </Route>
+            {/* USER APP */}
+            <Route
+              element={
+                <ProtectedRoute requiredRole="user">
+                  <UserLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/" element={<ReelsPage />} />
+              <Route path="/kitchens" element={<KitchensPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/orders/:id" element={<OrderDetailPage />} />
+              <Route path="/store/:id" element={<StorePage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
 
-          {/* PARTNER APP */}
-          <Route path="/partner" element={
-            <ProtectedRoute requiredRole="partner">
-              <PartnerLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Navigate to="/partner/dashboard" replace />} />
-            <Route path="dashboard"       element={<DashboardPage />} />
-            <Route path="orders"          element={<PartnerOrdersPage />} />
-            <Route path="orders/:orderId" element={<OTPVerifyPage />} />
-            <Route path="reels"           element={<PartnerReelsPage />} />
-            <Route path="analytics"       element={<AnalyticsPage />} />
-            <Route path="store"           element={<StoreManagePage />} />
-            <Route path="profile"         element={<PartnerProfilePage />} />
-          </Route>
+            {/* PARTNER APP */}
+            <Route
+              path="/partner"
+              element={
+                <ProtectedRoute requiredRole="partner">
+                  <PartnerLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/partner/dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="orders" element={<PartnerOrdersPage />} />
+              <Route path="orders/:orderId" element={<OTPVerifyPage />} />
+              <Route path="reels" element={<PartnerReelsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="store" element={<StoreManagePage />} />
+              <Route path="profile" element={<PartnerProfilePage />} />
+            </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </QueryClientProvider>
   );

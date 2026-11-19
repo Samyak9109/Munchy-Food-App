@@ -1,10 +1,11 @@
-import { useState, useRef, Suspense, lazy } from 'react';
+import { useState, useRef, Suspense, lazy, memo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Search, Star, MapPin, SlidersHorizontal, Heart } from 'lucide-react';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import { useLocationStore } from '../../store/locationStore';
+import { img, srcSet } from '../../lib/img';
 import styles from './KitchensPage.module.css';
 
 // Lazy-load KitchensMap so leaflet stays out of the initial bundle
@@ -192,7 +193,7 @@ export default function KitchensPage() {
   );
 }
 
-function StoreCard({ store, isFavorite, onToggleFavorite, selected, cardRef, onSelect }) {
+const StoreCard = memo(function StoreCard({ store, isFavorite, onToggleFavorite, selected, cardRef, onSelect }) {
   const navigate = useNavigate();
 
   return (
@@ -208,7 +209,17 @@ function StoreCard({ store, isFavorite, onToggleFavorite, selected, cardRef, onS
     >
       <div className={styles.thumb}>
         {store.image
-          ? <img src={store.image} alt={store.name} />
+          ? (
+            <img
+              src={img(store.image, { w: 160, h: 160, q: 75 })}
+              srcSet={srcSet(store.image, { w: 160, h: 160, q: 75 })}
+              alt={store.name}
+              loading="lazy"
+              decoding="async"
+              width={80}
+              height={80}
+            />
+          )
           : <div className={styles.thumbPlaceholder}>🍽️</div>
         }
         <div className={styles.playBadge}>▶</div>
@@ -260,4 +271,4 @@ function StoreCard({ store, isFavorite, onToggleFavorite, selected, cardRef, onS
       </div>
     </article>
   );
-}
+});
