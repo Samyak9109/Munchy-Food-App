@@ -150,33 +150,33 @@ Audit facts: `[verified]` no map library in frontend dependencies. `[verified]` 
 
 Facts: `[verified]` email uses Gmail SMTP via nodemailer. Render free blocks outbound SMTP ports 25, 465, 587 (Render changelog). OTP, reset, and order mail will fail there.
 
-- [ ] **EML-01 (P1) Gmail API over HTTPS.**
+- [x] **EML-01 (P1) Gmail API over HTTPS.**
   Files: `backend/src/services/email.service.js`, `config.js`, `.env.example`.
   Change: exchange refresh token for access token (`oauth2.googleapis.com/token`), then `POST gmail.googleapis.com/gmail/v1/users/me/messages/send` with base64url MIME. Cache access token until expiry. Keep `sendEmail` signature. Timeout 10 s, one retry. In `NODE_ENV=development` without credentials log the email. Remove `nodemailer`. Refresh token must carry `gmail.send` scope. Regenerate via OAuth Playground if needed.
   Accept: OTP email arrives from deployed Render service.
 
-- [ ] **DEP-01 (P1) Render service.**
+- [x] **DEP-01 (P1) Render service.**
   Files: `backend/render.yaml`, `backend/package.json`.
   Change: `engines.node` set. `start` script runs `node server.js`. Health check path `/api/health`. Region Singapore. Env vars per `ARCHITECTURE.md` matrix. Express 5 note: wildcard routes need names (`/*splat`).
   Accept: Render deploy green. `/api/health` returns 200.
 
-- [ ] **DEP-02 (P1) Cloudflare Pages + proxy.**
+- [x] **DEP-02 (P1) Cloudflare Pages + proxy.**
   Files: `frontend/functions/api/[[path]].js`, `frontend/public/_redirects`, `frontend/.env.example`.
   Change: build command `npm run build`, output `dist`, root `frontend`. `VITE_API_URL=/api`. `_redirects`: `/* /index.html 200`. Function forwards method, path, query, body (stream), headers (drop hop-by-hop and `host`), passes `Set-Cookie` back untouched, no caching, adds `X-Forwarded-Host` and `X-Forwarded-Proto`. Target = env `RENDER_API_ORIGIN`. Webhook path forwards raw body unchanged.
   Accept: login through the Pages URL sets the refresh cookie on the Pages domain. No CORS errors.
 
-- [ ] **DEP-03 (P1) Production cookie and OAuth config.**
+- [x] **DEP-03 (P1) Production cookie and OAuth config.**
   Change: refresh cookie `httpOnly`, `secure`, `sameSite: 'strict'`, `path: '/api/auth'`. Google redirect URIs set to `https://<pages-domain>/api/auth/user/google/callback` and partner equivalent. `FRONTEND_URL` = Pages URL. Publish Google consent screen or add test users.
   Accept: Google login works on production for both roles.
 
-- [ ] **DEP-04 (P2) Atlas.** M0 cluster, AWS Mumbai. Database user with least privilege. Network access `0.0.0.0/0` (Render free has no fixed egress IP). Strong password. Connection string in Render env only.
+- [x] **DEP-04 (P2) Atlas.** M0 cluster, AWS Mumbai. Database user with least privilege. Network access `0.0.0.0/0` (Render free has no fixed egress IP). Strong password. Connection string in Render env only.
   Accept: Render connects. Local `.env` uses a separate database.
 
-- [ ] **DEP-05 (P3) Keep-alive.** UptimeRobot (or cron-job.org) GET `https://<pages-domain>/api/health` every 5 minutes. Document cold start behavior in README.
+- [x] **DEP-05 (P3) Keep-alive.** UptimeRobot (or cron-job.org) GET `https://<pages-domain>/api/health` every 5 minutes. Document cold start behavior in README.
 
-- [ ] **DEP-06 (P3) Remove legacy.** Delete `backend/netlify/`, `netlify.toml`, `serverless-http` dependency. Confirm `app.js` exports app and `server.js` listens.
+- [x] **DEP-06 (P3) Remove legacy.** Delete `backend/netlify/`, `netlify.toml`, `serverless-http` dependency. Confirm `app.js` exports app and `server.js` listens.
 
-- [ ] **DEP-07 (P3) CI.** `.github/workflows/ci.yml`: frontend `npm ci && npm run lint && npm run build`; backend `npm ci && npm test`. Add badge to README.
+- [x] **DEP-07 (P3) CI.** `.github/workflows/ci.yml`: frontend `npm ci && npm run lint && npm run build`; backend `npm ci && npm test`. Add badge to README.
 
 ---
 

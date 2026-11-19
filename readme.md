@@ -1,5 +1,7 @@
 # Munchy
 
+[![CI](https://github.com/Samyak9109/Munchy-Food-App/actions/workflows/ci.yml/badge.svg)](https://github.com/Samyak9109/Munchy-Food-App/actions/workflows/ci.yml)
+
 Munchy is a full-stack food discovery and self-pickup platform. Customers discover dishes through short-form video reels, find nearby kitchens, receive AI-assisted recommendations, place orders, pay online or at pickup, and collect food using a secure OTP. Food partners manage their kitchen, menu, reels, orders, and sales analytics from a separate dashboard.
 
 ## [Live Demo](https://munchyfoodpickup.netlify.app/)

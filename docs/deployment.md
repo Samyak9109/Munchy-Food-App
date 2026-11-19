@@ -1,110 +1,146 @@
-# Netlify Deployment
+# Munchy — Production Deployment Guide
 
-The repository is configured to deploy the React frontend and Express backend in one Netlify site:
+Munchy uses a free-tier, portfolio-grade architecture:
+- **Frontend & API Proxy:** Cloudflare Pages (Free, global CDN + Edge Functions reverse proxy)
+- **Backend Web Service:** Render (Free tier, Singapore region, Express 5 + Node 22)
+- **Database:** MongoDB Atlas (M0 Shared cluster, AWS Mumbai)
+- **Media:** ImageKit (Free CDN + transformations)
+- **Payments:** Razorpay (Test mode)
+- **Geocoding & Directions:** OpenRouteService
+- **Email:** Gmail REST API v1 over HTTPS (Render free blocks SMTP ports 25, 465, 587)
+- **Keep-Alive:** UptimeRobot (pings `/api/health` every 5 min to prevent Render cold sleep)
 
-- `frontend/dist` is the published static site.
-- `backend/netlify/functions/api.js` is the serverless API.
-- `/api/*` is rewritten to the function.
-- All remaining paths are rewritten to `index.html` for React Router.
+---
 
-## 1. Prepare Production Services
+## Architecture
 
-Create production credentials for:
+```
+                  ┌──────────────────────────────────────────────┐
+                  │          Cloudflare Pages (Edge)             │
+                  │                                              │
+Browser ─────────►│  Static Assets: /assets/* ──► Global CDN    │
+                  │                                              │
+                  │  API Calls:     /api/* ────► Pages Function │
+                  └──────────────────────┬───────────────────────┘
+                                         │ (Reverse Proxy)
+                                         ▼
+                  ┌──────────────────────────────────────────────┐
+                  │            Render (Web Service)              │
+                  │         munchy-api.onrender.com              │
+                  │                                              │
+                  │  Express 5 API                               │
+                  │  /api/health (UptimeRobot ping)              │
+                  │  /api/payment/webhook (Raw body)             │
+                  └──────────────┬──────────────────┬────────────┘
+                                 │                  │
+                                 ▼                  ▼
+                         MongoDB Atlas M0       Gmail API v1
+                           (AWS Mumbai)           (HTTPS)
+```
 
-- MongoDB Atlas
-- ImageKit
-- Google OAuth
-- Gmail app password
-- Gemini
-- Razorpay, when online payments are enabled
-- OpenRouteService, when directions are enabled
+---
 
-MongoDB Atlas network access must permit Netlify function connections. A tightly restricted private network is preferable where the selected plans support it; otherwise configure Atlas network access according to its current security guidance and use strong credentials.
+## 1. MongoDB Atlas Setup (DEP-04)
 
-## 2. Import the Repository
+1. Create a free **M0 cluster** in **AWS / ap-south-1 (Mumbai)** for lowest latency to India.
+2. In **Database Access**: Create a database user with readWrite permissions on the `munchy` database.
+3. In **Network Access**: Add `0.0.0.0/0` (Allow access from anywhere). Render free instances have dynamic outbound IP addresses, so open access with strong authentication is required.
+4. Copy the connection string:
+   ```text
+   mongodb+srv://<username>:<password>@cluster0.xxxx.mongodb.net/munchy?retryWrites=true&w=majority
+   ```
 
-In Netlify, select **Add new site > Import an existing project** and connect the repository. `netlify.toml` supplies:
+---
 
+## 2. Render Backend Deployment (DEP-01)
+
+1. Log in to [Render](https://render.com) and click **New > Web Service**.
+2. Connect your GitHub repository.
+3. Settings:
+   - **Name:** `munchy-api`
+   - **Root Directory:** `backend`
+   - **Region:** `Singapore (Southeast Asia)`
+   - **Runtime:** `Node`
+   - **Build Command:** `npm ci`
+   - **Start Command:** `node server.js`
+   - **Plan:** `Free`
+   - **Health Check Path:** `/api/health`
+4. Set Environment Variables in Render:
+   | Variable | Value / Description |
+   |---|---|
+   | `NODE_ENV` | `production` |
+   | `PORT` | `10000` |
+   | `FRONTEND_URL` | `https://<your-project>.pages.dev` |
+   | `MONGO_URI` | Atlas connection string |
+   | `JWT_SECRET` | 32+ random characters |
+   | `IMAGEKIT_PRIVATE_KEY` | From ImageKit developer dashboard |
+   | `IMAGEKIT_PUBLIC_KEY` | From ImageKit developer dashboard |
+   | `IMAGEKIT_URL_ENDPOINT` | `https://ik.imagekit.io/<id>` |
+   | `CLIENT_ID` | Google OAuth Web Client ID |
+   | `CLIENT_SECRET` | Google OAuth Web Client Secret |
+   | `REFRESH_TOKEN` | Google refresh token with `gmail.send` scope |
+   | `EMAIL_USER` | `your-email@gmail.com` |
+   | `GOOGLE_CALLBACK_URL_USER` | `https://<your-project>.pages.dev/api/auth/user/google/callback` |
+   | `GOOGLE_CALLBACK_URL_PARTNER` | `https://<your-project>.pages.dev/api/auth/partner/google/callback` |
+   | `RAZORPAY_KEY_ID` | `rzp_test_...` |
+   | `RAZORPAY_KEY_SECRET` | Razorpay test secret |
+   | `RAZORPAY_WEBHOOK_SECRET` | Secret configured in Razorpay Webhooks |
+   | `OPENROUTE_API_KEY` | OpenRouteService token |
+   | `TAX_RATE` | `0.05` |
+   | `CORS_ORIGINS` | `https://<your-project>.pages.dev` |
+
+5. Deploy. Verify that `https://munchy-api.onrender.com/api/health` returns:
+   ```json
+   { "status": "ok", "message": "Munchy API is running" }
+   ```
+
+---
+
+## 3. Cloudflare Pages Deployment (DEP-02 & DEP-03)
+
+1. Log in to [Cloudflare](https://dash.cloudflare.com) and go to **Workers & Pages > Create application > Pages > Connect to Git**.
+2. Select your repository.
+3. Build configuration:
+   - **Framework preset:** `Vite`
+   - **Build command:** `npm run build`
+   - **Build output directory:** `dist`
+   - **Root directory:** `frontend`
+4. Set Environment Variables in Cloudflare Pages:
+   - `RENDER_API_ORIGIN`: `https://munchy-api.onrender.com` (your Render URL without trailing slash)
+   - `VITE_API_URL`: `/api`
+   - `VITE_RAZORPAY_KEY`: `rzp_test_...`
+5. Deploy.
+6. The built-in proxy function at `frontend/functions/api/[[path]].js` transparently forwards `/api/*` to Render, avoiding CORS and ensuring cookies are set directly on `<project>.pages.dev`.
+
+---
+
+## 4. Google OAuth Redirect URIs (DEP-03)
+
+In Google Cloud Console > APIs & Services > Credentials > Your OAuth 2.0 Client ID:
+Add Authorized redirect URIs:
 ```text
-Build command: npm ci --prefix backend && npm ci --prefix frontend && npm run build --prefix frontend
-Publish directory: frontend/dist
-Functions directory: backend/netlify/functions
-Node version: 22
+https://<your-project>.pages.dev/api/auth/user/google/callback
+https://<your-project>.pages.dev/api/auth/partner/google/callback
 ```
 
-## 3. Configure Environment Variables
+---
 
-Add all backend variables in **Site configuration > Environment variables**. Production-critical examples:
+## 5. Keep-Alive Ping (DEP-05)
 
-```env
-NODE_ENV=production
-FRONTEND_URL=https://your-site.netlify.app
-MONGO_URI=mongodb+srv://...
-JWT_SECRET=use-a-long-random-secret
-GOOGLE_CALLBACK_URL_USER=https://your-site.netlify.app/api/auth/user/google/callback
-GOOGLE_CALLBACK_URL_PARTNER=https://your-site.netlify.app/api/auth/partner/google/callback
-```
+Render free instances spin down after 15 minutes of inactivity. To keep the service warm and responsive:
+1. Create a free account at [UptimeRobot](https://uptimerobot.com).
+2. Add a new **HTTP(s)** monitor:
+   - **Friendly Name:** Munchy API Ping
+   - **URL:** `https://<your-project>.pages.dev/api/health` (or directly `https://munchy-api.onrender.com/api/health`)
+   - **Monitoring Interval:** Every 5 minutes
+3. Cold starts take ~40–50 seconds on Render free tier. With UptimeRobot pinging every 5 minutes, instances remain warm.
 
-Also add ImageKit, Gmail, Google, Gemini, Razorpay, and OpenRouteService values from `backend/.env.example`.
+---
 
-`VITE_API_URL=/api` is already defined in `netlify.toml`. Netlify build variables prefixed with `VITE_` are embedded in browser JavaScript and must never contain secrets.
+## 6. Seed Sample Data in Production
 
-## 4. Configure Google OAuth
-
-In the Google Cloud console, add these authorized redirect URIs:
-
-```text
-https://your-site.netlify.app/api/auth/user/google/callback
-https://your-site.netlify.app/api/auth/partner/google/callback
-```
-
-When using a custom domain, replace the Netlify subdomain in `FRONTEND_URL`, callback variables, and Google OAuth settings.
-
-## 5. Deploy and Verify
-
-After deployment, verify:
-
-1. `https://your-site.netlify.app/api/health` returns status `ok`.
-2. Direct navigation to `/login`, `/orders`, and `/partner/dashboard` loads the React app.
-3. Customer and partner email registration deliver OTP messages.
-4. Google OAuth returns to `/auth/success`.
-5. Image and video uploads reach ImageKit.
-6. Cart, cash checkout, order status, and pickup verification work.
-7. Razorpay test-mode payment completes and verifies.
-8. AI recommendations and map directions work with production keys.
-
-## Local Production Build
-
+To seed demo restaurants and menus in your Atlas database:
 ```bash
-npm run install:all
-npm run build
+# In backend directory with your production MONGO_URI in .env:
+ALLOW_PRODUCTION_SEED=true npm run seed:sample
 ```
-
-To emulate redirects and functions locally, install the Netlify CLI and run `netlify dev` after configuring local environment variables.
-
-## Operational Notes
-
-- Serverless cold starts can add latency to the first API request.
-- Mongoose connections are cached and reused within warm function instances.
-- Netlify function request-size and execution-time limits apply to uploads and AI/map calls.
-- The current in-memory Express rate limiter is instance-local in serverless deployment.
-- Logs are available in the Netlify function logs.
-- No automated production smoke test or CI pipeline is currently included.
-
-## Troubleshooting
-
-### API returns 500 immediately
-
-Check function logs for a missing required environment variable or a blocked MongoDB Atlas connection.
-
-### OAuth redirects fail
-
-Confirm that `FRONTEND_URL`, both callback variables, and the Google console redirect URIs use the same exact HTTPS domain.
-
-### Refresh sessions fail
-
-Keep frontend and API on the same Netlify origin through `/api`. Production refresh cookies are secure and use `SameSite=Strict`.
-
-### Uploads fail
-
-Check ImageKit credentials, Netlify payload limits, MIME types, and function logs. Large video uploads may require a future direct-to-ImageKit browser upload flow.
