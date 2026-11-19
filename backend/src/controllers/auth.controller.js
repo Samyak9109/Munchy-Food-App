@@ -44,6 +44,7 @@ async function issueTokens(account, role, req, res) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    path: "/api/auth",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -307,7 +308,12 @@ async function logout(req, res) {
     session.revoked = true;
     await session.save();
 
-    res.clearCookie("refreshToken");
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      path: "/api/auth",
+    });
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     return res
