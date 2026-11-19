@@ -1,7 +1,13 @@
 import storeModel from "../models/store.model.js";
 
-// find stores within X meters of user coordinates
-export const getNearbyStoresDAO = async (lng, lat, radiusInKm = 5) =>
+// find stores within X km of user coordinates (includes closed stores)
+export const getNearbyStoresDAO = async (
+  lng,
+  lat,
+  radiusInKm = 5,
+  page = 1,
+  limit = 20,
+) =>
   await storeModel.aggregate([
     {
       $geoNear: {
@@ -9,10 +15,10 @@ export const getNearbyStoresDAO = async (lng, lat, radiusInKm = 5) =>
           type: "Point",
           coordinates: [parseFloat(lng), parseFloat(lat)],
         },
-        distanceField: "distance", // adds distance field to each result
+        distanceField: "distanceMeters", // renamed from "distance"
         maxDistance: radiusInKm * 1000, // convert km to meters
         spherical: true,
-        query: { isOpen: true }, // only return open stores
+        // removed: query: { isOpen: true } — now shows closed stores too
       },
     },
     {
@@ -32,10 +38,12 @@ export const getNearbyStoresDAO = async (lng, lat, radiusInKm = 5) =>
         image: 1,
         cuisine: 1,
         rating: 1,
-        isOpen: 1,
-        distance: 1, // distance in meters
+        isOpen: 1, // frontend uses this to show "Closed" badge
+        distanceMeters: 1,
         location: 1,
         "partner.name": 1,
       },
     },
+    { $skip: (page - 1) * limit },
+    { $limit: limit },
   ]);
