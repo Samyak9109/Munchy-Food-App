@@ -186,6 +186,109 @@ npm run build
 
 ---
 
+## Deployment Quick-Reference (Copy-Paste Checklist)
+
+### ✅ Prerequisites (Have these ready before starting)
+| Service | What You Need |
+|---------|---------------|
+| **MongoDB Atlas** | M0 cluster (AWS ap-south-1 Mumbai), DB user + password, connection string |
+| **Google Cloud** | OAuth 2.0 Client ID + Secret, refresh token with `gmail.send` scope |
+| **ImageKit** | Private key, public key, URL endpoint (`https://ik.imagekit.io/<id>`) |
+| **Razorpay** | Test Key ID (`rzp_test_...`), Key Secret, Webhook secret |
+| **OpenRouteService** | API token (free tier: 2000 req/day) |
+| **GitHub** | Repo connected to both Render & Cloudflare Pages |
+
+### 🔑 Backend Environment Variables (Render Dashboard → Environment)
+| Variable | Value | Notes |
+|---|---|---|
+| `NODE_ENV` | `production` | |
+| `PORT` | `10000` | Render assigns this |
+| `FRONTEND_URL` | `https://<your-project>.pages.dev` | **Set AFTER Cloudflare deploy** |
+| `MONGO_URI` | `mongodb+srv://...` | Atlas connection string |
+| `JWT_SECRET` | `openssl rand -base64 32` | Generate 32+ random chars |
+| `IMAGEKIT_PRIVATE_KEY` | `private_...` | From ImageKit dashboard |
+| `IMAGEKIT_PUBLIC_KEY` | `public_...` | From ImageKit dashboard |
+| `IMAGEKIT_URL_ENDPOINT` | `https://ik.imagekit.io/<id>` | |
+| `CLIENT_ID` | `...apps.googleusercontent.com` | Google OAuth Web Client ID |
+| `CLIENT_SECRET` | `GOCSPX-...` | Google OAuth Web Client Secret |
+| `REFRESH_TOKEN` | `1//0...` | Google refresh token w/ `gmail.send` |
+| `EMAIL_USER` | `your-email@gmail.com` | Sender email |
+| `GOOGLE_CALLBACK_URL_USER` | `https://<project>.pages.dev/api/auth/user/google/callback` | |
+| `GOOGLE_CALLBACK_URL_PARTNER` | `https://<project>.pages.dev/api/auth/partner/google/callback` | |
+| `RAZORPAY_KEY_ID` | `rzp_test_...` | |
+| `RAZORPAY_KEY_SECRET` | `...` | |
+| `RAZORPAY_WEBHOOK_SECRET` | `whsec_...` | Set in Razorpay dashboard |
+| `OPENROUTE_API_KEY` | `5b3ce359...` | |
+| `TAX_RATE` | `0.05` | |
+| `CORS_ORIGINS` | `https://<your-project>.pages.dev` | Comma-separated if multiple |
+
+### 🔑 Frontend Environment Variables (Cloudflare Pages Dashboard → Environment)
+| Variable | Value |
+|---|---|
+| `RENDER_API_ORIGIN` | `https://munchy-api.onrender.com` (your Render URL, no trailing slash) |
+| `VITE_API_URL` | `/api` |
+| `VITE_RAZORPAY_KEY` | `rzp_test_...` (same as backend) |
+
+### 🚀 Step-by-Step Deploy Order
+
+```bash
+# 1. Push to GitHub (main branch)
+git add . && git commit -m "deploy: ready for production" && git push origin main
+
+# 2. DEPLOY BACKEND FIRST (Render)
+#    - New Web Service → Connect GitHub repo
+#    - Root Dir: backend, Region: Singapore, Plan: Free
+#    - Build: npm ci, Start: node server.js, Health: /api/health
+#    - Add ALL backend env vars above
+#    - Wait for deploy → verify: https://<your-api>.onrender.com/api/health
+
+# 3. DEPLOY FRONTEND (Cloudflare Pages)
+#    - Workers & Pages → Create Application → Pages → Connect to Git
+#    - Framework: Vite, Root: frontend, Build: npm run build, Output: dist
+#    - Add frontend env vars above (use Render URL from step 2)
+#    - Deploy → get your <project>.pages.dev URL
+
+# 4. UPDATE CROSS-REFERENCES (Critical!)
+#    - Render: Update FRONTEND_URL = https://<project>.pages.dev
+#    - Render: Update CORS_ORIGINS = https://<project>.pages.dev
+#    - Google Cloud Console: Add OAuth redirect URIs:
+#         https://<project>.pages.dev/api/auth/user/google/callback
+#         https://<project>.pages.dev/api/auth/partner/google/callback
+#    - Razorpay Dashboard: Set webhook URL = https://<project>.pages.dev/api/payment/webhook
+#    - Redeploy both services after updates
+
+# 5. KEEP-ALIVE (UptimeRobot)
+#    - Add HTTP monitor: https://<project>.pages.dev/api/health
+#    - Interval: 5 minutes
+
+# 6. SEED SAMPLE DATA (Optional)
+#    In backend with production MONGO_URI:
+#    ALLOW_PRODUCTION_SEED=true npm run seed:sample
+```
+
+### 🧪 Post-Deploy Smoke Tests
+| Test | Expected |
+|---|---|
+| `GET https://<project>.pages.dev/` | Loads React app (200) |
+| `GET https://<project>.pages.dev/api/health` | `{"status":"ok"}` (200) |
+| `GET https://<project>.pages.dev/api/health/db` | `{"status":"ok"}` (200) |
+| Login / Register flow | Sets `refreshToken` cookie on `<project>.pages.dev` |
+| Google OAuth → callback | Redirects to `/auth/success` |
+| Checkout → Razorpay → success | Order created, OTP generated |
+| Partner dashboard → create store | Map picker works, store saved |
+
+### ⚠️ Common Gotchas
+| Issue | Fix |
+|---|---|
+| `CORS error` | `CORS_ORIGINS` must exactly match Cloudflare Pages URL (no trailing slash) |
+| Cookies not set | Proxy function passes `Set-Cookie`; ensure `RENDER_API_ORIGIN` has no trailing slash |
+| Google OAuth `redirect_uri_mismatch` | Add both callback URLs in Google Cloud Console **exactly** |
+| Razorpay webhook fails | Webhook URL must be Cloudflare Pages URL (`/api/payment/webhook`), not Render |
+| Render cold start > 4s | UptimeRobot pinging `/api/health` every 5 min keeps it warm |
+| Map not loading | `OPENROUTE_API_KEY` valid? Check browser console for 401/403 |
+
+---
+
 ## Portfolio & Resume Highlights
 
 1. **High-Performance Architecture & Bundle Optimization**: Cut initial bundle size by 88.5% (from 576 kB to 58 kB / 20 kB gzip) via 17-route lazy loading, manual vendor partitioning, and an infinite-scrolling Reels feed with windowed video virtualization (max 3 active videos) and direct memory buffer ImageKit streaming.
