@@ -100,46 +100,46 @@ Reference: `ARCHITECTURE.md` map architecture.
 
 Audit facts: `[verified]` no map library in frontend dependencies. `[verified]` `KitchensPage` uses CSS placeholder pins. `[verified]` `/map/nearby` and `/map/directions` never called by frontend. `[verified]` store creation sends lat 0, lng 0. `[verified]` `updateStore` saves raw body, `location` not rebuilt. `[verified]` nearby query filters `isOpen` and stores default closed. `[verified]` Header location button only calls `alert()`. `[verified]` seed data uses Bengaluru coordinates.
 
-- [ ] **MAP-01 (P1) Install map stack.**
+- [x] **MAP-01 (P1) Install map stack.**
   Files: `frontend/package.json`.
   Change: add `leaflet`, `react-leaflet` (React 19 compatible version). Create `components/map/MapView.jsx` (OSM tiles, attribution, dark filter on tile pane via CSS), `StoreMarker.jsx`, `RouteLayer.jsx`, `LocationPicker.jsx`. Fix default marker icon paths for Vite. Import Leaflet CSS inside the lazy chunk. Pages load map components with `React.lazy`.
   Accept: map renders on kitchens page. Map code absent from initial bundle.
 
-- [ ] **MAP-02 (P1) Geocode endpoint.**
+- [x] **MAP-02 (P1) Geocode endpoint.**
   Files: `backend/src/services/map.service.js`, `controllers/map.controller.js`, `routes/map.routes.js`.
   Change: `GET /api/map/geocode?q=` calls ORS geocode search. Validate `q` (2–100 chars). Return `[{label, lat, lng}]` max 5. LRU cache (500 entries, 10 min). Auth required. Own rate limit 30 per minute per user. Handle ORS 429 and timeouts with clear messages.
   Accept: "Vijay Nagar Indore" returns coordinates.
 
-- [ ] **MAP-03 (P1) Partner location picker.**
+- [x] **MAP-03 (P1) Partner location picker.**
   Files: `frontend/src/pages/partner/StoreManagePage.jsx`, `backend/src/validators/store.validator.js`, `store.controller.js`.
   Change: replace blind lat/lng with address search → pick suggestion → draggable pin → save. Send `latitude`, `longitude`. Validator: numbers, lat −90..90, lng −180..180, reject exactly 0,0. Controller builds `location: {type:'Point', coordinates:[lng, lat]}`.
   Accept: new store appears at the pinned place. `[0,0]` rejected with 400.
 
-- [ ] **MAP-04 (P1) Update store rebuilds location.**
+- [x] **MAP-04 (P1) Update store rebuilds location.**
   Change: `updateStore` whitelists fields. If lat/lng provided, rebuild `location`. Do not pass raw `req.body` to the DAO.
   Accept: editing coordinates moves the store in `$geoNear` results.
 
-- [ ] **MAP-05 (P2) Nearby stores with distance.**
+- [x] **MAP-05 (P2) Nearby stores with distance.**
   Files: `dao/store.dao.js`, `store.controller.js`, `validators`.
   Change: `GET /stores?lat&lng&radius&page&limit&q&category`. Validate numbers (NaN → 400). Use `$geoNear` with `distanceField: 'distanceMeters'`, `spherical: true`, `maxDistance`. Do not hide closed stores. Return `isOpen`. Paginate. Without lat/lng fall back to normal list.
   Accept: response has `distanceMeters`. Closed stores present with flag.
 
-- [ ] **MAP-06 (P2) User location.**
+- [x] **MAP-06 (P2) User location.**
   Files: new `frontend/src/store/locationStore.js`, `components/common/Header.jsx`.
   Change: zustand persisted `{lat,lng,label,source}`. Header chip: "Use my location" via `navigator.geolocation`, or manual search via geocode. Handle denied and timeout. Replace `alert()` with toast.
   Accept: location persists on reload. Denied state shows manual input.
 
-- [ ] **MAP-07 (P2) Kitchens page.**
+- [x] **MAP-07 (P2) Kitchens page.**
   Files: `frontend/src/pages/user/KitchensPage.jsx` and CSS.
   Change: list/map toggle. Markers for each store. Marker click shows mini card. Distance label and sort (distance, rating). Open/closed badge. Remove placeholder pins. Skeleton while loading.
   Accept: distances match store positions. Map and list stay in sync.
 
-- [ ] **MAP-08 (P2) Directions.**
+- [x] **MAP-08 (P2) Directions.**
   Files: `map.service.js`, `StorePage.jsx`, `RouteLayer.jsx`.
   Change: `GET /api/map/directions?fromLat&fromLng&toLat&toLng&profile=driving-car|foot-walking|cycling-regular` calls ORS GeoJSON directions endpoint `[verify exact path in installed docs]`. Return `{distanceMeters, durationSeconds, geometry}`. Cache by rounded coordinates (4 decimals). Draw line. Show distance and ETA. Profile switch (car, walk, bike).
   Accept: route renders. ORS failure shows inline message, page still usable.
 
-- [ ] **MAP-09 (P2) Data repair and seed.**
+- [x] **MAP-09 (P2) Data repair and seed.**
   Files: `backend/scripts/seed-sample-data.js`, new `backend/scripts/fix-store-locations.js`.
   Change: seed center from env `SEED_CENTER_LAT`, `SEED_CENTER_LNG` (default 22.7196, 75.8577, Indore). Spread stores within 5 km. Repair script finds stores with `[0,0]`, sets `needsLocation: true`. Partner dashboard shows banner while true.
   Accept: seeded stores appear near default center. Broken stores flagged.
