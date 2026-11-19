@@ -13,6 +13,10 @@ const samplePartnerEmail =
 const samplePartnerPassword =
   process.env.SEED_PARTNER_PASSWORD || "SamplePartner123!";
 
+// Configurable center — defaults to Indore coordinates
+const CENTER_LAT = parseFloat(process.env.SEED_CENTER_LAT ?? "22.7196");
+const CENTER_LNG = parseFloat(process.env.SEED_CENTER_LNG ?? "75.8577");
+
 const restaurants = [
   {
     name: `Spice Route Kitchen ${SAMPLE_SUFFIX}`,
@@ -20,9 +24,9 @@ const restaurants = [
       "North Indian comfort food, biryani, and street-food favorites prepared for quick pickup.",
     image:
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
-    address: "100 Feet Road, Indiranagar, Bengaluru, Karnataka",
+    address: "100 Feet Road, Vijay Nagar, Indore, Madhya Pradesh",
     cuisine: ["North Indian", "Biryani", "Street Food"],
-    coordinates: { lat: 12.9784, lng: 77.6408 },
+    coordinates: { lat: CENTER_LAT + 0.018, lng: CENTER_LNG + 0.022 },
     timing: { open: "10:00", close: "23:00" },
     isOpen: true,
     rating: { average: 4.6, count: 128 },
@@ -75,9 +79,9 @@ const restaurants = [
       "Fresh salads, protein bowls, breakfast plates, smoothies, and vegetarian options.",
     image:
       "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200&q=80",
-    address: "5th Block, Koramangala, Bengaluru, Karnataka",
+    address: "Palasia Square, Indore, Madhya Pradesh",
     cuisine: ["Healthy", "Cafe", "Continental"],
-    coordinates: { lat: 12.9352, lng: 77.6245 },
+    coordinates: { lat: CENTER_LAT + (-0.012), lng: CENTER_LNG + 0.015 },
     timing: { open: "08:00", close: "22:00" },
     isOpen: true,
     rating: { average: 4.4, count: 94 },
@@ -130,9 +134,9 @@ const restaurants = [
       "Burgers, pizza, loaded snacks, and desserts for evening and late-night cravings.",
     image:
       "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1200&q=80",
-    address: "27th Main Road, HSR Layout, Bengaluru, Karnataka",
+    address: "AB Road, Scheme 54, Indore, Madhya Pradesh",
     cuisine: ["Fast Food", "Pizza", "Desserts"],
-    coordinates: { lat: 12.9116, lng: 77.6389 },
+    coordinates: { lat: CENTER_LAT + 0.025, lng: CENTER_LNG + (-0.010) },
     timing: { open: "12:00", close: "23:59" },
     isOpen: true,
     rating: { average: 4.3, count: 156 },
@@ -176,6 +180,41 @@ const restaurants = [
         image:
           "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=900&q=80",
         ratings: { average: 4.8, count: 52 },
+      },
+    ],
+  },
+  {
+    name: `Night Owl Cafe ${SAMPLE_SUFFIX}`,
+    description:
+      "Late-night cafe with desserts, coffees, and baked goods. Currently closed.",
+    image:
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80",
+    address: "MG Road, Indore",
+    cuisine: ["Cafe", "Desserts"],
+    coordinates: { lat: CENTER_LAT + (-0.020), lng: CENTER_LNG + (-0.018) },
+    timing: { open: "20:00", close: "04:00" },
+    isOpen: false, // closed store — tests "Closed" badge on the map
+    rating: { average: 4.1, count: 47 },
+    menu: [
+      {
+        name: `Dark Roast Cold Brew ${SAMPLE_SUFFIX}`,
+        description: "Slow-steeped cold brew with a rich, smooth finish.",
+        price: 149,
+        category: ["drinks"],
+        isVeg: true,
+        image:
+          "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=80",
+        ratings: { average: 4.3, count: 18 },
+      },
+      {
+        name: `Belgian Waffle ${SAMPLE_SUFFIX}`,
+        description: "Crispy waffle with whipped cream, berries, and maple syrup.",
+        price: 199,
+        category: ["desserts", "snacks"],
+        isVeg: true,
+        image:
+          "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=900&q=80",
+        ratings: { average: 4.5, count: 29 },
       },
     ],
   },

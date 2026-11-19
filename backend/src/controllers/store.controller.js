@@ -13,7 +13,18 @@ import partnerModel from "../models/partner.model.js";
 
 // ── CREATE STORE ─────────────────────────────────────────────
 export const createStore = async (req, res) => {
-  const { name, address, description, cuisine, timing, coordinates } = req.body;
+  const { name, address, description, cuisine, timing, latitude, longitude } =
+    req.body;
+
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+
+  // Guard against [0,0] slipping through (belt-and-suspenders)
+  if (lat === 0 && lng === 0) {
+    return res
+      .status(400)
+      .json({ message: "Store location cannot be [0,0]" });
+  }
 
   try {
     const store = await createStoreDAO({
@@ -22,10 +33,9 @@ export const createStore = async (req, res) => {
       description,
       cuisine,
       timing,
-      coordinates,
       location: {
         type: "Point",
-        coordinates: [coordinates.lng, coordinates.lat], 
+        coordinates: [lng, lat],
       },
       partner: req.partner._id,
     });
@@ -111,7 +121,35 @@ export const updateStore = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const updated = await updateStoreDAO(req.params.id, req.body);
+    // Whitelist only the fields the partner is allowed to change.
+    // Never pass raw req.body to the DAO — it could carry location or
+    // partner fields that would silently overwrite the 2dsphere index.
+    const updateData = {};
+    for (const key of ["name", "address", "description", "cuisine", "timing", "image"]) {
+      if (req.body[key] !== undefined) updateData[key] = req.body[key];
+    }
+
+    // If the partner moves the pin, rebuild the GeoJSON location so the
+    // 2dsphere index and $geoNear queries pick up the new position.
+    if (req.body.latitude !== undefined || req.body.longitude !== undefined) {
+      const lat = Number(req.body.latitude);
+      const lng = Number(req.body.longitude);
+      if (Number.isNaN(lat) || Number.isNaN(lng)) {
+        return res.status(400).json({ message: "latitude and longitude must be numbers" });
+      }
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+      if (lat === 0 && lng === 0) {
+        return res.status(400).json({ message: "Store location cannot be [0,0]" });
+      }
+      updateData.location = {
+        type: "Point",
+        coordinates: [lng, lat],
+      };
+    }
+
+    const updated = await updateStoreDAO(req.params.id, updateData);
     return res
       .status(200)
       .json({ message: "Store updated successfully", store: updated });

@@ -33,6 +33,26 @@ export const validateCreateStore = [
     .matches(timeRegex)
     .withMessage("Closing time must be in HH:MM format"),
 
+  body("latitude")
+    .notEmpty()
+    .withMessage("latitude is required")
+    .isFloat({ min: -90, max: 90 })
+    .withMessage("Invalid latitude"),
+
+  body("longitude")
+    .notEmpty()
+    .withMessage("longitude is required")
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Invalid longitude"),
+
+  // reject [0,0] — not a valid store location
+  body("latitude").custom((lat, { req }) => {
+    if (Number(lat) === 0 && Number(req.body.longitude) === 0) {
+      throw new Error("Store location cannot be [0,0]");
+    }
+    return true;
+  }),
+
   handleValidationErrors,
 ];
 
