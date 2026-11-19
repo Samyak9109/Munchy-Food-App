@@ -40,9 +40,9 @@ const config = {
   GOOGLE_CALLBACK_URL_USER: process.env.GOOGLE_CALLBACK_URL_USER,
   GOOGLE_CALLBACK_URL_PARTNER: process.env.GOOGLE_CALLBACK_URL_PARTNER,
 
-  // ===== Email =====
+  // ===== Email (Gmail API over HTTPS) =====
   EMAIL_USER: requireEnv("EMAIL_USER"),
-  EMAIL_PASS: requireEnv("EMAIL_PASS"),
+  EMAIL_PASS: process.env.EMAIL_PASS,
   
   // ===== Payment =====
   RAZORPAY_KEY_ID: requireEnv("RAZORPAY_KEY_ID"),
