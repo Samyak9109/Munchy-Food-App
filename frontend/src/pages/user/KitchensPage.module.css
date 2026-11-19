@@ -1,53 +1,18 @@
 .page { min-height: 100%; }
 
-/* Map area */
-.mapArea {
+/* Real map view */
+.mapView {
+  height: calc(100dvh - 60px);
   position: relative;
-  height: 240px;
-  background: #0a0a0a;
-  overflow: hidden;
 }
 
-.mapGrid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,83,82,0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,83,82,0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.mapPins {
-  position: absolute;
-  inset: 0;
-}
-
-.pin {
-  position: absolute;
-  background: var(--primary-red);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  white-space: nowrap;
-  transform: translate(-50%, -50%);
-}
-
-.pinYellow {
-  background: var(--yellow);
-  color: #000;
-}
-
-.mapHandle {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 4px;
-  background: var(--outline-dim);
-  border-radius: 2px;
+.mapFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 /* List */
@@ -259,3 +224,53 @@
 
 .open { background: rgba(255, 219, 60, 0.15); color: var(--yellow); }
 .closed { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+
+/* View toggle */
+.viewToggle {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--outline-dim);
+  border-radius: 10px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.toggleBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggleBtnActive {
+  background: var(--primary-red);
+  color: #fff;
+}
+
+/* Selected card highlight */
+.cardSelected {
+  border-color: var(--primary-red) !important;
+  background: var(--surface-high);
+}
+
+/* Map pin button on card */
+.mapPinBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--outline-dim);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 4px;
+}
+.mapPinBtn:hover { border-color: var(--primary-red); color: var(--primary-red); }

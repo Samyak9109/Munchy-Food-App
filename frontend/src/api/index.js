@@ -67,6 +67,7 @@ export const getFavorites    = ()        => api.get('/favorite');
 
 // ── MAP ──────────────────────────────────────────────────────
 export const getNearbyStores = (params) => api.get('/map/nearby', { params });
+export const geocode         = (q)        => api.get('/map/geocode', { params: { q } });
 export const getDirections   = (storeId, params) => api.get(`/map/directions/${storeId}`, { params });
 
 // ── DASHBOARD ────────────────────────────────────────────────

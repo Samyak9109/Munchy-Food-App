@@ -30,6 +30,7 @@ import OTPVerifyPage from './pages/partner/OTPVerifyPage';
 import PartnerProfilePage from './pages/partner/PartnerProfilePage';
 
 import ProtectedRoute from './components/common/ProtectedRoute';
+import ToastContainer from './components/common/ToastContainer';
 
 const qc = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
@@ -39,6 +40,7 @@ export default function App() {
   return (
     <QueryClientProvider client={qc}>
       <BrowserRouter>
+        <ToastContainer />
         <Routes>
           {/* AUTH */}
           <Route path="/login"            element={<LoginPage />} />
