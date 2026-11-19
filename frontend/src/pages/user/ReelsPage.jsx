@@ -4,6 +4,7 @@ import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tansta
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import { img } from '../../lib/img';
+import useToastStore from '../../store/toastStore';
 import styles from './ReelsPage.module.css';
 
 export default function ReelsPage() {
@@ -160,8 +161,28 @@ const ReelCard = memo(function ReelCard({
   const likeMut = useMutation({
     mutationFn: () => api.toggleLike(reel._id),
     onMutate: () => {
-      setLiked((v) => !v);
-      setLocalLikes((v) => (liked ? v - 1 : v + 1));
+      const prevLiked = liked;
+      const prevLikes = localLikes;
+      setLiked(!prevLiked);
+      setLocalLikes((prev) => (prevLiked ? Math.max(0, prev - 1) : prev + 1));
+      return { prevLiked, prevLikes };
+    },
+    onSuccess: (res) => {
+      if (res?.data && typeof res.data.liked === 'boolean') {
+        setLiked(res.data.liked);
+        if (typeof res.data.likes === 'number') {
+          setLocalLikes(res.data.likes);
+        }
+      }
+    },
+    onError: (err, _vars, context) => {
+      if (context) {
+        setLiked(context.prevLiked);
+        setLocalLikes(context.prevLikes);
+      }
+      useToastStore.getState().error(
+        err?.response?.data?.message || 'Could not update like. Please sign in as a customer.'
+      );
     },
   });
 

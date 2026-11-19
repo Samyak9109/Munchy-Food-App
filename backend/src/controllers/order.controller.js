@@ -42,9 +42,13 @@ export const previewOrder = async (req, res) => {
     const pricing = await computeOrderTotals(cart.items, foodModel);
 
     // Validate store is open
+    const foodIds = cart.items
+      .map((i) => (i.food?._id ? i.food._id : i.food))
+      .filter(Boolean);
+    const storeTargetId = cart.store?._id || cart.store;
     await validateStoreAndAvailability(
-      await foodModel.find({ _id: { $in: cart.items.map((i) => i.food) } }),
-      cart.store._id,
+      await foodModel.find({ _id: { $in: foodIds } }),
+      storeTargetId,
       storeModel,
     );
 
@@ -75,12 +79,16 @@ export const placeOrder = async (req, res) => {
     const pricing = await computeOrderTotals(cart.items, foodModel);
 
     // Validate store is open and all items from same store
+    const foodIds = cart.items
+      .map((i) => (i.food?._id ? i.food._id : i.food))
+      .filter(Boolean);
     const foods = await foodModel.find({
-      _id: { $in: cart.items.map((i) => i.food) },
+      _id: { $in: foodIds },
     });
+    const storeTargetId = cart.store?._id || cart.store;
     const store = await validateStoreAndAvailability(
       foods,
-      cart.store._id,
+      storeTargetId,
       storeModel,
     );
 

@@ -7,6 +7,7 @@ import PartnerLayout from './layouts/PartnerLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ToastContainer from './components/common/ToastContainer';
 import PageSkeleton from './components/common/PageSkeleton';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // ── LAZY-LOADED AUTH PAGES ────────────────────────────────────
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -57,56 +58,58 @@ export default function App() {
     <QueryClientProvider client={qc}>
       <BrowserRouter>
         <ToastContainer />
-        <Suspense fallback={<PageSkeleton />}>
-          <Routes>
-            {/* AUTH */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify-otp" element={<VerifyOTPPage />} />
-            <Route path="/auth/success" element={<AuthSuccessPage />} />
-            <Route path="/auth/error" element={<AuthErrorPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <ErrorBoundary>
+          <Suspense fallback={<PageSkeleton />}>
+            <Routes>
+              {/* AUTH */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/verify-otp" element={<VerifyOTPPage />} />
+              <Route path="/auth/success" element={<AuthSuccessPage />} />
+              <Route path="/auth/error" element={<AuthErrorPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-            {/* USER APP */}
-            <Route
-              element={
-                <ProtectedRoute requiredRole="user">
-                  <UserLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/" element={<ReelsPage />} />
-              <Route path="/kitchens" element={<KitchensPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/orders/:id" element={<OrderDetailPage />} />
-              <Route path="/store/:id" element={<StorePage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-            </Route>
+              {/* USER APP */}
+              <Route
+                element={
+                  <ProtectedRoute requiredRole="user">
+                    <UserLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/" element={<ReelsPage />} />
+                <Route path="/kitchens" element={<KitchensPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/orders/:id" element={<OrderDetailPage />} />
+                <Route path="/store/:id" element={<StorePage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
 
-            {/* PARTNER APP */}
-            <Route
-              path="/partner"
-              element={
-                <ProtectedRoute requiredRole="partner">
-                  <PartnerLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/partner/dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="orders" element={<PartnerOrdersPage />} />
-              <Route path="orders/:orderId" element={<OTPVerifyPage />} />
-              <Route path="reels" element={<PartnerReelsPage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
-              <Route path="store" element={<StoreManagePage />} />
-              <Route path="profile" element={<PartnerProfilePage />} />
-            </Route>
+              {/* PARTNER APP */}
+              <Route
+                path="/partner"
+                element={
+                  <ProtectedRoute requiredRole="partner">
+                    <PartnerLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/partner/dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="orders" element={<PartnerOrdersPage />} />
+                <Route path="orders/:orderId" element={<OTPVerifyPage />} />
+                <Route path="reels" element={<PartnerReelsPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="store" element={<StoreManagePage />} />
+                <Route path="profile" element={<PartnerProfilePage />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Suspense>
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </BrowserRouter>
     </QueryClientProvider>
   );

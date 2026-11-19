@@ -190,23 +190,23 @@ Execute tasks `UI-*` in `DESIGN-SYSTEM.md`.
 
 ## Phase 6 — Quality and portfolio (branch `phase-6-polish`)
 
-- [ ] **QA-01 (P1) Fix reel like state.** `[verified]` `liked` starts `false`; reload loses state. No rollback on error.
+- [x] **QA-01 (P1) Fix reel like state.** `[verified]` `liked` starts `false`; reload loses state. No rollback on error.
   Change: feed API returns `likedByMe` and `likes`. `ReelCard` initial state from server. `onError` rolls back.
   Accept: liked reel stays liked after reload.
 
-- [ ] **QA-02 (P2) Order-time guards.** Re-test ORD-01 with closed store, unavailable item, deleted food, empty cart, cart from another store.
+- [x] **QA-02 (P2) Order-time guards.** Re-test ORD-01 with closed store, unavailable item, deleted food, empty cart, cart from another store.
 
-- [ ] **QA-03 (P2) Error and empty states.** Each page: loading skeleton, empty, error with retry. Add React error boundary at layout level.
+- [x] **QA-03 (P2) Error and empty states.** Each page: loading skeleton, empty, error with retry. Add React error boundary at layout level.
 
-- [ ] **QA-04 (P2) Replace dialogs.** `[verified]` 7 `alert()`/`confirm()` calls. Use Toast and confirm Sheet (`UI-05`).
+- [x] **QA-04 (P2) Replace dialogs.** `[verified]` 7 `alert()`/`confirm()` calls. Use Toast and confirm Sheet (`UI-05`).
 
-- [ ] **QA-05 (P2) Tests.** Backend: auth flow, pricing, payment verify, webhook. Frontend: smoke test of checkout hook. Keep fast.
+- [x] **QA-05 (P2) Tests.** Backend: auth flow, pricing, payment verify, webhook. Frontend: smoke test of checkout hook. Keep fast.
 
-- [ ] **QA-06 (P2) End-to-end manual run** of the PRD demo script (section 10). Record result in README.
+- [x] **QA-06 (P2) End-to-end manual run** of the PRD demo script (section 10). Record result in README.
 
-- [ ] **QA-07 (P3) README and demo.** Live links, demo accounts (user, partner), Razorpay test card numbers, architecture diagram (from `ARCHITECTURE.md`), screenshots, short demo GIF, "free tier cold start" note, known limits.
+- [x] **QA-07 (P3) README and demo.** Live links, demo accounts (user, partner), Razorpay test card numbers, architecture diagram (from `ARCHITECTURE.md`), screenshots, short demo GIF, "free tier cold start" note, known limits.
 
-- [ ] **QA-08 (P3) Resume bullets.** Draft 3 bullets: payments (idempotent verify + webhook), geospatial (`$geoNear`, routing), performance (bundle and LCP numbers before/after). Fill numbers from real measurements only.
+- [x] **QA-08 (P3) Resume bullets.** Draft 3 bullets: payments (idempotent verify + webhook), geospatial (`$geoNear`, routing), performance (bundle and LCP numbers before/after). Fill numbers from real measurements only.
 
 ---
 

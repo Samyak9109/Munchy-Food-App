@@ -6,6 +6,7 @@ import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import { useLocationStore } from '../../store/locationStore';
 import { img, srcSet } from '../../lib/img';
+import { EmptyState } from '../../components/ui';
 import styles from './KitchensPage.module.css';
 
 // Lazy-load KitchensMap so leaflet stays out of the initial bundle
@@ -174,7 +175,7 @@ export default function KitchensPage() {
           {loadingStores
             ? <p className={styles.dim}>Loading...</p>
             : stores.length === 0
-              ? <p className={styles.dim}>No kitchens found.</p>
+              ? <EmptyState title="No kitchens found" hint="Try adjusting your filters or location search." />
               : stores.map((store) => (
                 <StoreCard
                   key={store._id}

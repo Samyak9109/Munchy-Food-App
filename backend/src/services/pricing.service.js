@@ -18,8 +18,10 @@ export async function computeOrderTotals(cartItems, FoodModel) {
     throw new Error("Cart is empty");
   }
 
-  // Load all food documents by ID
-  const foodIds = cartItems.map((item) => item.food);
+  // Load all food documents by ID (handling unpopulated ObjectId or populated object)
+  const foodIds = cartItems
+    .map((item) => (item.food?._id ? item.food._id : item.food))
+    .filter(Boolean);
   const foods = await FoodModel.find({ _id: { $in: foodIds } });
 
   if (foods.length !== cartItems.length) {
@@ -34,7 +36,8 @@ export async function computeOrderTotals(cartItems, FoodModel) {
   const items = [];
 
   for (const cartItem of cartItems) {
-    const foodId = cartItem.food.toString();
+    const rawFood = cartItem.food;
+    const foodId = (rawFood?._id ? rawFood._id : rawFood)?.toString();
     const food = foodMap.get(foodId);
 
     if (!food) {

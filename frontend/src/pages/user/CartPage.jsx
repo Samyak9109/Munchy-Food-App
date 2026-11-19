@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import { img } from '../../lib/img';
+import { EmptyState, ErrorState, Button } from '../../components/ui';
 import styles from './CartPage.module.css';
 
 export default function CartPage() {
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['cart'],
     queryFn: () => api.getCart().then(r => r.data),
   });
@@ -33,15 +34,33 @@ export default function CartPage() {
 
   if (isLoading) return <div className={styles.empty}><p>Loading...</p></div>;
 
+  if (isError) {
+    return (
+      <div className={styles.page}>
+        <Header title="Cart" showLocation={false} />
+        <ErrorState
+          title="Could not load cart"
+          message={error?.response?.data?.message || 'Failed to fetch cart items.'}
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
+
   if (!cart || cart.items?.length === 0) {
     return (
       <div className={styles.page}>
         <Header title="Cart" showLocation={false} />
-        <div className={styles.empty}>
-          <ShoppingCart size={48} strokeWidth={1} />
-          <p>Your cart is empty.</p>
-          <Link to="/" className={styles.browseBtn}>Browse Reels</Link>
-        </div>
+        <EmptyState
+          icon={<ShoppingCart size={40} />}
+          title="Your cart is empty"
+          hint="Looks like you haven't added any items yet."
+          action={
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <Button variant="primary">Browse Reels</Button>
+            </Link>
+          }
+        />
       </div>
     );
   }

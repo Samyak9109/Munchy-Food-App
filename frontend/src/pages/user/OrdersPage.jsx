@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ClipboardList, CreditCard } from 'lucide-react';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { EmptyState, ErrorState, Button } from '../../components/ui';
 import styles from './OrdersPage.module.css';
 
 export default function OrdersPage() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['orders'],
     queryFn: () => api.getOrders().then(r => r.data),
   });
@@ -26,11 +27,24 @@ export default function OrdersPage() {
 
       <div className={styles.content}>
         {isLoading && <p className={styles.dim}>Loading...</p>}
-        {!isLoading && orders.length === 0 && (
-          <div className={styles.empty}>
-            <ClipboardList size={48} strokeWidth={1} />
-            <p>No orders yet.</p>
-          </div>
+        {isError && (
+          <ErrorState
+            title="Failed to load orders"
+            message={error?.response?.data?.message || 'Could not fetch your order history.'}
+            onRetry={refetch}
+          />
+        )}
+        {!isLoading && !isError && orders.length === 0 && (
+          <EmptyState
+            icon={<ClipboardList size={40} />}
+            title="No orders yet"
+            hint="When you place an order, it will appear here."
+            action={
+              <Link to="/kitchens" style={{ textDecoration: 'none' }}>
+                <Button variant="primary">Explore Kitchens</Button>
+              </Link>
+            }
+          />
         )}
         {orders.map(order => (
           <Link key={order._id} to={`/orders/${order._id}`} className={styles.card}>

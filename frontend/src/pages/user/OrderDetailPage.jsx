@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, MapPin, Store } from 'lucide-react';
 import * as api from '../../api/index';
+import { ErrorState } from '../../components/ui';
 import styles from './OrderDetailPage.module.css';
 
 const STATUS_STEPS = ['placed', 'confirmed', 'ready', 'pickedup'];
@@ -18,7 +19,7 @@ export default function OrderDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['order', id],
     queryFn: () => api.getOrderById(id).then(r => r.data),
     refetchInterval: (query) => {
@@ -31,7 +32,27 @@ export default function OrderDetailPage() {
   const order = data?.order;
 
   if (isLoading) return <div className={styles.loading}>Loading order...</div>;
-  if (!order) return <div className={styles.loading}>Order not found.</div>;
+
+  if (isError || !order) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.topBar}>
+          <button className={styles.backBtn} onClick={() => navigate('/orders')} aria-label="Go back">
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className={styles.title}>Order Status</h1>
+          <div className={styles.spacer} />
+        </div>
+        <div style={{ padding: 'var(--space-6, 24px)' }}>
+          <ErrorState
+            title={isError ? "Error loading order" : "Order not found"}
+            message={error?.response?.data?.message || "The requested order could not be located."}
+            onRetry={isError ? refetch : () => navigate('/orders')}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const stepIdx = STATUS_STEPS.indexOf(order.status);
   const isCancelled = order.status === 'cancelled';

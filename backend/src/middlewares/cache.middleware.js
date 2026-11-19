@@ -1,9 +1,16 @@
 export const cachePublic = (maxAge = 30, swr = 120) => (req, res, next) => {
   if (req.method === "GET") {
-    res.setHeader(
-      "Cache-Control",
-      `public, max-age=${maxAge}, stale-while-revalidate=${swr}`,
-    );
+    if (req.user || req.partner || req.headers.authorization) {
+      res.setHeader(
+        "Cache-Control",
+        "private, no-cache, no-store, must-revalidate",
+      );
+    } else {
+      res.setHeader(
+        "Cache-Control",
+        `public, max-age=${maxAge}, stale-while-revalidate=${swr}`,
+      );
+    }
   }
   next();
 };

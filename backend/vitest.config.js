@@ -7,6 +7,7 @@ export default defineConfig({
     include: ["tests/**/*.test.js"],
     globalSetup: "./tests/globalSetup.js",
     pool: "forks",
+    fileParallelism: false,
     testTimeout: 30000,
     hookTimeout: 30000,
   },

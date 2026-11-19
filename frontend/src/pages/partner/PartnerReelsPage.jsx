@@ -58,10 +58,16 @@ export default function PartnerReelsPage() {
 
         {isLoading && <p className={styles.dim}>Loading...</p>}
         {!isLoading && reels.length === 0 && (
-          <div className={styles.empty}>
-            <Film size={48} strokeWidth={1} />
-            <p>No reels yet. Upload your first!</p>
-          </div>
+          <EmptyState
+            icon={<Film size={40} />}
+            title="No reels uploaded yet"
+            hint="Showcase your signature dishes to hungry nearby customers with video."
+            action={
+              <Button variant="primary" onClick={() => setShowForm(true)}>
+                Upload Reel
+              </Button>
+            }
+          />
         )}
 
         <div className={styles.grid}>

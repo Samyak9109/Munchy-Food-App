@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import * as api from '../../api/index';
 import { useLocationStore } from '../../store/locationStore';
 import { img, srcSet } from '../../lib/img';
+import { EmptyState, ErrorState } from '../../components/ui';
 import styles from './StorePage.module.css';
 
 // Fix Leaflet icon in Vite
@@ -65,6 +66,21 @@ export default function StorePage() {
 
   if (isLoading) return <div className={styles.loading}>Loading...</div>;
 
+  if (!store) {
+    return (
+      <div className={styles.page} style={{ padding: 'var(--space-6, 24px)' }}>
+        <button className={styles.backBtn} onClick={() => navigate('/kitchens')} aria-label="Back">
+          <ArrowLeft size={20} />
+        </button>
+        <ErrorState
+          title="Kitchen Not Found"
+          message="We couldn't find the kitchen you're looking for. It may have moved or been removed."
+          onRetry={() => navigate('/kitchens')}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       {/* Hero */}
@@ -112,12 +128,17 @@ export default function StorePage() {
 
       {/* Menu */}
       <div className={styles.menu}>
-        {filtered.length === 0
-          ? <p className={styles.dim}>No items available.</p>
-          : filtered.map((food) => (
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon="🍽️"
+            title="No items available"
+            hint="This kitchen has not added items in this category yet."
+          />
+        ) : (
+          filtered.map((food) => (
             <FoodItem key={food._id} food={food} onAdd={() => addToCart.mutate(food._id)} />
           ))
-        }
+        )}
       </div>
     </div>
   );

@@ -73,7 +73,13 @@ export default function PartnerOrdersPage() {
 
       <div className={styles.list}>
         {isLoading && <p className={styles.dim}>Loading...</p>}
-        {!isLoading && filtered.length === 0 && <p className={styles.dim}>No orders here.</p>}
+        {!isLoading && filtered.length === 0 && (
+          <EmptyState
+            icon="📋"
+            title={`No ${tab === 'active' ? 'active' : STATUS_LABEL[tab]} orders`}
+            hint="Orders received in this category will appear here in real time."
+          />
+        )}
         {filtered.map(order => {
           const nextStatus = NEXT_STATUS[order.status];
           const statusClass = styles[`status_${order.status}`] || '';

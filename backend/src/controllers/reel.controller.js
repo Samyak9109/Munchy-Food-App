@@ -96,12 +96,14 @@ export const toggleLike = async (req, res) => {
       // already liked → unlike
       await deleteLikeDAO(req.params.id, req.user._id);
       await decrementLikesDAO(req.params.id);
-      return res.status(200).json({ message: "Reel unliked" });
+      const updatedLikes = Math.max(0, (reel.likes || 1) - 1);
+      return res.status(200).json({ message: "Reel unliked", liked: false, likes: updatedLikes });
     } else {
       // not liked → like
       await createLikeDAO(req.params.id, req.user._id);
       await incrementLikesDAO(req.params.id);
-      return res.status(200).json({ message: "Reel liked" });
+      const updatedLikes = (reel.likes || 0) + 1;
+      return res.status(200).json({ message: "Reel liked", liked: true, likes: updatedLikes });
     }
   } catch (error) {
     return res

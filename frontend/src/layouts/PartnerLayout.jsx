@@ -1,5 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Film, ClipboardList, BarChart2, Store, User } from 'lucide-react';
+import ErrorBoundary from '../components/common/ErrorBoundary';
 import styles from './PartnerLayout.module.css';
 
 const links = [
@@ -15,7 +16,9 @@ export default function PartnerLayout() {
   return (
     <div className={styles.layout}>
       <main className={styles.main}>
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <nav className={styles.nav}>
         {links.map(({ to, icon: Icon, label }) => (
