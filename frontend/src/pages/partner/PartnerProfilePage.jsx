@@ -47,13 +47,19 @@ export default function PartnerProfilePage() {
       <Header title="Profile" showLocation={false} />
       <div className={styles.content}>
         <div className={styles.avatarSection}>
-          <div className={styles.avatar} style={{ position: 'relative', overflow: 'hidden' }}>
+          <div className={styles.avatar}>
             {user?.avatar ? <img src={user.avatar} alt={user.name} /> : <User size={40} />}
-            <label style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '0.7rem', textAlign: 'center', padding: '4px 0', cursor: 'pointer', display: 'block' }}>
+            <label className={styles.avatarUploadLabel}>
               {uploadAvatarMut.isPending ? '...' : 'Upload'}
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
-                if (e.target.files[0]) uploadAvatarMut.mutate(e.target.files[0]);
-              }} disabled={uploadAvatarMut.isPending} />
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  if (e.target.files[0]) uploadAvatarMut.mutate(e.target.files[0]);
+                }}
+                disabled={uploadAvatarMut.isPending}
+              />
             </label>
           </div>
           {editing

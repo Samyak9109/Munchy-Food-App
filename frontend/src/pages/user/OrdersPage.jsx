@@ -5,15 +5,6 @@ import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import styles from './OrdersPage.module.css';
 
-const STATUS_COLOR = {
-  pending_payment: 'var(--yellow)',
-  placed:     'var(--text-dim)',
-  confirmed:  'var(--primary)',
-  ready:      'var(--yellow)',
-  pickedup:   'var(--success)',
-  cancelled:  'var(--error)',
-};
-
 export default function OrdersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['orders'],
@@ -45,7 +36,7 @@ export default function OrdersPage() {
           <Link key={order._id} to={`/orders/${order._id}`} className={styles.card}>
             <div className={styles.cardTop}>
               <span className={styles.orderId}>ORDER #{order._id.slice(-4).toUpperCase()}</span>
-              <span className={styles.status} style={{ color: STATUS_COLOR[order.status] }}>
+              <span className={`${styles.status} ${styles[`status_${order.status}`] || ''}`}>
                 ● {order.status.replace('_', ' ').toUpperCase()}
               </span>
             </div>

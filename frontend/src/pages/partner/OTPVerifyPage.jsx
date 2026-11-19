@@ -46,7 +46,7 @@ export default function OTPVerifyPage() {
       <div className={styles.topBar}>
         <button className={styles.back} onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
         <h1 className={styles.title}>Order #{orderId?.slice(-4).toUpperCase()}</h1>
-        <div style={{ width: 36 }} />
+        <div className={styles.spacer} />
       </div>
 
       {/* Ready banner */}

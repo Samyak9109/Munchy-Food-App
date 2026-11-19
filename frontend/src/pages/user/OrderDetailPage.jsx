@@ -43,7 +43,7 @@ export default function OrderDetailPage() {
       <div className={styles.topBar}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
         <h1 className={styles.title}>Order #{order._id.slice(-4).toUpperCase()}</h1>
-        <div style={{ width: 36 }} />
+        <div className={styles.spacer} />
       </div>
 
       <div className={styles.content}>

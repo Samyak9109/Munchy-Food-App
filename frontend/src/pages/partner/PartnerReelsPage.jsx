@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { Film, Plus, Trash2, Eye, Heart, Upload } from 'lucide-react';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { Button, ConfirmSheet, EmptyState } from '../../components/ui/index';
 import styles from './PartnerReelsPage.module.css';
 
 export default function PartnerReelsPage() {
@@ -11,6 +12,7 @@ export default function PartnerReelsPage() {
   const qc = useQueryClient();
   const storeId = user?.stores?.[0] || null;
   const [showForm, setShowForm] = useState(false);
+  const [reelToDelete, setReelToDelete] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['partner-reels', storeId],
@@ -29,9 +31,16 @@ export default function PartnerReelsPage() {
     return (
       <div className={styles.page}>
         <Header title="Reels" showLocation={false} />
-        <div className={styles.content} style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <p>Please create a Kitchen first from the Kitchen tab.</p>
-        </div>
+        <EmptyState
+          icon="🎬"
+          title="No Kitchen Found"
+          hint="Please create your kitchen first before posting food reels."
+          action={
+            <Button variant="primary" onClick={() => window.location.href = '/partner/store'}>
+              Create Kitchen
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -73,7 +82,8 @@ export default function PartnerReelsPage() {
               </div>
               <button
                 className={styles.deleteBtn}
-                onClick={() => { if (confirm('Delete reel?')) deleteReel.mutate(reel._id); }}
+                onClick={() => setReelToDelete(reel._id)}
+                aria-label="Delete reel"
               >
                 <Trash2 size={16} />
               </button>
@@ -81,6 +91,19 @@ export default function PartnerReelsPage() {
           ))}
         </div>
       </div>
+
+      <ConfirmSheet
+        isOpen={Boolean(reelToDelete)}
+        title="Delete Reel?"
+        message="Are you sure you want to delete this reel? This action cannot be undone."
+        confirmLabel="Delete"
+        isDanger
+        onConfirm={() => {
+          deleteReel.mutate(reelToDelete);
+          setReelToDelete(null);
+        }}
+        onCancel={() => setReelToDelete(null)}
+      />
     </div>
   );
 }
@@ -124,7 +147,13 @@ function UploadForm({ storeId, onClose }) {
       >
         <Upload size={24} />
         <p>{file ? file.name : 'Tap to upload video'}</p>
-        <input ref={fileRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={e => setFile(e.target.files[0])} />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="video/*"
+          className="sr-only"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
       </div>
 
       <select className={styles.select} value={foodId} onChange={e => setFoodId(e.target.value)}>

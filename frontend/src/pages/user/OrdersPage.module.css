@@ -93,3 +93,27 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+
+.status_pending_payment {
+  color: var(--secondary) !important;
+}
+
+.status_placed {
+  color: var(--secondary) !important;
+}
+
+.status_confirmed {
+  color: var(--primary-container) !important;
+}
+
+.status_ready {
+  color: var(--success) !important;
+}
+
+.status_pickedup {
+  color: var(--on-surface-variant) !important;
+}
+
+.status_cancelled {
+  color: var(--error) !important;
+}

@@ -260,3 +260,20 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+
+.starIcon {
+  color: var(--secondary);
+}
+
+.skelLong {
+  width: 80px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+}
+
+.skelShort {
+  width: 60px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+  margin-left: var(--space-2);
+}

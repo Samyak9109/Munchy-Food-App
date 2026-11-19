@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { TrendingUp, ShoppingBag, Star, Clock } from 'lucide-react';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { Button, EmptyState } from '../../components/ui/index';
 import styles from './AnalyticsPage.module.css';
 
 const PERIODS = ['daily', 'weekly', 'monthly'];
@@ -38,19 +39,26 @@ export default function AnalyticsPage() {
   const growth = growthData?.growth || {};
 
   const statCards = [
-    { icon: TrendingUp, label: 'Revenue',    value: `₹${(stats.totalRevenue || 0).toLocaleString()}`, color: 'var(--success)' },
-    { icon: ShoppingBag, label: 'Orders',    value: stats.totalOrders || 0,                           color: 'var(--primary)' },
-    { icon: Star,        label: 'Avg Order', value: `₹${Math.round(stats.avgOrderValue || 0)}`,       color: 'var(--yellow)' },
-    { icon: Clock,       label: 'Completed', value: `${stats.completionRate || 0}%`,                  color: 'var(--success)' },
+    { icon: TrendingUp, label: 'Revenue',    value: `₹${(stats.totalRevenue || 0).toLocaleString()}`, iconClass: styles.iconSuccess },
+    { icon: ShoppingBag, label: 'Orders',    value: stats.totalOrders || 0,                           iconClass: styles.iconPrimary },
+    { icon: Star,        label: 'Avg Order', value: `₹${Math.round(stats.avgOrderValue || 0)}`,       iconClass: styles.iconSecondary },
+    { icon: Clock,       label: 'Completed', value: `${stats.completionRate || 0}%`,                  iconClass: styles.iconSuccess },
   ];
 
   if (!storeId) {
     return (
       <div className={styles.page}>
         <Header title="Analytics" showLocation={false} />
-        <div className={styles.content} style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <p>Please create a Kitchen first from the Kitchen tab.</p>
-        </div>
+        <EmptyState
+          icon="📊"
+          title="No Kitchen Found"
+          hint="Create a kitchen first to start tracking your revenue, order volume, and sales analytics."
+          action={
+            <Button variant="primary" onClick={() => window.location.href = '/partner/store'}>
+              Create Kitchen
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -75,9 +83,9 @@ export default function AnalyticsPage() {
 
         {/* Stat cards */}
         <div className={styles.grid}>
-          {statCards.map(({ icon: Icon, label, value, color }) => (
+          {statCards.map(({ icon: Icon, label, value, iconClass }) => (
             <div key={label} className={styles.statCard}>
-              <Icon size={18} style={{ color }} />
+              <Icon size={18} className={iconClass} />
               <p className={styles.statValue}>{value}</p>
               <p className={styles.statLabel}>{label}</p>
             </div>
@@ -90,13 +98,13 @@ export default function AnalyticsPage() {
             <p className={styles.growthTitle}>vs Previous Period</p>
             <div className={styles.growthRow}>
               <div className={styles.growthItem}>
-                <span className={styles.growthVal} style={{ color: growth.revenueGrowth >= 0 ? 'var(--success)' : 'var(--error)' }}>
+                <span className={`${styles.growthVal} ${growth.revenueGrowth >= 0 ? styles.growthPositive : styles.growthNegative}`}>
                   {growth.revenueGrowth >= 0 ? '↑' : '↓'} {Math.abs(growth.revenueGrowth || 0)}%
                 </span>
                 <span className={styles.growthLabel}>Revenue</span>
               </div>
               <div className={styles.growthItem}>
-                <span className={styles.growthVal} style={{ color: growth.ordersGrowth >= 0 ? 'var(--success)' : 'var(--error)' }}>
+                <span className={`${styles.growthVal} ${growth.ordersGrowth >= 0 ? styles.growthPositive : styles.growthNegative}`}>
                   {growth.ordersGrowth >= 0 ? '↑' : '↓'} {Math.abs(growth.ordersGrowth || 0)}%
                 </span>
                 <span className={styles.growthLabel}>Orders</span>

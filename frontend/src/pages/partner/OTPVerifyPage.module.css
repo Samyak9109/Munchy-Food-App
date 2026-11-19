@@ -219,3 +219,8 @@
   transition: opacity 0.2s;
 }
 .confirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spacer {
+  width: 36px;
+  height: 36px;
+}

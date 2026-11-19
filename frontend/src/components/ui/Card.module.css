@@ -1,0 +1,18 @@
+.card {
+  background: var(--surface-slate);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-sizing: border-box;
+  color: var(--on-surface);
+}
+
+.interactive {
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.22);
+}

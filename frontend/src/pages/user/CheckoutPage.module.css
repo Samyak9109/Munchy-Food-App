@@ -149,3 +149,8 @@
 }
 .placeBtn:hover { opacity: 0.9; }
 .placeBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spacer {
+  width: 36px;
+  height: 36px;
+}

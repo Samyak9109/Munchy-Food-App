@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Store, MapPin } from 'lu
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
 import LocationPicker from '../../components/map/LocationPicker';
+import { ConfirmSheet } from '../../components/ui/index';
 import styles from './StoreManagePage.module.css';
 
 export default function StoreManagePage() {
@@ -16,6 +17,7 @@ export default function StoreManagePage() {
 
   const [showFoodForm, setShowFoodForm] = useState(false);
   const [editFood, setEditFood] = useState(null);
+  const [foodToDelete, setFoodToDelete] = useState(null);
 
   const { data: storeData, isLoading: storeLoading } = useQuery({
     queryKey: ['my-store', storeId],
@@ -87,17 +89,23 @@ export default function StoreManagePage() {
                 <MapPin size={16} /> Your kitchen has no valid location — customers cannot find it on the map.
               </div>
             ) : null}
-            <div style={{ position: 'relative', width: 100, height: 100, flexShrink: 0, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={styles.storeCoverWrap}>
               {store.image ? (
-                <img src={store.image} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={store.image} alt={store.name} className={styles.storeCoverImg} />
               ) : (
-                <Store size={32} style={{ color: 'var(--text-muted)' }} />
+                <Store size={32} />
               )}
-              <label style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '0.75rem', textAlign: 'center', padding: '4px 0', cursor: 'pointer' }}>
+              <label className={styles.coverUploadLabel}>
                 {uploadStoreImageMut.isPending ? 'Uploading...' : 'Cover'}
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
-                  if (e.target.files[0]) uploadStoreImageMut.mutate(e.target.files[0]);
-                }} disabled={uploadStoreImageMut.isPending} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => {
+                    if (e.target.files[0]) uploadStoreImageMut.mutate(e.target.files[0]);
+                  }}
+                  disabled={uploadStoreImageMut.isPending}
+                />
               </label>
             </div>
             <div className={styles.storeInfo}>
@@ -194,7 +202,8 @@ export default function StoreManagePage() {
                 </button>
                 <button
                   className={`${styles.iconBtn} ${styles.deleteBtn}`}
-                  onClick={() => { if (confirm('Delete item?')) deleteFood.mutate(food._id); }}
+                  onClick={() => setFoodToDelete(food._id)}
+                  aria-label="Delete item"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -203,6 +212,19 @@ export default function StoreManagePage() {
           ))}
         </div>
       </div>
+
+      <ConfirmSheet
+        isOpen={Boolean(foodToDelete)}
+        title="Delete Item?"
+        message="Are you sure you want to delete this menu item? This action cannot be undone."
+        confirmLabel="Delete"
+        isDanger
+        onConfirm={() => {
+          deleteFood.mutate(foodToDelete);
+          setFoodToDelete(null);
+        }}
+        onCancel={() => setFoodToDelete(null)}
+      />
     </div>
   );
 }
@@ -258,10 +280,10 @@ function CreateKitchenForm() {
 
   return (
     <div className={styles.content}>
-      <div className={styles.form} style={{ maxWidth: 480, margin: '2rem auto' }}>
-        <Store size={32} style={{ color: 'var(--accent)', marginBottom: '0.5rem' }} />
+      <div className={`${styles.form} ${styles.createKitchenForm}`}>
+        <Store size={32} className={styles.createKitchenIcon} />
         <h2 className={styles.formTitle}>Create Your Kitchen</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+        <p className={styles.createKitchenSubtitle}>
           Set up your store profile before adding menu items.
         </p>
         <input className={styles.input} placeholder="Kitchen name *" value={form.name} onChange={e => setF('name', e.target.value)} />
@@ -272,7 +294,7 @@ function CreateKitchenForm() {
         <LocationPicker initialLat={location?.lat} initialLng={location?.lng} onPick={setLocation} />
 
         {error && <p className={styles.error}>{error}</p>}
-        {!location && <p className={styles.dim} style={{ fontSize: '0.85rem', marginBottom: 12 }}>Pin your kitchen on the map to set its location.</p>}
+        {!location && <p className={styles.mapLocationHint}>Pin your kitchen on the map to set its location.</p>}
         <button
           className={styles.submitBtn}
           onClick={() => createStore.mutate()}
@@ -345,7 +367,7 @@ function FoodForm({ storeId, food, onClose }) {
       {/* Image upload (required for new items) */}
       <div className={styles.fileRow}>
         <label className={styles.fileLabel}>
-          🖼 Image {!food && <span style={{ color: 'var(--accent)' }}>*</span>}
+          🖼 Image {!food && <span className={styles.requiredAsterisk}>*</span>}
         </label>
         <input ref={imageRef} type="file" accept="image/*" className={styles.fileInput} />
       </div>

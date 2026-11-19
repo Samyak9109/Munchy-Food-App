@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Film, ClipboardList, TrendingUp, Store, MapPin } from 'lucide-react';
+import { Film, ClipboardList, TrendingUp, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { EmptyState } from '../../components/ui/index';
 import styles from './DashboardPage.module.css';
 
-const STATUS_COLOR = { placed: '#ffdb3c', confirmed: 'var(--primary)', ready: 'var(--success)', pickedup: 'var(--text-dim)', cancelled: 'var(--error)' };
 const STATUS_LABEL = { placed: 'New', confirmed: 'Preparing', ready: 'Ready', pickedup: 'Done', cancelled: 'Cancelled' };
 
 export default function DashboardPage() {
@@ -84,16 +84,16 @@ export default function DashboardPage() {
     return (
       <div className={styles.page}>
         <Header title="Munchy" />
-        <div className={styles.content}>
-          <div className={styles.welcome}>
-            <Store size={40} style={{ color: 'var(--primary)', marginBottom: 8 }} />
-            <h2>No Kitchen Found</h2>
-            <p>You haven't set up your kitchen yet.</p>
-            <Link to="/partner/store" className={styles.uploadBtn} style={{ marginTop: 16 }}>
+        <EmptyState
+          icon="🏪"
+          title="No Kitchen Found"
+          hint="You haven't set up your kitchen yet. Set it up to start taking orders and posting reels."
+          action={
+            <Link to="/partner/store" className={styles.uploadBtn}>
               Create Your Kitchen →
             </Link>
-          </div>
-        </div>
+          }
+        />
       </div>
     );
   }
@@ -126,16 +126,16 @@ export default function DashboardPage() {
         {/* Stats grid */}
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
-            <div className={styles.statHeader}>
-              <ClipboardList size={18} style={{ color: 'var(--yellow)' }} />
-              <span style={{ color: 'var(--yellow)' }}>Active Orders</span>
+            <div className={`${styles.statHeader} ${styles.statActive}`}>
+              <ClipboardList size={18} />
+              <span>Active Orders</span>
             </div>
             <p className={styles.statValue}>{activeOrders.length}</p>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statHeader}>
-              <TrendingUp size={18} style={{ color: 'var(--success)' }} />
-              <span style={{ color: 'var(--success)' }}>Sales Today</span>
+            <div className={`${styles.statHeader} ${styles.statSales}`}>
+              <TrendingUp size={18} />
+              <span>Sales Today</span>
             </div>
             <p className={styles.statValue}>₹{salesToday.toLocaleString()}</p>
           </div>
@@ -179,15 +179,15 @@ export default function DashboardPage() {
 }
 
 function OrderCard({ order }) {
-  const statusColor = STATUS_COLOR[order.status] || 'var(--text-dim)';
+  const statusClass = styles[`status_${order.status}`] || '';
 
   return (
     <Link to={`/partner/orders/${order._id}`} className={styles.orderCard}>
-      <div className={styles.orderLeft} style={{ borderColor: statusColor }} />
+      <div className={`${styles.orderLeft} ${statusClass}`} />
       <div className={styles.orderInfo}>
         <div className={styles.orderTop}>
           <span className={styles.orderNum}>ORDER #{order._id.slice(-4).toUpperCase()}</span>
-          <span className={styles.orderStatus} style={{ color: statusColor, borderColor: statusColor }}>
+          <span className={`${styles.orderStatus} ${statusClass}`}>
             ● {STATUS_LABEL[order.status]}
           </span>
         </div>

@@ -100,3 +100,28 @@
 
 .otpBtn { border-color: var(--yellow); color: var(--yellow); }
 .otpBtn:hover { background: rgba(255,215,0,0.1); }
+
+.status_placed {
+  color: var(--secondary) !important;
+  background-color: var(--secondary);
+}
+
+.status_confirmed {
+  color: var(--primary-container) !important;
+  background-color: var(--primary-container);
+}
+
+.status_ready {
+  color: var(--success) !important;
+  background-color: var(--success);
+}
+
+.status_pickedup {
+  color: var(--on-surface-variant) !important;
+  background-color: var(--on-surface-variant);
+}
+
+.status_cancelled {
+  color: var(--error) !important;
+  background-color: var(--error);
+}

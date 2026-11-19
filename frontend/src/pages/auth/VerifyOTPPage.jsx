@@ -72,7 +72,7 @@ export default function VerifyOTPPage() {
                 }}
                 maxLength={6}
                 required
-                style={{ textAlign: 'center', letterSpacing: '0.25em', fontSize: '1.2rem' }}
+                className={`${styles.input} ${styles.otpInput}`}
               />
             </div>
 

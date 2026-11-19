@@ -279,3 +279,8 @@
 
 .paid { color: var(--success) !important; }
 .pending { color: var(--yellow) !important; }
+
+.spacer {
+  width: 36px;
+  height: 36px;
+}

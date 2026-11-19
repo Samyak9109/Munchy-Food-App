@@ -207,3 +207,17 @@
   text-decoration: none;
   letter-spacing: 0.03em;
 }
+
+.signingIn {
+  text-align: center;
+  color: var(--on-surface-variant);
+  font-size: var(--fs-body);
+}
+
+.otpInput {
+  text-align: center;
+  letter-spacing: 0.25em;
+  font-size: var(--fs-title);
+  font-family: var(--font-display);
+  font-weight: 700;
+}

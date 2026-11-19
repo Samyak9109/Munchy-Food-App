@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { Button, EmptyState } from '../../components/ui/index';
 import styles from './PartnerOrdersPage.module.css';
 
 const TABS = ['active', 'ready', 'pickedup', 'cancelled'];
 const STATUS_LABEL = { placed: 'New', confirmed: 'Preparing', ready: 'Ready', pickedup: 'Done', cancelled: 'Cancelled' };
-const STATUS_COLOR = { placed: 'var(--yellow)', confirmed: 'var(--primary)', ready: 'var(--success)', pickedup: 'var(--text-muted)', cancelled: 'var(--error)' };
 
 export default function PartnerOrdersPage() {
   const { user } = useAuthStore();
@@ -45,9 +45,16 @@ export default function PartnerOrdersPage() {
     return (
       <div className={styles.page}>
         <Header title="Orders" showLocation={false} />
-        <div className={styles.content} style={{ textAlign: 'center', marginTop: '3rem', padding: '0 1rem' }}>
-          <p>Please create a Kitchen first from the Kitchen tab.</p>
-        </div>
+        <EmptyState
+          icon="🏪"
+          title="No Kitchen Found"
+          hint="Please create your kitchen first to start receiving and managing customer orders."
+          action={
+            <Button variant="primary" onClick={() => navigate('/partner/store')}>
+              Create Kitchen
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -69,13 +76,14 @@ export default function PartnerOrdersPage() {
         {!isLoading && filtered.length === 0 && <p className={styles.dim}>No orders here.</p>}
         {filtered.map(order => {
           const nextStatus = NEXT_STATUS[order.status];
+          const statusClass = styles[`status_${order.status}`] || '';
           return (
             <div key={order._id} className={styles.card} onClick={() => navigate(`/partner/orders/${order._id}`)}>
-              <div className={styles.cardLeft} style={{ background: STATUS_COLOR[order.status] }} />
+              <div className={`${styles.cardLeft} ${statusClass}`} />
               <div className={styles.cardBody}>
                 <div className={styles.cardTop}>
                   <span className={styles.orderId}>#{order._id.slice(-4).toUpperCase()}</span>
-                  <span className={styles.status} style={{ color: STATUS_COLOR[order.status] }}>
+                  <span className={`${styles.status} ${statusClass}`}>
                     ● {STATUS_LABEL[order.status]}
                   </span>
                 </div>

@@ -197,36 +197,36 @@ Shared helper: `lib/format.js` with `formatPrice`, `formatDistance`, `formatDura
 
 ## 7. Tasks
 
-- [ ] **UI-01 (P1) Create tokens.** Add `styles/tokens.css` and `styles/base.css` (reset, body, headings, focus ring, reduced motion, scrollbar). Move content out of `index.css`. Keep aliases.
+- [x] **UI-01 (P1) Create tokens.** Add `styles/tokens.css` and `styles/base.css` (reset, body, headings, focus ring, reduced motion, scrollbar). Move content out of `index.css`. Keep aliases.
   Accept: app renders identically. `--accent` and `--bg-secondary` resolve. Build passes.
 
-- [ ] **UI-02 (P1) Resolve `--surface` collision.** Search `var(--surface)` and `var(--bg)` usage. Card and panel backgrounds → `--surface-slate`. Page backgrounds → `--surface`. Update tokens so no ambiguous alias remains.
+- [x] **UI-02 (P1) Resolve `--surface` collision.** Search `var(--surface)` and `var(--bg)` usage. Card and panel backgrounds → `--surface-slate`. Page backgrounds → `--surface`. Update tokens so no ambiguous alias remains.
   Accept: visual diff shows no regressions on cards, headers, sheets.
 
-- [ ] **UI-03 (P1) Contrast fixes.** Replace readable uses of old `--text-muted` with `--on-surface-variant`. Disabled and decorative uses → `--text-disabled`. Buttons on coral use `--on-primary-container`. Replace the 16 `#fff` and 6 `#000` raw values with `--white`, `--scrim`, or proper tokens.
+- [x] **UI-03 (P1) Contrast fixes.** Replace readable uses of old `--text-muted` with `--on-surface-variant`. Disabled and decorative uses → `--text-disabled`. Buttons on coral use `--on-primary-container`. Replace the 16 `#fff` and 6 `#000` raw values with `--white`, `--scrim`, or proper tokens.
   Accept: all body-size text ≥ 4.5:1 (check with browser devtools or axe).
 
-- [ ] **UI-04 (P2) Radius, type, spacing migration.** Apply section 3 maps across all `*.module.css`. Work page by page. Visual check each.
+- [x] **UI-04 (P2) Radius, type, spacing migration.** Apply section 3 maps across all `*.module.css`. Work page by page. Visual check each.
   Accept: only token radii and font sizes remain (except `50%` circles).
 
-- [ ] **UI-05 (P1) Build UI primitives.** Section 4 list. Include `Toast` and `ConfirmSheet` first.
+- [x] **UI-05 (P1) Build UI primitives.** Section 4 list. Include `Toast` and `ConfirmSheet` first.
   Accept: Storybook not required. Create a hidden `/__ui` route (dev only) showing all primitives.
 
-- [ ] **UI-06 (P2) Replace dialogs.** Swap all 7 `alert()`/`confirm()` for `Toast` or `ConfirmSheet`.
+- [x] **UI-06 (P2) Replace dialogs.** Swap all 7 `alert()`/`confirm()` for `Toast` or `ConfirmSheet`.
   Accept: `grep -rn "alert(\|confirm(" frontend/src` returns nothing.
 
-- [ ] **UI-07 (P2) Remove inline styles.** Partner pages first (StoreManage, Dashboard, Analytics, PartnerProfile, PartnerOrders), then StorePage, ReelsPage, PartnerReels. Move to modules using primitives.
+- [x] **UI-07 (P2) Remove inline styles.** Partner pages first (StoreManage, Dashboard, Analytics, PartnerProfile, PartnerOrders), then StorePage, ReelsPage, PartnerReels. Move to modules using primitives.
   Accept: static inline styles gone.
 
-- [ ] **UI-08 (P2) Adopt primitives across pages.** Buttons, inputs, cards, chips, badges, empty and error states, skeletons. Remove legacy aliases. Delete dead CSS.
+- [x] **UI-08 (P2) Adopt primitives across pages.** Buttons, inputs, cards, chips, badges, empty and error states, skeletons. Remove legacy aliases. Delete dead CSS.
   Accept: no legacy token names remain. CSS size not larger than baseline 60.79 kB.
 
-- [ ] **UI-09 (P2) Shared shells.** `PageHeader` on every page. Same spacing and title treatment in user and partner layouts. Same nav component logic.
+- [x] **UI-09 (P2) Shared shells.** `PageHeader` on every page. Same spacing and title treatment in user and partner layouts. Same nav component logic.
   Accept: partner and user screens look like one product.
 
-- [ ] **UI-10 (P3) Accessibility pass.** Labels on all inputs. `aria-label` on icon buttons. Focus order. Sheet focus trap. Alt text on images (store and food names). Reduced motion.
+- [x] **UI-10 (P3) Accessibility pass.** Labels on all inputs. `aria-label` on icon buttons. Focus order. Sheet focus trap. Alt text on images (store and food names). Reduced motion.
   Accept: axe devtools shows no critical issues on login, reels, kitchens, checkout, partner dashboard.
 
-- [ ] **UI-11 (P3) Brand polish.** Favicon, `theme-color` meta (`#131313`), social preview image, consistent logo lockup in header and auth pages.
+- [x] **UI-11 (P3) Brand polish.** Favicon, `theme-color` meta (`#131313`), social preview image, consistent logo lockup in header and auth pages.
 
-- [ ] **UI-12 (P3) Lint guard.** Add a CI script that fails on raw hex in `*.module.css`, inline `style={{` with static colors, and `alert(`.
+- [x] **UI-12 (P3) Lint guard.** Add a CI script that fails on raw hex in `*.module.css`, inline `style={{` with static colors, and `alert(`.

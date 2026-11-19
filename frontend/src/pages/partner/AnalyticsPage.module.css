@@ -130,3 +130,23 @@
   border-radius: 2px;
   transition: width 0.5s ease;
 }
+
+.iconSuccess {
+  color: var(--success);
+}
+
+.iconPrimary {
+  color: var(--primary);
+}
+
+.iconSecondary {
+  color: var(--secondary);
+}
+
+.growthPositive {
+  color: var(--success);
+}
+
+.growthNegative {
+  color: var(--error);
+}

@@ -1,0 +1,34 @@
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.iconBtn:hover:not(:disabled) {
+  background: var(--surface-container);
+}
+
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.glass {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+}
+.glass:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}

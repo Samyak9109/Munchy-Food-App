@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useLogout } from '../../hooks/useAuth';
 import * as api from '../../api/index';
 import Header from '../../components/common/Header';
+import { ConfirmSheet } from '../../components/ui/index';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const avatarInputRef = useRef(null);
 
   const { data } = useQuery({
@@ -168,14 +170,26 @@ export default function ProfilePage() {
           </button>
           <button
             className={styles.deleteBtn}
-            onClick={() => {
-              if (confirm('Delete account? This cannot be undone.')) deleteMut.mutate();
-            }}
+            onClick={() => setShowDeleteConfirm(true)}
+            aria-label="Delete account"
           >
             <Trash2 size={18} /> Delete Account
           </button>
         </div>
       </div>
+
+      <ConfirmSheet
+        isOpen={showDeleteConfirm}
+        title="Delete Account?"
+        message="Are you sure you want to delete your account? This action cannot be undone."
+        confirmLabel="Delete Account"
+        isDanger
+        onConfirm={() => {
+          deleteMut.mutate();
+          setShowDeleteConfirm(false);
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

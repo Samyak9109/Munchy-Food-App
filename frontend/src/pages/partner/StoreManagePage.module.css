@@ -253,3 +253,60 @@
   width: 100%;
 }
 .fileInput:focus { outline: none; border-color: var(--primary-red); }
+
+.storeCoverWrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-slate);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.storeCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverUploadLabel {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: var(--scrim);
+  color: var(--white);
+  font-size: var(--fs-label);
+  text-align: center;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.createKitchenForm {
+  max-width: 480px;
+  margin: var(--space-8) auto;
+}
+
+.createKitchenIcon {
+  color: var(--primary-container);
+  margin-bottom: var(--space-2);
+}
+
+.createKitchenSubtitle {
+  color: var(--on-surface-variant);
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-body-sm);
+}
+
+.mapLocationHint {
+  font-size: var(--fs-label);
+  margin-bottom: var(--space-3);
+  color: var(--on-surface-variant);
+}
+
+.requiredAsterisk {
+  color: var(--primary-container);
+}

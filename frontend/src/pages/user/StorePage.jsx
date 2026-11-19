@@ -86,7 +86,7 @@ export default function StorePage() {
         </div>
         <p className={styles.cuisine}>{store?.cuisine?.join(' · ')}</p>
         <div className={styles.meta}>
-          <span><Star size={13} fill="currentColor" style={{ color: 'var(--yellow)' }} /> {store?.rating?.average?.toFixed(1) || '—'} ({store?.rating?.count || 0})</span>
+          <span><Star size={13} fill="currentColor" className={styles.starIcon} /> {store?.rating?.average?.toFixed(1) || '—'} ({store?.rating?.count || 0})</span>
           <span><MapPin size={13} /> {store?.address || 'Nearby'}</span>
         </div>
         {store?.description && <p className={styles.desc}>{store.description}</p>}
@@ -186,8 +186,8 @@ function DirectionsSection({ store, storeId }) {
 
       {isLoading && (
         <div className={styles.dirRow}>
-          <div className={styles.skeleton} style={{ width: 80, height: 20, borderRadius: 6 }} />
-          <div className={styles.skeleton} style={{ width: 60, height: 20, borderRadius: 6, marginLeft: 8 }} />
+          <div className={`${styles.skeleton} ${styles.skelLong}`} />
+          <div className={`${styles.skeleton} ${styles.skelShort}`} />
         </div>
       )}
 

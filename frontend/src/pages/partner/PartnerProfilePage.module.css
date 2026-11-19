@@ -10,6 +10,7 @@
 }
 
 .avatar {
+  position: relative;
   width: 88px; height: 88px;
   border-radius: 50%;
   background: var(--surface-high);
@@ -21,6 +22,19 @@
   border: 2px solid var(--primary-red);
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.avatarUploadLabel {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: var(--scrim);
+  color: var(--white);
+  font-size: var(--fs-label);
+  text-align: center;
+  padding: 4px 0;
+  cursor: pointer;
+  display: block;
+}
 
 .name { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 700; }
 

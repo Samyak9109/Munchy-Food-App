@@ -39,7 +39,7 @@ export default function AuthSuccessPage() {
       <div className={styles.content}>
         <h1 className={styles.brand}>Munchy</h1>
         <div className={styles.card}>
-          <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+          <p className={styles.signingIn}>
             Signing you in…
           </p>
         </div>
