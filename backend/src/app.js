@@ -20,6 +20,7 @@ import reelRouter from "./routes/reel.routes.js";
 import favoriteRouter from "./routes/favorite.routes.js";
 import mapRouter from "./routes/map.routes.js";
 import dashboardRouter from "./routes/dashboard.routes.js";
+import healthRouter from "./routes/health.routes.js";
 // import chatbotRouter from "./routes/chatbot.routes.js"; // Removed AI feature
 
 // middlewares
@@ -67,31 +68,20 @@ app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-// ── HEALTH CHECK (before rate limiter) ────────────────────────
-app.get("/api/health", (req, res) => {
+// ── HEALTH CHECK & MONITORING (mounted BEFORE rate limiters for Railway / Render probes) ──
+app.use("/api/health", healthRouter);
+app.use("/health", healthRouter);
+app.use("/healthz", healthRouter);
+
+// Root health & welcome (prevents 404 on default host root pings)
+app.get("/", (req, res) => {
   res.status(200).json({
     status: "ok",
-    message: "Munchy API is running",
-    timestamp: new Date().toISOString(),
+    service: "munchy-api",
+    message: "Munchy Food Delivery API is active",
+    health: "/health",
+    apiHealth: "/api/health",
   });
-});
-
-app.get("/api/health/db", async (req, res) => {
-  try {
-    const mongoose = await import("mongoose");
-    await mongoose.default.connection.db.admin().ping();
-    res.status(200).json({
-      status: "ok",
-      message: "Database connected",
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(503).json({
-      status: "error",
-      message: "Database unavailable",
-      timestamp: new Date().toISOString(),
-    });
-  }
 });
 
 app.use(generalLimiter);
