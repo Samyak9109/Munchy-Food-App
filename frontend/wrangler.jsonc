@@ -1,8 +1,12 @@
 {
   "name": "munchy-food-app",
+  "main": "worker.js",
   "compatibility_date": "2026-04-01",
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "RENDER_API_ORIGIN": "https://munchy-api.onrender.com"
   }
 }
