@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useLogin } from '../../hooks/useAuth';
+import { API_BASE_URL } from '../../api/client';
 import styles from './AuthPage.module.css';
 
 export default function LoginPage() {
@@ -88,7 +89,7 @@ export default function LoginPage() {
           {/* Google OAuth */}
           <div className={styles.divider}><span>or</span></div>
           <a
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/${role}/google`}
+            href={`${API_BASE_URL}/auth/${role}/google`}
             className={styles.googleBtn}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">

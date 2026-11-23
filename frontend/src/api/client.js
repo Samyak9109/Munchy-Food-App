@@ -1,8 +1,18 @@
 import axios from 'axios';
 import { useToastStore } from '../store/toastStore';
 
+const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+export const API_BASE_URL = (() => {
+  if (!rawBaseUrl) return 'http://localhost:3000/api';
+  const trimmed = rawBaseUrl.trim().replace(/\/+$/, '');
+  if (!trimmed || trimmed === '/') return '/api';
+  if (trimmed.endsWith('/api')) return trimmed;
+  return `${trimmed}/api`;
+})();
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 

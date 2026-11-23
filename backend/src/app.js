@@ -61,7 +61,7 @@ app.use(
 
 // ── WEBHOOK ROUTE (before express.json for raw body) ─────────
 import { handleRazorpayWebhook } from "./controllers/webhook.controller.js";
-app.use("/api/payment/webhook", express.raw({ type: "application/json" }), handleRazorpayWebhook);
+app.use(["/api/payment/webhook", "/payment/webhook"], express.raw({ type: "application/json" }), handleRazorpayWebhook);
 
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
@@ -101,18 +101,18 @@ app.use((req, res, next) => {
 });
 
 // ── ROUTES ───────────────────────────────────────────────────
-app.use("/api/auth", cachePrivate, authRouter);
-app.use("/api/food", foodRouter);
-app.use("/api/store", storeRouter);
-app.use("/api/user", cachePrivate, userRouter);
-app.use("/api/cart", cachePrivate, cartRouter);
-app.use("/api/order", cachePrivate, orderRouter);
-app.use("/api/payment", cachePrivate, paymentRouter);
-app.use("/api/review", reviewRouter);
-app.use("/api/reel", reelRouter);
-app.use("/api/favorite", cachePrivate, favoriteRouter);
-app.use("/api/map", mapRouter);
-app.use("/api/dashboard", cachePrivate, dashboardRouter);
+app.use(["/api/auth", "/auth"], cachePrivate, authRouter);
+app.use(["/api/food", "/food"], foodRouter);
+app.use(["/api/store", "/store"], storeRouter);
+app.use(["/api/user", "/user"], cachePrivate, userRouter);
+app.use(["/api/cart", "/cart"], cachePrivate, cartRouter);
+app.use(["/api/order", "/order"], cachePrivate, orderRouter);
+app.use(["/api/payment", "/payment"], cachePrivate, paymentRouter);
+app.use(["/api/review", "/review"], reviewRouter);
+app.use(["/api/reel", "/reel"], reelRouter);
+app.use(["/api/favorite", "/favorite"], cachePrivate, favoriteRouter);
+app.use(["/api/map", "/map"], mapRouter);
+app.use(["/api/dashboard", "/dashboard"], cachePrivate, dashboardRouter);
 // app.use("/api/chatbot", chatbotRouter); // Removed AI feature
 
 // ── ERROR HANDLING ───────────────────────────────────────────
